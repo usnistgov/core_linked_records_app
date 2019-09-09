@@ -1,2 +1,2 @@
-""" Linked records
+""" Linked records views
 """
