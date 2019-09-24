@@ -4,15 +4,24 @@ import json
 import logging
 from importlib import import_module
 
+from rest_framework import status
+from rest_framework.parsers import JSONParser
+from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_xml.renderers import XMLRenderer
 
+from core_linked_records_app.components.data.api import get_data_by_pid
 from core_linked_records_app.settings import HANDLE_SYSTEMS
+from core_main_app.rest.data.serializers import DataSerializer
 
 LOGGER = logging.getLogger("core_linked_records_app.rest.handle.views")
 
 
 class HandleRecord(APIView):
+    parser_classes = (JSONParser,)
+    renderer_classes = (BrowsableAPIRenderer, JSONRenderer, XMLRenderer)
+
     def __init__(self):
         self.handle_system_instances = {
             handle_system: None for handle_system in HANDLE_SYSTEMS.keys()
@@ -103,12 +112,17 @@ class HandleRecord(APIView):
         handle_system = self._get_system_instance(system)
         handle_response = handle_system.get(handle)
 
-        handle_content = json.loads(handle_response.content)
+        try:
+            query_result = get_data_by_pid(request, handle_response.url)
+        except Exception as ex:
+            content = {'message': str(ex)}
+            return Response(content, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(
-            handle_content,
-            status=handle_response.status_code
+            DataSerializer(query_result).data,
+            status=status.HTTP_200_OK
         )
+
 
     def delete(self, request, system, handle):
         """ Delete a handle record

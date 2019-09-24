@@ -11,3 +11,4 @@ PID_XPATH = getattr(settings, "PID_XPATH", "Resource.@localid")
 
 HANDLE_SYSTEMS = getattr(settings, "HANDLE_SYSTEMS", {})
 
+PID_XPATH = getattr(settings, "PID_XPATH", "Resource.@localid")

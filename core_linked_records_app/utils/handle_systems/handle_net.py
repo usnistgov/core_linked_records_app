@@ -5,6 +5,8 @@ import logging
 
 from base64 import b64encode
 
+from django.urls import reverse
+
 from core_linked_records_app.utils.handle_systems import AbstractHandleSystem
 from core_main_app.utils.requests_utils.requests_utils import \
     send_put_request, send_delete_request, send_get_request
@@ -41,6 +43,11 @@ class HandleNetSystem(AbstractHandleSystem):
 
         json_response_content["message"] = self._get_message_for_handle_code(
             json_response_content["responseCode"]
+        )
+
+        json_response_content["url"] = "%s/%s" % (
+            self.handle_url,
+            json_response_content["handle"]
         )
 
         return json.dumps(json_response_content)
@@ -96,8 +103,16 @@ class HandleNetSystem(AbstractHandleSystem):
                             "type": "URL",
                             "data": {
                                 "format": "string",
-                                "value": "%s/handle/rest/handle.net/%s" %
-                                         (self.local_url, handle)
+                                "value": "%s%s" % (
+                                    self.local_url,
+                                    reverse(
+                                        "core_linked_records_app_rest_handle_record_view",
+                                        kwargs={
+                                            "system": "handle.net",
+                                            "handle": handle
+                                        }
+                                    )
+                                )
                             }
                         }
                     ]
@@ -131,8 +146,16 @@ class HandleNetSystem(AbstractHandleSystem):
                             "type": "URL",
                             "data": {
                                 "format": "string",
-                                "value": "%s/handle/rest/handle.net/%s" %
-                                         (self.local_url, handle)
+                                "value": "%s%s" % (
+                                    self.local_url,
+                                    reverse(
+                                        "core_linked_records_app_rest_handle_record_view",
+                                        kwargs={
+                                            "system": "handle.net",
+                                            "handle": handle
+                                        }
+                                    )
+                                )
                             }
                         }
                     ]
