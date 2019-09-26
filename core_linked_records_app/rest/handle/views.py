@@ -49,11 +49,22 @@ class HandleRecord(APIView):
 
         Returns:
         """
+        prefix_handle_list = handle.split("/")
+
+        if len(prefix_handle_list) == 1:
+            prefix = prefix_handle_list[0]
+            handle = None
+        elif prefix_handle_list[-1] == "":
+            prefix = "/".join(prefix_handle_list[:-1])
+            handle = None
+        else:
+            prefix = "/".join(prefix_handle_list[:-1])
+            handle = prefix_handle_list[-1]
+
         handle_system = self._get_system_instance(system)
-        handle_response = handle_system.create(handle)
+        handle_response = handle_system.create(prefix, handle)
 
         handle_content = json.loads(handle_response.content)
-
         return Response(
             handle_content,
             status=handle_response.status_code

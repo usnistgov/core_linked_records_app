@@ -18,7 +18,7 @@ class AbstractHandleSystem(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def create(self, handle):
+    def create(self, prefix, handle=None):
         raise NotImplementedError()
 
     @abstractmethod

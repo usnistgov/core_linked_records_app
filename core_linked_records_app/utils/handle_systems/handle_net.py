@@ -67,16 +67,27 @@ class HandleNetSystem(AbstractHandleSystem):
         response._content = self._update_response_content(response)
         return response
 
-    def create(self, handle):
+    def create(self, prefix, handle=None):
         """ Create a new handle for a handle.net system.
 
         Args:
+            prefix:
             handle:
 
         Returns:
         """
+        # Create request url depending on handle value
+        if handle is not None:
+            request_url = "%s/%s/%s?overwrite=false" % (
+                self.handle_url, prefix, handle
+            )
+        else:
+            request_url = "%s/%s/?overwrite=false&mintNewSuffix=true" % (
+                self.handle_url, prefix
+            )
+
         response = send_put_request(
-            "%s/%s?overwrite=false" % (self.handle_url, handle),
+            request_url,
             json.dumps(
                 {
                     "values": [
