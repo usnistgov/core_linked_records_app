@@ -13,6 +13,7 @@ from rest_framework_xml.renderers import XMLRenderer
 
 from core_linked_records_app.components.data.api import get_data_by_pid
 from core_linked_records_app.settings import HANDLE_SYSTEMS
+from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.rest.data.serializers import DataSerializer
 
 LOGGER = logging.getLogger("core_linked_records_app.rest.handle.views")
@@ -113,16 +114,21 @@ class HandleRecord(APIView):
         handle_response = handle_system.get(handle)
 
         try:
-            query_result = get_data_by_pid(request, handle_response.url)
+            query_result = get_data_by_pid(
+                json.loads(handle_response.content)["url"], request.user
+            )
+            return Response(
+                DataSerializer(query_result).data,
+                status=status.HTTP_200_OK
+            )
+        except DoesNotExist:
+            content = {"message": "No data with specified handle found"}
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
         except Exception as ex:
-            content = {'message': str(ex)}
-            return Response(content, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        return Response(
-            DataSerializer(query_result).data,
-            status=status.HTTP_200_OK
-        )
-
+            content = {"message": str(ex)}
+            return Response(
+                content, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def delete(self, request, system, handle):
         """ Delete a handle record

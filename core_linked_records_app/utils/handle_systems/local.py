@@ -4,19 +4,31 @@ import json
 import random
 import string
 
+from django.urls import reverse
 from requests import Response
 from rest_framework import status
 
-from core_main_app.commons import exceptions
-from core_linked_records_app.components.handle.models import Handle
 from core_linked_records_app.components.handle import api as handle_api
+from core_linked_records_app.components.handle.models import Handle
 from core_linked_records_app.utils.handle_systems import AbstractHandleSystem
+from core_main_app.commons import exceptions
 from core_main_app.commons.exceptions import NotUniqueError
 
 
 class LocalHandleSystem(AbstractHandleSystem):
     def __init__(self, base_url):
-        super().__init__(base_url, None, None, None)
+        api_url = "%s%s" % (
+            base_url,
+            reverse(
+                "core_linked_records_app_rest_handle_record_view",
+                kwargs={
+                    "system": "local",
+                    "handle": "@handle@"
+                }
+            )
+        )
+
+        super().__init__(api_url, base_url, None, None)
 
     def encode_token(self, username, password):
         return None
@@ -35,13 +47,16 @@ class LocalHandleSystem(AbstractHandleSystem):
 
     def get(self, handle):
         response = Response()
+        response_url = self.handle_url.replace("@handle@", handle)
 
         try:
             handle_api.get_by_name(handle)
+            response.status_code = status.HTTP_200_OK
             response._content = json.dumps(
                 {
                     "message": "Successful operation",
-                    "handle": handle
+                    "handle": handle,
+                    "url": response_url
                 }
             )
         except exceptions.DoesNotExist:
@@ -49,7 +64,8 @@ class LocalHandleSystem(AbstractHandleSystem):
             response._content = json.dumps(
                 {
                     "message": "Handle not found",
-                    "handle": handle
+                    "handle": handle,
+                    "url": response_url
                 }
             )
 
@@ -67,7 +83,8 @@ class LocalHandleSystem(AbstractHandleSystem):
 
         response = Response()
         response_content = {
-            "handle": handle
+            "handle": handle,
+            "url": self.handle_url.replace("@handle@", handle)
         }
 
         try:
@@ -92,7 +109,8 @@ class LocalHandleSystem(AbstractHandleSystem):
         response = Response()
         response._content = json.dumps({
             "handle": handle,
-            "message": "Successful operation"
+            "message": "Successful operation",
+            "url": self.handle_url.replace("@handle@", handle)
         })
 
         return response
@@ -106,13 +124,15 @@ class LocalHandleSystem(AbstractHandleSystem):
 
             response._content = json.dumps({
                 "handle": handle,
-                "message": "Successful operation"
+                "message": "Successful operation",
+                "url": self.handle_url.replace("@handle@", handle)
             })
         except exceptions.DoesNotExist:
             response.status_code = status.HTTP_404_NOT_FOUND
             response._content = json.dumps({
                 "handle": handle,
-                "message": "Handle not found"
+                "message": "Handle not found",
+                "url": self.handle_url.replace("@handle@", handle)
             })
 
         return response

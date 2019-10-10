@@ -1,28 +1,25 @@
 """ Signals to trigger before Data save
 """
-import json
 import logging
 
 from django.urls import reverse
-from rest_framework import status
 
-from core_linked_records_app.settings import PID_XPATH, HANDLE_SYSTEMS, SERVER_URI
+from core_linked_records_app.settings import HANDLE_SYSTEMS, PID_XPATH, SERVER_URI
+from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils.xml import get_xpath_from_dot_notation, \
     get_xpath_with_target_namespace, get_value_at_xpath, set_value_at_xpath
 from core_main_app.components.data.models import Data
-from core_main_app.utils.requests_utils.requests_utils import send_get_request, send_put_request
+from core_main_app.utils.requests_utils.requests_utils import send_put_request
 from signals_utils.signals.mongo import signals, connector
 from xml_utils.xsd_tree.xsd_tree import XSDTree
 
-LOGGER = logging.getLogger(
-    "core_linked_records_app.utils.handle_systems.handle_net"
-)
+LOGGER = logging.getLogger(__name__)
 
 
 def init():
     """ Connect to Data object events.
     """
-    connector.connect(set_data_pid, signals.pre_save, Data)
+    connector.connect(set_data_pid, signals.pre_save, sender=Data)
 
 
 def set_data_pid(sender, document, **kwargs):
@@ -58,17 +55,17 @@ def set_data_pid(sender, document, **kwargs):
     generate_pid = True
     if document_pid is not None and document_pid != "":
         try:
-            generate_pid = (
-                send_get_request(document_pid).status_code != status.HTTP_200_OK
+            generate_pid = not system_api.is_pid_defined_for_document(
+                document_pid, document.pk
             )
         except Exception as e:
             LOGGER.info("Exception when fetching local id %s: %s" % (
-                document_pid, str(e))
-            )
+                document_pid, str(e)
+            ))
 
     if generate_pid:  # If the PID needs to be generated
         document_pid_response = send_put_request(
-            "%s%s" % (
+            "%s%s?format=json" % (
                 SERVER_URI,
                 reverse(
                     "core_linked_records_app_rest_handle_record_view",
@@ -80,17 +77,7 @@ def set_data_pid(sender, document, **kwargs):
             )
         )
 
-        # FIXME change to remote URL
-        document_pid = "%s%s" % (
-            SERVER_URI,
-            reverse(
-                "core_linked_records_app_rest_handle_record_view",
-                kwargs={
-                    "system": default_system,
-                    "handle": json.loads(document_pid_response.content)["handle"]
-                }
-            )
-        )
+        document_pid = document_pid_response.json()["url"]
 
     # Set the document PID into XML data and update `xml_content`
     set_value_at_xpath(xml_tree, pid_xpath, document_pid, namespaces)
@@ -99,4 +86,3 @@ def set_data_pid(sender, document, **kwargs):
     # Update the whole document with the updated XML content
     document.convert_to_file()
     document.convert_to_dict()
-

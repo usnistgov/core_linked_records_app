@@ -19,6 +19,7 @@ LOGGER = logging.getLogger(
 class HandleNetSystem(AbstractHandleSystem):
     """
     """
+    registration_api = "api/handles"
     handle_code_messages = {
         1: "Successful operation",
         2: "Unexpected handle server error",
@@ -57,7 +58,7 @@ class HandleNetSystem(AbstractHandleSystem):
         return b64encode(user_pass.encode("utf-8")).decode("utf-8")
 
     def get(self, handle):
-        """ Create a new handle for a handle.net system.
+        """ Retrieve an existring handle.net handle.
 
         Args:
             handle:
@@ -65,7 +66,7 @@ class HandleNetSystem(AbstractHandleSystem):
         Returns:
         """
         response = send_get_request(
-            "%s/%s" % (self.handle_url, handle),
+            "%s/%s/%s" % (self.handle_url, self.registration_api, handle),
             headers={
                 "Content-Type": "application/json",
             }
@@ -85,12 +86,12 @@ class HandleNetSystem(AbstractHandleSystem):
         """
         # Create request url depending on handle value
         if handle is not None:
-            request_url = "%s/%s/%s?overwrite=false" % (
-                self.handle_url, prefix, handle
+            request_url = "%s/%s/%s/%s?overwrite=false" % (
+                self.handle_url, self.registration_api, prefix, handle
             )
         else:
-            request_url = "%s/%s/?overwrite=false&mintNewSuffix=true" % (
-                self.handle_url, prefix
+            request_url = "%s/%s/%s/?overwrite=false&mintNewSuffix=true" % (
+                self.handle_url, self.registration_api, prefix
             )
 
         response = send_put_request(
@@ -124,8 +125,11 @@ class HandleNetSystem(AbstractHandleSystem):
             }
         )
 
-        response._content = self._update_response_content(response)
-        return response
+        if handle is None:
+            return self.update(response.json()["handle"])
+        else:
+            response._content = self._update_response_content(response)
+            return response
 
     def update(self, handle):
         """ Update a handle for a handle.net system.
@@ -136,7 +140,9 @@ class HandleNetSystem(AbstractHandleSystem):
         Returns:
         """
         response = send_put_request(
-            "%s/%s?overwrite=true" % (self.handle_url, handle),
+            "%s/%s/%s?overwrite=true" % (
+                self.handle_url, self.registration_api, handle
+            ),
             json.dumps(
                 {
                     "handle": handle,
@@ -172,7 +178,7 @@ class HandleNetSystem(AbstractHandleSystem):
 
     def delete(self, handle):
         response = send_delete_request(
-            "%s/%s" % (self.handle_url, handle),
+            "%s/%s/%s" % (self.handle_url, self.registration_api, handle),
             headers={
                 "Authorization": "Basic %s" % str(self.auth_token)
             }
