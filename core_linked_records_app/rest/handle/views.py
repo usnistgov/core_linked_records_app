@@ -9,9 +9,9 @@ from rest_framework.parsers import JSONParser
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_xml.renderers import XMLRenderer
 
 from core_linked_records_app.components.data.api import get_data_by_pid
+from core_linked_records_app.rest.data.renderers.data_xml_renderer import DataXmlRenderer
 from core_linked_records_app.settings import HANDLE_SYSTEMS
 from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.rest.data.serializers import DataSerializer
@@ -21,7 +21,7 @@ LOGGER = logging.getLogger("core_linked_records_app.rest.handle.views")
 
 class HandleRecord(APIView):
     parser_classes = (JSONParser,)
-    renderer_classes = (BrowsableAPIRenderer, JSONRenderer, XMLRenderer)
+    renderer_classes = (BrowsableAPIRenderer, JSONRenderer, DataXmlRenderer)
 
     def __init__(self):
         self.handle_system_instances = {
