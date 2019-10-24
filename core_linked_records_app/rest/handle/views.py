@@ -4,13 +4,14 @@ import json
 import logging
 from importlib import import_module
 
-from rest_framework import status
 from rest_framework.parsers import JSONParser
-from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_200_OK
 from rest_framework.views import APIView
 
 from core_linked_records_app.components.data.api import get_data_by_pid
+from core_linked_records_app.rest.data.renderers.data_html_user_renderer import DataHtmlUserRenderer
 from core_linked_records_app.rest.data.renderers.data_xml_renderer import DataXmlRenderer
 from core_linked_records_app.settings import HANDLE_SYSTEMS
 from core_main_app.commons.exceptions import DoesNotExist
@@ -21,7 +22,7 @@ LOGGER = logging.getLogger("core_linked_records_app.rest.handle.views")
 
 class HandleRecord(APIView):
     parser_classes = (JSONParser,)
-    renderer_classes = (BrowsableAPIRenderer, JSONRenderer, DataXmlRenderer)
+    renderer_classes = (DataHtmlUserRenderer, JSONRenderer, DataXmlRenderer)
 
     def __init__(self):
         self.handle_system_instances = {
@@ -119,15 +120,23 @@ class HandleRecord(APIView):
             )
             return Response(
                 DataSerializer(query_result).data,
-                status=status.HTTP_200_OK
+                status=HTTP_200_OK
             )
         except DoesNotExist:
-            content = {"message": "No data with specified handle found"}
-            return Response(content, status=status.HTTP_404_NOT_FOUND)
+            content = {
+                "status": "error",
+                "code": HTTP_404_NOT_FOUND,
+                "message": "No data with specified handle found"
+            }
+            return Response(content, status=HTTP_404_NOT_FOUND)
         except Exception as ex:
-            content = {"message": str(ex)}
+            content = {
+                "status": "error",
+                "code": HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": str(ex)
+            }
             return Response(
-                content, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                content, status=HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     def delete(self, request, system, handle):

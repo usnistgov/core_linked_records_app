@@ -1,6 +1,8 @@
 """ Data Xml renderer for django REST API
 """
+from django.http import HttpResponse
 from rest_framework import renderers
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 
 class DataXmlRenderer(renderers.BaseRenderer):
@@ -18,4 +20,12 @@ class DataXmlRenderer(renderers.BaseRenderer):
 
         Returns: xml string
         """
-        return data['xml_content']
+
+        # check errors
+        if 'status' in data and data['status'] == 'error':
+            if data['code'] == HTTP_404_NOT_FOUND:
+                return HttpResponse(status=HTTP_404_NOT_FOUND)
+            else:
+                return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return data['xml_content']
