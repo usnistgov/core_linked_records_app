@@ -50,7 +50,7 @@ class HandleRecord(APIView):
 
         return self.handle_system_instances[system]
 
-    def put(self, request, system, handle):
+    def post(self, request, system, handle):
         """ Create a handle record
 
         Args:
@@ -81,7 +81,7 @@ class HandleRecord(APIView):
             status=handle_response.status_code
         )
 
-    def post(self, request, system, handle):
+    def put(self, request, system, handle):
         """ Update the value of a given handle record
 
         Args:
