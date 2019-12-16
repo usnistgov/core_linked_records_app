@@ -7,20 +7,18 @@ from base64 import b64encode
 
 from django.urls import reverse
 
-from core_linked_records_app.utils.handle_systems import AbstractHandleSystem
+from core_linked_records_app.utils.providers import AbstractIdProvider
 from core_main_app.utils.requests_utils.requests_utils import \
     send_put_request, send_delete_request, send_get_request
 
-LOGGER = logging.getLogger(
-    "core_linked_records_app.utils.handle_systems.handle_net"
-)
+LOGGER = logging.getLogger(__name__)
 
 
-class HandleNetSystem(AbstractHandleSystem):
+class HandleNetSystem(AbstractIdProvider):
     """
     """
     registration_api = "api/handles"
-    handle_code_messages = {
+    response_code_messages = {
         1: "Successful operation",
         2: "Unexpected handle server error",
         100: "Handle not found",
@@ -33,21 +31,21 @@ class HandleNetSystem(AbstractHandleSystem):
         402: "Authentication needed"
     }
 
-    def _get_message_for_handle_code(self, handle_code):
-        if handle_code in self.handle_code_messages.keys():
-            return self.handle_code_messages[handle_code]
+    def _get_message_for_response_code(self, return_code):
+        if return_code in self.response_code_messages.keys():
+            return self.response_code_messages[return_code]
         else:
             return "Handle code not recognized"
 
     def _update_response_content(self, response):
         json_response_content = json.loads(response.content)
 
-        json_response_content["message"] = self._get_message_for_handle_code(
+        json_response_content["message"] = self._get_message_for_response_code(
             json_response_content["responseCode"]
         )
 
         json_response_content["url"] = "%s/%s" % (
-            self.handle_url,
+            self.provider_url,
             json_response_content["handle"]
         )
 
@@ -57,16 +55,16 @@ class HandleNetSystem(AbstractHandleSystem):
         user_pass = "%s:%s" % (username, password)
         return b64encode(user_pass.encode("utf-8")).decode("utf-8")
 
-    def get(self, handle):
+    def get(self, record):
         """ Retrieve an existring handle.net handle.
 
         Args:
-            handle:
+            record:
 
         Returns:
         """
         response = send_get_request(
-            "%s/%s/%s" % (self.handle_url, self.registration_api, handle),
+            "%s/%s/%s" % (self.provider_url, self.registration_api, record),
             headers={
                 "Content-Type": "application/json",
             }
@@ -75,23 +73,23 @@ class HandleNetSystem(AbstractHandleSystem):
         response._content = self._update_response_content(response)
         return response
 
-    def create(self, prefix, handle=None):
+    def create(self, prefix, record=None):
         """ Create a new handle for a handle.net system.
 
         Args:
             prefix:
-            handle:
+            record:
 
         Returns:
         """
         # Create request url depending on handle value
-        if handle is not None:
+        if record is not None:
             request_url = "%s/%s/%s/%s?overwrite=false" % (
-                self.handle_url, self.registration_api, prefix, handle
+                self.provider_url, self.registration_api, prefix, record
             )
         else:
             request_url = "%s/%s/%s/?overwrite=false&mintNewSuffix=true" % (
-                self.handle_url, self.registration_api, prefix
+                self.provider_url, self.registration_api, prefix
             )
 
         response = send_put_request(
@@ -107,10 +105,10 @@ class HandleNetSystem(AbstractHandleSystem):
                                 "value": "%s%s" % (
                                     self.local_url,
                                     reverse(
-                                        "core_linked_records_app_rest_handle_record_view",
+                                        "core_linked_records_app_rest_provider_record_view",
                                         kwargs={
-                                            "system": "handle.net",
-                                            "handle": handle
+                                            "provider": "handle.net",
+                                            "record": record
                                         }
                                     )
                                 )
@@ -125,27 +123,27 @@ class HandleNetSystem(AbstractHandleSystem):
             }
         )
 
-        if handle is None:
+        if record is None:
             return self.update(response.json()["handle"])
         else:
             response._content = self._update_response_content(response)
             return response
 
-    def update(self, handle):
+    def update(self, record):
         """ Update a handle for a handle.net system.
 
         Args:
-            handle:
+            record:
 
         Returns:
         """
         response = send_put_request(
             "%s/%s/%s?overwrite=true" % (
-                self.handle_url, self.registration_api, handle
+                self.provider_url, self.registration_api, record
             ),
             json.dumps(
                 {
-                    "handle": handle,
+                    "handle": record,
                     "values": [
                         {
                             "index": 100,
@@ -155,10 +153,10 @@ class HandleNetSystem(AbstractHandleSystem):
                                 "value": "%s%s" % (
                                     self.local_url,
                                     reverse(
-                                        "core_linked_records_app_rest_handle_record_view",
+                                        "core_linked_records_app_rest_provider_record_view",
                                         kwargs={
-                                            "system": "handle.net",
-                                            "handle": handle
+                                            "provider": "handle.net",
+                                            "record": record
                                         }
                                     )
                                 )
@@ -176,9 +174,9 @@ class HandleNetSystem(AbstractHandleSystem):
         response._content = self._update_response_content(response)
         return response
 
-    def delete(self, handle):
+    def delete(self, record):
         response = send_delete_request(
-            "%s/%s/%s" % (self.handle_url, self.registration_api, handle),
+            "%s/%s/%s" % (self.provider_url, self.registration_api, record),
             headers={
                 "Authorization": "Basic %s" % str(self.auth_token)
             }

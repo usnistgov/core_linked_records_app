@@ -47,4 +47,8 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
             else:
                 return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            return render(renderer_context['request'], 'core_main_app/user/data/detail.html', context=context, assets=assets)
+            return render(
+                renderer_context['request'],
+                'core_main_app/user/data/detail.html', context=context,
+                assets=assets
+            )

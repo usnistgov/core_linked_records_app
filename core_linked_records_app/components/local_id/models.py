@@ -7,19 +7,19 @@ from mongoengine import errors as mongoengine_errors
 from core_main_app.commons import exceptions
 
 
-class Handle(Document):
+class LocalId(Document):
     """ Handle object
     """
-    handle_name = fields.StringField(
+    record_name = fields.StringField(
         blank=False,
         unique=True,
         regex=NOT_EMPTY_OR_WHITESPACES
     )
 
     @staticmethod
-    def get_by_name(handle_name):
+    def get_by_name(record_name):
         try:
-            return Handle.objects.get(handle_name=handle_name)
+            return LocalId.objects.get(record_name=record_name)
         except mongoengine_errors.DoesNotExist as e:
             raise exceptions.DoesNotExist(str(e))
         except Exception as ex:

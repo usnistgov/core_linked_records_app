@@ -4,12 +4,12 @@ import logging
 
 from django.urls import reverse
 
-from core_linked_records_app.settings import HANDLE_SYSTEMS, PID_XPATH, SERVER_URI
+from core_linked_records_app.settings import ID_PROVIDER_SYSTEMS, PID_XPATH, SERVER_URI
 from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils.xml import get_xpath_from_dot_notation, \
     get_xpath_with_target_namespace, get_value_at_xpath, set_value_at_xpath
 from core_main_app.components.data.models import Data
-from core_main_app.utils.requests_utils.requests_utils import send_put_request
+from core_main_app.utils.requests_utils.requests_utils import send_post_request
 from signals_utils.signals.mongo import signals, connector
 from xml_utils.xsd_tree.xsd_tree import XSDTree
 
@@ -34,7 +34,7 @@ def set_data_pid(sender, document, **kwargs):
     Returns:
     """
     # FIXME remove hard-coded variables
-    default_system = list(HANDLE_SYSTEMS.keys())[0]
+    default_system = list(ID_PROVIDER_SYSTEMS.keys())[0]
     prefix = "cdcs"
 
     pid_xpath = get_xpath_from_dot_notation(PID_XPATH)
@@ -64,14 +64,14 @@ def set_data_pid(sender, document, **kwargs):
             ))
 
     if generate_pid:  # If the PID needs to be generated
-        document_pid_response = send_put_request(
+        document_pid_response = send_post_request(
             "%s%s?format=json" % (
                 SERVER_URI,
                 reverse(
-                    "core_linked_records_app_rest_handle_record_view",
+                    "core_linked_records_app_rest_provider_record_view",
                     kwargs={
-                        "system": default_system,
-                        "handle": prefix
+                        "provider": default_system,
+                        "record": prefix
                     }
                 )
             )

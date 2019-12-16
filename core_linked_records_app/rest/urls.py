@@ -2,10 +2,10 @@
 """
 from django.conf.urls import url
 
-from core_linked_records_app.rest.handle import views as handle_rest_views
+from core_linked_records_app.rest.providers import views as providers_views
 
 urlpatterns = [
-    url(r'^(?P<system>[^/]+)/(?P<handle>.+)$',
-        handle_rest_views.HandleRecord.as_view(),
-        name='core_linked_records_app_rest_handle_record_view')
+    url(r'^(?P<provider>[^/]+)/(?P<record>.+)$',
+        providers_views.ProviderRecord.as_view(),
+        name='core_linked_records_app_rest_provider_record_view')
 ]

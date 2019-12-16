@@ -1,4 +1,4 @@
-""" Local handle system implementation
+""" Local record system implementation
 """
 import json
 import random
@@ -8,22 +8,22 @@ from django.urls import reverse
 from requests import Response
 from rest_framework import status
 
-from core_linked_records_app.components.handle import api as handle_api
-from core_linked_records_app.components.handle.models import Handle
-from core_linked_records_app.utils.handle_systems import AbstractHandleSystem
+from core_linked_records_app.components.local_id import api as record_api
+from core_linked_records_app.components.local_id.models import LocalId
+from core_linked_records_app.utils.providers import AbstractIdProvider
 from core_main_app.commons import exceptions
 from core_main_app.commons.exceptions import NotUniqueError
 
 
-class LocalHandleSystem(AbstractHandleSystem):
+class LocalIdProvider(AbstractIdProvider):
     def __init__(self, base_url):
         api_url = "%s%s" % (
             base_url,
             reverse(
-                "core_linked_records_app_rest_handle_record_view",
+                "core_linked_records_app_rest_provider_record_view",
                 kwargs={
-                    "system": "local",
-                    "handle": "@handle@"
+                    "provider": "local",
+                    "record": "@record@"
                 }
             )
         )
@@ -40,22 +40,22 @@ class LocalHandleSystem(AbstractHandleSystem):
             for _ in range(length_id)
         )
 
-    def is_id_already_used(self, handle):
+    def is_id_already_used(self, record):
         return json.loads(
-            self.get(handle).content
+            self.get(record).content
         )["message"] == "Successful operation"
 
-    def get(self, handle):
+    def get(self, record):
         response = Response()
-        response_url = self.handle_url.replace("@handle@", handle)
+        response_url = self.provider_url.replace("@record@", record)
 
         try:
-            handle_api.get_by_name(handle)
+            record_api.get_by_name(record)
             response.status_code = status.HTTP_200_OK
             response._content = json.dumps(
                 {
                     "message": "Successful operation",
-                    "handle": handle,
+                    "record": record,
                     "url": response_url
                 }
             )
@@ -63,76 +63,76 @@ class LocalHandleSystem(AbstractHandleSystem):
             response.status_code = status.HTTP_404_NOT_FOUND
             response._content = json.dumps(
                 {
-                    "message": "Handle not found",
-                    "handle": handle,
+                    "message": "record not found",
+                    "record": record,
                     "url": response_url
                 }
             )
 
         return response
 
-    def create(self, prefix, handle=None):
-        if handle is None:
+    def create(self, prefix, record=None):
+        if record is None:
             # FIXME: duplicate code with core_main_registry_app
-            # Create new handle randomly
-            handle = "%s/%s" % (prefix, self._generate_id())
+            # Create new record randomly
+            record = "%s/%s" % (prefix, self._generate_id())
 
-            # While the handle exists, retry creation of handle
-            while self.is_id_already_used(handle):
-                handle = "%s/%s" % (prefix, self._generate_id())
+            # While the record exists, retry creation of record
+            while self.is_id_already_used(record):
+                record = "%s/%s" % (prefix, self._generate_id())
 
         response = Response()
         response_content = {
-            "handle": handle,
-            "url": self.handle_url.replace("@handle@", handle)
+            "record": record,
+            "url": self.provider_url.replace("@record@", record)
         }
 
         try:
-            handle_object = Handle(
-                handle_name=handle
+            record_object = LocalId(
+                record_name=record
             )
 
-            handle_api.insert(handle_object)
+            record_api.insert(record_object)
 
             response.status_code = status.HTTP_201_CREATED
             response_content["message"] = "Successful operation"
         except NotUniqueError:
             response.status_code = status.HTTP_409_CONFLICT
-            response_content["message"] = "Handle already exists"
+            response_content["message"] = "record already exists"
 
         response._content = json.dumps(response_content)
         return response
 
-    def update(self, handle):
-        self.create(handle)
+    def update(self, record):
+        self.create(record)
 
         response = Response()
         response._content = json.dumps({
-            "handle": handle,
+            "record": record,
             "message": "Successful operation",
-            "url": self.handle_url.replace("@handle@", handle)
+            "url": self.provider_url.replace("@record@", record)
         })
 
         return response
 
-    def delete(self, handle):
+    def delete(self, record):
         response = Response()
 
         try:
-            handle_object = handle_api.get_by_name(handle)
-            handle_object.delete()
+            record_object = record_api.get_by_name(record)
+            record_object.delete()
 
             response._content = json.dumps({
-                "handle": handle,
+                "record": record,
                 "message": "Successful operation",
-                "url": self.handle_url.replace("@handle@", handle)
+                "url": self.provider_url.replace("@record@", record)
             })
         except exceptions.DoesNotExist:
             response.status_code = status.HTTP_404_NOT_FOUND
             response._content = json.dumps({
-                "handle": handle,
-                "message": "Handle not found",
-                "url": self.handle_url.replace("@handle@", handle)
+                "record": record,
+                "message": "record not found",
+                "url": self.provider_url.replace("@record@", record)
             })
 
         return response

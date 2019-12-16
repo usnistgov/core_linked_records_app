@@ -3,9 +3,9 @@
 from abc import ABC, abstractmethod
 
 
-class AbstractHandleSystem(ABC):
+class AbstractIdProvider(ABC):
     def __init__(self, base_url, cdcs_base_url, username, password):
-        self.handle_url = base_url
+        self.provider_url = base_url
         self.local_url = cdcs_base_url
         self.auth_token = self.encode_token(username, password)
 
@@ -14,17 +14,17 @@ class AbstractHandleSystem(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def get(self, handle):
+    def get(self, record):
         raise NotImplementedError()
 
     @abstractmethod
-    def create(self, prefix, handle=None):
+    def create(self, prefix, record=None):
         raise NotImplementedError()
 
     @abstractmethod
-    def update(self, handle):
+    def update(self, record):
         raise NotImplementedError()
 
     @abstractmethod
-    def delete(self, handle):
+    def delete(self, record):
         raise NotImplementedError()
