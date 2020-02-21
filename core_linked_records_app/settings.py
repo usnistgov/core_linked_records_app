@@ -18,3 +18,5 @@ ID_PROVIDER_SYSTEMS = getattr(settings, "ID_PROVIDER_SYSTEMS", {
         ]
     }
 })
+
+ID_PROVIDER_PREFIX = getattr(settings, "ID_PROVIDER_PREFIX", "cdcs")

@@ -4,7 +4,7 @@ import logging
 
 from django.urls import reverse
 
-from core_linked_records_app.settings import ID_PROVIDER_SYSTEMS, PID_XPATH, SERVER_URI
+from core_linked_records_app.settings import ID_PROVIDER_SYSTEMS, PID_XPATH, SERVER_URI, ID_PROVIDER_PREFIX
 from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils.xml import get_xpath_from_dot_notation, \
     get_xpath_with_target_namespace, get_value_at_xpath, set_value_at_xpath
@@ -35,7 +35,6 @@ def set_data_pid(sender, document, **kwargs):
     """
     # FIXME remove hard-coded variables
     default_system = list(ID_PROVIDER_SYSTEMS.keys())[0]
-    prefix = "cdcs"
 
     pid_xpath = get_xpath_from_dot_notation(PID_XPATH)
 
@@ -71,7 +70,7 @@ def set_data_pid(sender, document, **kwargs):
                     "core_linked_records_app_rest_provider_record_view",
                     kwargs={
                         "provider": default_system,
-                        "record": prefix
+                        "record": ID_PROVIDER_PREFIX
                     }
                 )
             )
