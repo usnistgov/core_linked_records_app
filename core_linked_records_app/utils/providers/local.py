@@ -75,11 +75,13 @@ class LocalIdProvider(AbstractIdProvider):
         if record is None:
             # FIXME: duplicate code with core_main_registry_app
             # Create new record randomly
-            record = "%s/%s" % (prefix, self._generate_id())
+            record = self._generate_id()
 
             # While the record exists, retry creation of record
-            while self.is_id_already_used(record):
-                record = "%s/%s" % (prefix, self._generate_id())
+            while self.is_id_already_used("%s/%s" % (prefix, record)):
+                record = self._generate_id()
+
+        record = "%s/%s" % (prefix, record)
 
         response = Response()
         response_content = {
@@ -136,5 +138,3 @@ class LocalIdProvider(AbstractIdProvider):
             })
 
         return response
-
-

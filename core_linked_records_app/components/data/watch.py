@@ -1,10 +1,12 @@
 """ Signals to trigger before Data save
 """
 import logging
+import re
 
 from django.urls import reverse
 
-from core_linked_records_app.settings import ID_PROVIDER_SYSTEMS, PID_XPATH, SERVER_URI, ID_PROVIDER_PREFIX
+from core_linked_records_app.settings import ID_PROVIDER_SYSTEMS, PID_XPATH, SERVER_URI, \
+    ID_PROVIDER_PREFIX
 from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils.xml import get_xpath_from_dot_notation, \
     get_xpath_with_target_namespace, get_value_at_xpath, set_value_at_xpath
@@ -52,7 +54,8 @@ def set_data_pid(sender, document, **kwargs):
 
     # Decide if the PID needs to be generated
     generate_pid = True
-    if document_pid is not None and document_pid != "":
+
+    if document_pid is not None and document_pid != "" and document.pk is not None:
         try:
             generate_pid = not system_api.is_pid_defined_for_document(
                 document_pid, document.pk
@@ -63,19 +66,25 @@ def set_data_pid(sender, document, **kwargs):
             ))
 
     if generate_pid:  # If the PID needs to be generated
-        document_pid_response = send_post_request(
-            "%s%s?format=json" % (
-                SERVER_URI,
-                reverse(
-                    "core_linked_records_app_rest_provider_record_view",
-                    kwargs={
-                        "provider": default_system,
-                        "record": ID_PROVIDER_PREFIX
-                    }
-                )
+        pid_generation_url = "%s%s" % (
+            SERVER_URI,
+            reverse(
+                "core_linked_records_app_rest_provider_record_view",
+                kwargs={
+                    "provider": default_system,
+                    "record": ID_PROVIDER_PREFIX
+                }
             )
         )
 
+        # If the document PID is not a valid PID URL, generate a random PID
+        if re.match(r"^%s/[a-zA-Z0-9]+$" % pid_generation_url, document_pid) is None:
+            document_pid = pid_generation_url
+
+        # Register the PID and return the URL provided
+        document_pid_response = send_post_request(
+            "%s?format=json" % document_pid
+        )
         document_pid = document_pid_response.json()["url"]
 
     # Set the document PID into XML data and update `xml_content`
