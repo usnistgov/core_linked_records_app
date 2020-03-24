@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from rest_framework import renderers
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
+from core_main_app.components.data import api as data_api
 from core_main_app.utils.rendering import render
 
 
@@ -23,7 +24,7 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
         Returns: html page
         """
         context = {
-            'data': data
+            'data': data_api.get_by_id(data["id"], renderer_context["request"].user)
         }
 
         assets = {
