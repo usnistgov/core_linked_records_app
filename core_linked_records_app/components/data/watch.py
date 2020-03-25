@@ -78,7 +78,7 @@ def set_data_pid(sender, document, **kwargs):
         )
 
         # If the document PID is not a valid PID URL, generate a random PID
-        if re.match(r"^%s/[a-zA-Z0-9]+$" % pid_generation_url, document_pid) is None:
+        if re.match(r"^%s/[a-zA-Z0-9_\-]+$" % pid_generation_url, document_pid) is None:
             document_pid = pid_generation_url
 
         # Register the PID and return the URL provided
