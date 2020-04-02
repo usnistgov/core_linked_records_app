@@ -6,10 +6,11 @@ import re
 from django.urls import reverse
 
 from core_linked_records_app.settings import ID_PROVIDER_SYSTEMS, PID_XPATH, SERVER_URI, \
-    ID_PROVIDER_PREFIX
+    ID_PROVIDER_PREFIX, PID_FORMAT
 from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils.xml import get_xpath_from_dot_notation, \
     get_xpath_with_target_namespace, get_value_at_xpath, set_value_at_xpath
+from core_main_app.commons import exceptions
 from core_main_app.components.data.models import Data
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
 from signals_utils.signals.mongo import signals, connector
@@ -46,46 +47,48 @@ def set_data_pid(sender, document, **kwargs):
         pid_xpath, document.template.content
     )
 
-    # Retrieve element value
+    # If PID XPath not found in document, do not go further
     try:
         document_pid = get_value_at_xpath(xml_tree, pid_xpath, namespaces)
-    except AssertionError:  # PID XPath not found in document
+    except AssertionError:
         return
 
-    # Decide if the PID needs to be generated
-    generate_pid = True
-
-    if document_pid is not None and document_pid != "" and document.pk is not None:
-        try:
-            generate_pid = not system_api.is_pid_defined_for_document(
-                document_pid, document.pk
-            )
-        except Exception as e:
-            LOGGER.info("Exception when fetching local id %s: %s" % (
-                document_pid, str(e)
-            ))
-
-    if generate_pid:  # If the PID needs to be generated
-        pid_generation_url = "%s%s" % (
-            SERVER_URI,
-            reverse(
-                "core_linked_records_app_rest_provider_record_view",
-                kwargs={
-                    "provider": default_system,
-                    "record": ID_PROVIDER_PREFIX
-                }
-            )
+    pid_generation_url = "%s%s" % (
+        SERVER_URI,
+        reverse(
+            "core_linked_records_app_rest_provider_record_view",
+            kwargs={
+                "provider": default_system,
+                "record": ID_PROVIDER_PREFIX
+            }
         )
+    )
 
-        # If the document PID is not a valid PID URL, generate a random PID
-        if re.match(r"^%s/[a-zA-Z0-9_\-]+$" % pid_generation_url, document_pid) is None:
-            document_pid = pid_generation_url
+    # Generate new PID if none has been specified
+    if document_pid is None or document_pid == "" or \
+            re.match(r"^%s/?$" % pid_generation_url, document_pid) is not None:
+        document_pid = pid_generation_url
+    else:  # PID has been specified
+        # Check that PID is following default format
+        if re.match(r"^%s/%s$" % (pid_generation_url, PID_FORMAT), document_pid) is None:
+            raise exceptions.ModelError("Invalid PID provided")
 
-        # Register the PID and return the URL provided
-        document_pid_response = send_post_request(
-            "%s?format=json" % document_pid
-        )
-        document_pid = document_pid_response.json()["url"]
+        # Check that PID is not assigned to another document
+        # * Check 1: document is already registered in database
+        if document.pk is not None \
+                and not system_api.is_pid_defined_for_document(document_pid, document.pk) \
+                and system_api.is_pid_defined(document_pid):
+            raise exceptions.ModelError("PID already defined for another document")
+
+        # * Check 2: registering a new document in the database
+        if document.pk is None and system_api.is_pid_defined(document_pid):
+            raise exceptions.ModelError("PID already defined for another document")
+
+    # Register the PID and return the URL provided
+    document_pid_response = send_post_request(
+        "%s?format=json" % document_pid
+    )
+    document_pid = document_pid_response.json()["url"]
 
     # Set the document PID into XML data and update `xml_content`
     set_value_at_xpath(xml_tree, pid_xpath, document_pid, namespaces)

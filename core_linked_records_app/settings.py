@@ -9,6 +9,8 @@ SERVER_URI = getattr(settings, "SERVER_URI", "http://localhost")
 
 PID_XPATH = getattr(settings, "PID_XPATH", "Resource.@localid")
 
+PID_FORMAT = getattr(settings, "PID_FORMAT", r"[a-zA-Z0-9_\-]+")
+
 ID_PROVIDER_SYSTEMS = getattr(settings, "ID_PROVIDER_SYSTEMS", {
     "local": {
         "class":
