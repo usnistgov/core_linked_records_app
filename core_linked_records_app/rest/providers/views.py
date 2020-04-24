@@ -13,7 +13,8 @@ from rest_framework.views import APIView
 from core_linked_records_app.components.data.api import get_data_by_pid
 from core_linked_records_app.rest.data.renderers.data_html_user_renderer import DataHtmlUserRenderer
 from core_linked_records_app.rest.data.renderers.data_xml_renderer import DataXmlRenderer
-from core_linked_records_app.settings import ID_PROVIDER_SYSTEMS
+from core_linked_records_app.settings import ID_PROVIDER_SYSTEMS, ID_PROVIDER_PREFIX_DEFAULT, \
+    ID_PROVIDER_PREFIXES
 from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.rest.data.serializers import DataSerializer
 
@@ -60,17 +61,23 @@ class ProviderRecord(APIView):
 
         Returns:
         """
+        # Parse record entry to split between prefix and record ID.
         prefix_record_list = record.split("/")
 
-        if len(prefix_record_list) == 1:
+        if len(prefix_record_list) == 1:  # No record provided
             prefix = prefix_record_list[0]
             record = None
-        elif prefix_record_list[-1] == "":
+        elif prefix_record_list[-1] == "":  # Only prefix provided
             prefix = "/".join(prefix_record_list[:-1])
             record = None
-        else:
+        else:  # Prefix and record provided
             prefix = "/".join(prefix_record_list[:-1])
             record = prefix_record_list[-1]
+
+        # Assign default prefix if the prefix is undefined or not in the list of
+        # authorized ones.
+        if prefix == "" or prefix not in ID_PROVIDER_PREFIXES:
+            prefix = ID_PROVIDER_PREFIX_DEFAULT
 
         id_provider = self._get_provider_instance(provider)
         provider_response = id_provider.create(prefix, record)
