@@ -43,6 +43,3 @@ def delete(record):
 
     """
     return record.delete()
-
-
-

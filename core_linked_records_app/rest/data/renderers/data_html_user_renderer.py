@@ -12,40 +12,34 @@ LOGGER = logging.getLogger(__name__)
 
 
 class DataHtmlUserRenderer(renderers.BaseRenderer):
-    media_type = 'text/html'
-    format = 'html'
-    charset = 'utf-8'
+    media_type = "text/html"
+    format = "html"
+    charset = "utf-8"
 
     @staticmethod
     def build_page(data, request):
-        context = {
-            'data': data_api.get_by_id(data["id"], request.user)
-        }
+        context = {"data": data_api.get_by_id(data["id"], request.user)}
 
         assets = {
             "js": [
-                {
-                    "path": 'core_main_app/common/js/XMLTree.js',
-                    "is_raw": False
-                },
-                {
-                    "path": 'core_main_app/user/js/data/detail.js',
-                    "is_raw": False
-                },
+                {"path": "core_main_app/common/js/XMLTree.js", "is_raw": False},
+                {"path": "core_main_app/user/js/data/detail.js", "is_raw": False},
             ],
             "css": ["core_main_app/common/css/XMLTree.css"],
         }
 
         # check errors
-        if 'status' in data and data['status'] == 'error':
-            if data['code'] == HTTP_404_NOT_FOUND:
+        if "status" in data and data["status"] == "error":
+            if data["code"] == HTTP_404_NOT_FOUND:
                 return HttpResponse(status=HTTP_404_NOT_FOUND)
             else:
                 return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return render(
-                request, 'core_main_app/user/data/detail.html', context=context,
-                assets=assets
+                request,
+                "core_main_app/user/data/detail.html",
+                context=context,
+                assets=assets,
             )
 
     def render(self, data, media_type=None, renderer_context=None):
@@ -64,14 +58,14 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
             LOGGER.error("Error while building data page: %s" % str(e))
 
             if "kwargs" in renderer_context and "record" in renderer_context["kwargs"]:
-                error_msg = "Document %s does not exist." % \
-                            renderer_context["kwargs"]["record"]
+                error_msg = (
+                    "Document %s does not exist." % renderer_context["kwargs"]["record"]
+                )
             else:
                 error_msg = "Invalid request provided."
 
             return render(
-                renderer_context["request"], 'core_main_app/common/commons/error.html',
-                context={
-                    "error": error_msg
-                }
+                renderer_context["request"],
+                "core_main_app/common/commons/error.html",
+                context={"error": error_msg},
             )

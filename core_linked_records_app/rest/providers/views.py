@@ -7,14 +7,25 @@ from importlib import import_module
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_200_OK
+from rest_framework.status import (
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_200_OK,
+)
 from rest_framework.views import APIView
 
 from core_linked_records_app.components.data.api import get_data_by_pid
-from core_linked_records_app.rest.data.renderers.data_html_user_renderer import DataHtmlUserRenderer
-from core_linked_records_app.rest.data.renderers.data_xml_renderer import DataXmlRenderer
-from core_linked_records_app.settings import ID_PROVIDER_SYSTEMS, ID_PROVIDER_PREFIX_DEFAULT, \
-    ID_PROVIDER_PREFIXES
+from core_linked_records_app.rest.data.renderers.data_html_user_renderer import (
+    DataHtmlUserRenderer,
+)
+from core_linked_records_app.rest.data.renderers.data_xml_renderer import (
+    DataXmlRenderer,
+)
+from core_linked_records_app.settings import (
+    ID_PROVIDER_SYSTEMS,
+    ID_PROVIDER_PREFIX_DEFAULT,
+    ID_PROVIDER_PREFIXES,
+)
 from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.rest.data.serializers import DataSerializer
 
@@ -40,9 +51,7 @@ class ProviderRecord(APIView):
 
             # Import module and class
             id_provider_module = import_module(id_provider_modpath)
-            id_provider_class = getattr(
-                id_provider_module, id_provider_classname
-            )
+            id_provider_class = getattr(id_provider_module, id_provider_classname)
 
             # Initialize handel system instance
             self.id_provider_instances[system] = id_provider_class(
@@ -83,10 +92,7 @@ class ProviderRecord(APIView):
         provider_response = id_provider.create(prefix, record)
 
         provider_content = json.loads(provider_response.content)
-        return Response(
-            provider_content,
-            status=provider_response.status_code
-        )
+        return Response(provider_content, status=provider_response.status_code)
 
     def put(self, request, provider, record):
         """ Update the value of a given handle record
@@ -103,10 +109,7 @@ class ProviderRecord(APIView):
 
         provider_content = json.loads(provider_response.content)
 
-        return Response(
-            provider_content,
-            status=provider_response.status_code
-        )
+        return Response(provider_content, status=provider_response.status_code)
 
     def get(self, request, provider, record):
         """ Retrieve the local data of a given handle record
@@ -125,26 +128,21 @@ class ProviderRecord(APIView):
             query_result = get_data_by_pid(
                 json.loads(provider_response.content)["url"], request.user
             )
-            return Response(
-                DataSerializer(query_result).data,
-                status=HTTP_200_OK
-            )
+            return Response(DataSerializer(query_result).data, status=HTTP_200_OK)
         except DoesNotExist:
             content = {
                 "status": "error",
                 "code": HTTP_404_NOT_FOUND,
-                "message": "No data with specified handle found"
+                "message": "No data with specified handle found",
             }
             return Response(content, status=HTTP_404_NOT_FOUND)
         except Exception as ex:
             content = {
                 "status": "error",
                 "code": HTTP_500_INTERNAL_SERVER_ERROR,
-                "message": str(ex)
+                "message": str(ex),
             }
-            return Response(
-                content, status=HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response(content, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, provider, record):
         """ Delete a handle record
@@ -161,7 +159,4 @@ class ProviderRecord(APIView):
 
         provider_content = json.loads(provider_response.content)
 
-        return Response(
-            provider_content,
-            status=provider_response.status_code
-        )
+        return Response(provider_content, status=provider_response.status_code)

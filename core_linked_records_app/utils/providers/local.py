@@ -21,11 +21,8 @@ class LocalIdProvider(AbstractIdProvider):
             base_url,
             reverse(
                 "core_linked_records_app_rest_provider_record_view",
-                kwargs={
-                    "provider": "local",
-                    "record": "@record@"
-                }
-            )
+                kwargs={"provider": "local", "record": "@record@"},
+            ),
         )
 
         super().__init__(api_url, base_url, None, None)
@@ -35,15 +32,13 @@ class LocalIdProvider(AbstractIdProvider):
 
     @staticmethod
     def _generate_id(length_id=16):
-        return ''.join(
+        return "".join(
             random.choice(string.ascii_uppercase + string.digits)
             for _ in range(length_id)
         )
 
     def is_id_already_used(self, record):
-        return json.loads(
-            self.get(record).content
-        )["message"] == "Successful operation"
+        return json.loads(self.get(record).content)["message"] == "Successful operation"
 
     def get(self, record):
         response = Response()
@@ -56,17 +51,13 @@ class LocalIdProvider(AbstractIdProvider):
                 {
                     "message": "Successful operation",
                     "record": record,
-                    "url": response_url
+                    "url": response_url,
                 }
             )
         except exceptions.DoesNotExist:
             response.status_code = status.HTTP_404_NOT_FOUND
             response._content = json.dumps(
-                {
-                    "message": "record not found",
-                    "record": record,
-                    "url": response_url
-                }
+                {"message": "record not found", "record": record, "url": response_url}
             )
 
         return response
@@ -86,13 +77,11 @@ class LocalIdProvider(AbstractIdProvider):
         response = Response()
         response_content = {
             "record": record,
-            "url": self.provider_url.replace("@record@", record)
+            "url": self.provider_url.replace("@record@", record),
         }
 
         try:
-            record_object = LocalId(
-                record_name=record
-            )
+            record_object = LocalId(record_name=record)
 
             record_api.insert(record_object)
 
@@ -109,11 +98,13 @@ class LocalIdProvider(AbstractIdProvider):
         self.create(record)
 
         response = Response()
-        response._content = json.dumps({
-            "record": record,
-            "message": "Successful operation",
-            "url": self.provider_url.replace("@record@", record)
-        })
+        response._content = json.dumps(
+            {
+                "record": record,
+                "message": "Successful operation",
+                "url": self.provider_url.replace("@record@", record),
+            }
+        )
 
         return response
 
@@ -124,17 +115,21 @@ class LocalIdProvider(AbstractIdProvider):
             record_object = record_api.get_by_name(record)
             record_object.delete()
 
-            response._content = json.dumps({
-                "record": record,
-                "message": "Successful operation",
-                "url": self.provider_url.replace("@record@", record)
-            })
+            response._content = json.dumps(
+                {
+                    "record": record,
+                    "message": "Successful operation",
+                    "url": self.provider_url.replace("@record@", record),
+                }
+            )
         except exceptions.DoesNotExist:
             response.status_code = status.HTTP_404_NOT_FOUND
-            response._content = json.dumps({
-                "record": record,
-                "message": "record not found",
-                "url": self.provider_url.replace("@record@", record)
-            })
+            response._content = json.dumps(
+                {
+                    "record": record,
+                    "message": "record not found",
+                    "url": self.provider_url.replace("@record@", record),
+                }
+            )
 
         return response

@@ -1,6 +1,9 @@
 """ XML utilities functions
 """
-from xml_utils.xsd_tree.operations.namespaces import get_target_namespace, get_namespaces
+from xml_utils.xsd_tree.operations.namespaces import (
+    get_target_namespace,
+    get_namespaces,
+)
 from xml_utils.xsd_tree.xsd_tree import XSDTree
 
 
@@ -33,8 +36,7 @@ def get_xpath_with_target_namespace(xpath, xsd_string):
 
     """
     namespaces = get_target_namespace(
-        XSDTree.build_tree(xsd_string),
-        get_namespaces(xsd_string)
+        XSDTree.build_tree(xsd_string), get_namespaces(xsd_string)
     )
 
     xpath = xpath.format(namespaces[1])
@@ -67,9 +69,7 @@ def set_value_at_xpath(xml_tree, xpath, value, namespaces):
         attribute = xpath_list[-1].replace("@", "")
         xpath = "/%s" % "/".join(xpath_list[:-1])
 
-        xml_tree.xpath(
-            xpath, namespaces=namespaces
-        )[0].attrib[attribute] = value
+        xml_tree.xpath(xpath, namespaces=namespaces)[0].attrib[attribute] = value
 
 
 def get_value_at_xpath(xml_tree, xpath, namespaces):
@@ -94,4 +94,3 @@ def get_value_at_xpath(xml_tree, xpath, namespaces):
         xpath_value = xpath_element_list[0]
 
     return xpath_value
-
