@@ -1,6 +1,7 @@
 """ Data HTML renderer for django REST API
 """
 import logging
+
 from django.http import HttpResponse
 from rest_framework import renderers
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
@@ -12,21 +13,31 @@ LOGGER = logging.getLogger(__name__)
 
 
 class DataHtmlUserRenderer(renderers.BaseRenderer):
+    # FIXME class is very close to ViewData, remove duplicated code.
     media_type = "text/html"
     format = "html"
     charset = "utf-8"
 
     @staticmethod
     def build_page(data, request):
-        context = {"data": data_api.get_by_id(data["id"], request.user)}
+        context = {
+            "data": data_api.get_by_id(data["id"], request.user),
+            "share_pid_button": True,
+        }
 
         assets = {
             "js": [
                 {"path": "core_main_app/common/js/XMLTree.js", "is_raw": False},
                 {"path": "core_main_app/user/js/data/detail.js", "is_raw": False},
+                {"path": "core_main_app/user/js/sharing_modal.js", "is_raw": False,},
+                {
+                    "path": "core_linked_records_app/user/js/sharing/data_detail.js",
+                    "is_raw": False,
+                },
             ],
             "css": ["core_main_app/common/css/XMLTree.css"],
         }
+        modals = ["core_linked_records_app/user/sharing/data_detail/modal.html"]
 
         # check errors
         if "status" in data and data["status"] == "error":
@@ -40,6 +51,7 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
                 "core_main_app/user/data/detail.html",
                 context=context,
                 assets=assets,
+                modals=modals,
             )
 
     def render(self, data, media_type=None, renderer_context=None):
