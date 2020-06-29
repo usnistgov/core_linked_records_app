@@ -5,6 +5,7 @@ import sys
 from django.apps import AppConfig
 
 from core_linked_records_app.components.data import watch as data_watch
+from core_linked_records_app.settings import AUTO_SET_PID
 
 
 class LinkedRecordsAppConfig(AppConfig):
@@ -20,4 +21,5 @@ class LinkedRecordsAppConfig(AppConfig):
 
         """
         if "migrate" not in sys.argv:
-            data_watch.init()
+            if AUTO_SET_PID:
+                data_watch.init()

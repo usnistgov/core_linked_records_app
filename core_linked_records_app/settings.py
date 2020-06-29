@@ -27,3 +27,5 @@ ID_PROVIDER_PREFIXES = getattr(settings, "ID_PROVIDER_PREFIXES", ["cdcs"])
 ID_PROVIDER_PREFIX_DEFAULT = getattr(
     settings, "ID_PROVIDER_PREFIX_DEFAULT", ID_PROVIDER_PREFIXES[0]
 )
+
+AUTO_SET_PID = getattr(settings, "AUTO_SET_PID", False)
