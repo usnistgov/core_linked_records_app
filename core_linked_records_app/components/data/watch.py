@@ -9,7 +9,6 @@ from core_linked_records_app.settings import (
     ID_PROVIDER_SYSTEMS,
     PID_XPATH,
     SERVER_URI,
-    ID_PROVIDER_PREFIXES,
     PID_FORMAT,
 )
 from core_linked_records_app.system import api as system_api
@@ -20,9 +19,11 @@ from core_linked_records_app.utils.xml import (
     set_value_at_xpath,
 )
 from core_main_app.commons import exceptions
+
 from core_main_app.components.data.models import Data
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
 from signals_utils.signals.mongo import signals, connector
+from xml_utils.xpath import create_tree_from_xpath
 from xml_utils.xsd_tree.xsd_tree import XSDTree
 
 LOGGER = logging.getLogger(__name__)
@@ -62,8 +63,23 @@ def set_data_pid(sender, document, **kwargs):
             "/"
         ):  # Cleanup PID if it ends with a '/'
             document_pid = document_pid[:-1]
-    except AssertionError:  # If PID XPath not found in document, do not go further
-        return
+    except AssertionError:  # PID XPath not found in document
+        try:  # Try to create the element at the given PID
+            # Import libs that need to wait for apps to be ready
+            from core_main_app.components.data import api as data_api
+
+            modified_xml_tree = create_tree_from_xpath(pid_xpath, xml_tree, namespaces)
+            set_value_at_xpath(
+                modified_xml_tree, pid_xpath, "http://sample_pid.org", namespaces
+            )
+            document.xml_content = XSDTree.tostring(modified_xml_tree)
+            data_api.check_xml_file_is_valid(document)
+
+            xml_tree = modified_xml_tree
+            document_pid = None
+        except Exception as exc:  # Cannot create PID at given XPath
+            LOGGER.warning("Cannot create PID at %s: %s" % (pid_xpath, str(exc)))
+            return
 
     # Generate the default URL for the default system and remove the final '/'
     pid_generation_url = (
