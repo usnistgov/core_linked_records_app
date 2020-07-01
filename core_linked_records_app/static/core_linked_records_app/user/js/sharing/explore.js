@@ -11,11 +11,11 @@ $(document).ready(function() {
 
 let configurePIDListSharingModal = function() {
     let dataList = [];
-    let $linkList = $(".result-title>a");
+    let $linkList = $(".exporter-checkbox");
     let hasError = false;
 
     for(const link of $linkList) {
-        dataList.push($(link).attr("href").split("=")[1]);
+        dataList.push($(link).attr("value").split("=")[1]);
     }
 
     $.ajax({
