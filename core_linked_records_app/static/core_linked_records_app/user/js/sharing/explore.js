@@ -18,6 +18,11 @@ let configurePIDListSharingModal = function() {
         dataList.push($(link).attr("value").split("=")[1]);
     }
 
+    if(dataList.length===0) {
+        $("#pid-list-sharing-link").val("No data available");
+        return !hasError;
+    }
+
     $.ajax({
         url: retrievePidUrl,
         data: {"data_list": JSON.stringify(dataList)},
