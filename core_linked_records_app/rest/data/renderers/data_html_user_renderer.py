@@ -3,7 +3,8 @@
 import logging
 
 from django.http import HttpResponse
-from rest_framework import renderers
+from rest_framework import renderers, status
+from rest_framework.exceptions import APIException
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from core_main_app.components.data import api as data_api
@@ -64,8 +65,29 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
 
         Returns: html page
         """
+
         try:
+            request = (
+                renderer_context["request"] if "request" in renderer_context else None
+            )
+            # check the renderer format
+            if (
+                request
+                and request.query_params != {}
+                and "format" in request.query_params
+                and request.query_params["format"] != "html"
+            ):
+                raise APIException(
+                    "Wrong data format parameter.", status.HTTP_404_NOT_FOUND
+                )
+
             return self.build_page(data, renderer_context["request"])
+        except APIException as api_error:
+            return render(
+                renderer_context["request"],
+                "core_main_app/common/commons/error.html",
+                context={"error": str(api_error)},
+            )
         except Exception as e:
             LOGGER.error("Error while building data page: %s" % str(e))
 
