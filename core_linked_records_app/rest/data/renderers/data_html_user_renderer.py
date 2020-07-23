@@ -7,53 +7,16 @@ from rest_framework import renderers, status
 from rest_framework.exceptions import APIException
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
-from core_main_app.components.data import api as data_api
 from core_main_app.utils.rendering import render
+from core_main_app.utils.view_builders import data as data_view_builder
 
 LOGGER = logging.getLogger(__name__)
 
 
 class DataHtmlUserRenderer(renderers.BaseRenderer):
-    # FIXME class is very close to ViewData, remove duplicated code.
     media_type = "text/html"
     format = "html"
     charset = "utf-8"
-
-    @staticmethod
-    def build_page(data, request):
-        context = {
-            "data": data_api.get_by_id(data["id"], request.user),
-            "share_pid_button": True,
-        }
-
-        assets = {
-            "js": [
-                {"path": "core_main_app/common/js/XMLTree.js", "is_raw": False},
-                {"path": "core_main_app/user/js/data/detail.js", "is_raw": False},
-                {"path": "core_main_app/user/js/sharing_modal.js", "is_raw": False,},
-                {
-                    "path": "core_linked_records_app/user/js/sharing/data_detail.js",
-                    "is_raw": False,
-                },
-            ],
-            "css": ["core_main_app/common/css/XMLTree.css"],
-        }
-        modals = ["core_linked_records_app/user/sharing/data_detail/modal.html"]
-
-        # check errors
-        if "status" in data and data["status"] == "error":
-            if data["code"] == HTTP_404_NOT_FOUND:
-                return HttpResponse(status=HTTP_404_NOT_FOUND)
-            else:
-                return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return render(
-                request,
-                "core_main_app/user/data/detail.html",
-                context=context,
-                assets=assets,
-                modals=modals,
-            )
 
     def render(self, data, media_type=None, renderer_context=None):
         """ Render the data object by returning the user template
@@ -65,12 +28,18 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
 
         Returns: html page
         """
+        # If the data retrieved contains an error
+        if "status" in data and data["status"] == "error":
+            if data["code"] == HTTP_404_NOT_FOUND:
+                return HttpResponse(status=HTTP_404_NOT_FOUND)
+            else:
+                return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Build the request object or set it up to None if undefined
+        request = renderer_context["request"] if "request" in renderer_context else None
 
         try:
-            request = (
-                renderer_context["request"] if "request" in renderer_context else None
-            )
-            # check the renderer format
+            # Check the renderer format
             if (
                 request
                 and request.query_params != {}
@@ -81,10 +50,25 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
                     "Wrong data format parameter.", status.HTTP_404_NOT_FOUND
                 )
 
-            return self.build_page(data, renderer_context["request"])
+            page_info = data_view_builder.build_page(data["id"], request.user)
+
+            if page_info["error"] is None:
+                return render(
+                    request,
+                    "core_main_app/user/data/detail.html",
+                    context=page_info["context"],
+                    assets=page_info["assets"],
+                    modals=page_info["modals"],
+                )
+            else:
+                render(
+                    request,
+                    "core_main_app/common/commons/error.html",
+                    context={"error": page_info["error"]},
+                )
         except APIException as api_error:
             return render(
-                renderer_context["request"],
+                request,
                 "core_main_app/common/commons/error.html",
                 context={"error": str(api_error)},
             )
@@ -99,7 +83,7 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
                 error_msg = "Invalid request provided."
 
             return render(
-                renderer_context["request"],
+                request,
                 "core_main_app/common/commons/error.html",
                 context={"error": error_msg},
             )
