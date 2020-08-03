@@ -10,22 +10,16 @@ $(document).ready(function() {
 });
 
 let configurePIDListSharingModal = function() {
-    let dataList = [];
-    let $linkList = $(".exporter-checkbox");
     let hasError = false;
-
-    for(const link of $linkList) {
-        dataList.push($(link).attr("value").split("=")[1]);
-    }
-
-    if(dataList.length===0) {
-        $("#pid-list-sharing-link").val("No data available");
-        return !hasError;
-    }
+    let dataSourceIndex = $(".tab-pane.active").attr("id").replace("results_", "");
+    let queryId = $("#query_id").text();
 
     $.ajax({
         url: retrievePidUrl,
-        data: {"data_list": JSON.stringify(dataList)},
+        data: {
+            "query_id": queryId,
+            "data_source_index": dataSourceIndex
+        },
         type: "POST",
         dataType: 'json',
         async: false,
@@ -36,8 +30,13 @@ let configurePIDListSharingModal = function() {
             }
             $("#pid-list-sharing-link").val(sharing_link_value);
         },
-        error:function(){
-            showErrorModal("Error while retrieving list of PIDs.");
+        error: function(returnState) {
+            let errorMessage = "responseJSON" in returnState?
+                returnState.responseJSON["error"]: "";
+
+            showErrorModal(
+                "Error while retrieving list of PIDs. " + errorMessage
+            );
             hasError = true;
         }
     });
