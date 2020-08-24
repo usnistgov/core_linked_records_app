@@ -3,28 +3,23 @@
  */
 $(document).ready(function() {
     initSharingModal(
-        configurePIDListSharingModal, "#pid-sharing",
+        configurePIDDataSharingModal, "#pid-sharing",
         "#pid-sharing-modal", "#pid-sharing-link",
         "#pid-sharing-submit"
     );
 });
 
-let configurePIDListSharingModal = function() {
+let configurePIDDataSharingModal = function() {
     let hasError = false;
 
     $.ajax({
-        url: retrievePidUrl,
-        data: {"data_list": JSON.stringify(dataList)},
+        url: retrieveDataPidUrl,
+        data: {"data_id": dataId},
         type: "POST",
         dataType: 'json',
         success: function(data){
-            let pid_url = null;
-            if(data["pids"].length === 1) {
-                pid_url = data["pids"][0];
-            }
-
             $("#pid-sharing-link").val(
-                pid_url===null?"PID not available":pid_url
+                data["pid"]===null?"PID not available":data["pid"]
             );
         },
         error:function(){

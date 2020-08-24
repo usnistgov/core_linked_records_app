@@ -1,11 +1,10 @@
 """ Local resolver API
 """
-from bson import ObjectId
 
 from core_linked_records_app.settings import PID_XPATH
+from core_linked_records_app.utils.dict import get_dict_value_from_key_list
 from core_main_app.commons.exceptions import ApiError, DoesNotExist
 from core_main_app.components.data import api as data_api
-from core_main_app.components.data.models import Data
 
 
 def get_data_by_pid(pid, user):
@@ -39,37 +38,30 @@ def get_pids_for_data_list(data_id_list, user):
     Returns:
     """
 
-    def get_data_content_from_pid_xpath_parts(data_content, pid_xpath_parts):
-        """ Browse dictionary content given an ordered list of keys.
-
-        Params:
-            data_content:
-            pid_xpath_parts:
-
-        Returns:
-        """
-        while len(pid_xpath_parts) > 0:
-            pid_xpath_part = pid_xpath_parts.pop(0)
-
-            if pid_xpath_part in data_content.keys():
-                return get_data_content_from_pid_xpath_parts(
-                    data_content[pid_xpath_part], pid_xpath_parts
-                )
-            else:
-                return None
-
-        return data_content
-
     # Retrieve the document passed as input and extra the PID field.
     data_list = data_api.get_by_id_list(data_id_list, user)
 
     # Build the list of PID from the document and the PID_XPATH
     pid_list = [
-        get_data_content_from_pid_xpath_parts(
-            data["dict_content"], PID_XPATH.split(".")
-        )
+        get_dict_value_from_key_list(data["dict_content"], PID_XPATH.split("."))
         for data in data_list
     ]
 
     # Returns a list of PID available from the list.
     return [pid for pid in pid_list if pid is not None]
+
+
+def get_pid_for_data(data_id, user):
+    """ Retrieve PID matching the document ID provided.
+
+    Args:
+        data_id:
+        user:
+
+    Returns:
+    """
+    # Retrieve the document passed as input and extra the PID field.
+    data = data_api.get_by_id(data_id, user)
+
+    # Return PID value from the document and the PID_XPATH
+    return get_dict_value_from_key_list(data["dict_content"], PID_XPATH.split("."))

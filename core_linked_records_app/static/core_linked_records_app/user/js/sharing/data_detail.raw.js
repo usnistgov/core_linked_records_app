@@ -1,2 +1,2 @@
-let dataList = ["{{ data.data.id }}"];
-let retrievePidUrl = "{% url 'core_linked_record_retrieve_pid_url' %}";
+let dataId = "{{ data.data.id }}";
+let retrieveDataPidUrl = "{% url 'core_linked_record_retrieve_data_pid_url' %}";

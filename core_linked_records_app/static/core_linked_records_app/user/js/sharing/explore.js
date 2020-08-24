@@ -15,7 +15,7 @@ let configurePIDListSharingModal = function() {
     let queryId = $("#query_id").text();
 
     $.ajax({
-        url: retrievePidUrl,
+        url: retrieveListPidUrl,
         data: {
             "query_id": queryId,
             "data_source_index": dataSourceIndex
