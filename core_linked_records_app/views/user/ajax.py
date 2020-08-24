@@ -3,9 +3,12 @@
 import json
 
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views import View
 from rest_framework import status
-
+from core_explore_common_app.utils.protocols.oauth2 import (
+    send_post_request as oauth2_request,
+)
 from core_linked_records_app.components.data.api import get_pids_for_data_list
 from core_explore_common_app.components.query import api as query_api
 from core_main_app.utils.requests_utils.requests_utils import (
@@ -43,11 +46,21 @@ class RetrievePID(View):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
-            response = send_get_request(
-                data_source.capabilities["url_pid"],
-                data=json_query,
-                cookies={"sessionid": request.session.session_key},
-            )
+            if data_source.authentication.type == "session":
+                response = send_get_request(
+                    data_source.capabilities["url_pid"],
+                    data=json_query,
+                    cookies={"sessionid": request.session.session_key},
+                )
+            elif data_source.authentication.type == "oauth2":
+                response = oauth2_request(
+                    data_source.capabilities["url_pid"],
+                    json_query,
+                    data_source.authentication.params["access_token"],
+                    session_time_zone=timezone.get_current_timezone(),
+                )
+            else:
+                raise Exception("Unknown authentication type.")
 
             if response.status_code == 200:
                 return JsonResponse(
