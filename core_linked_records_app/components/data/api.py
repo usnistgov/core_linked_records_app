@@ -8,13 +8,13 @@ from core_main_app.components.data import api as data_api
 
 
 def get_data_by_pid(pid, user):
-    """ Return data object with the given pid.
+    """Return data object with the given pid.
 
-        Parameters:
-            pid:
-            user:
+    Parameters:
+        pid:
+        user:
 
-        Returns: data object
+    Returns: data object
     """
     json_pid_path = "dict_content.%s" % PID_XPATH
     query_result = data_api.execute_query({json_pid_path: pid}, user)
@@ -29,7 +29,7 @@ def get_data_by_pid(pid, user):
 
 
 def get_pids_for_data_list(data_id_list, user):
-    """ Retrieve PID matching the document list provided.
+    """Retrieve PID matching the document list provided.
 
     Args:
         data_id_list:
@@ -52,7 +52,7 @@ def get_pids_for_data_list(data_id_list, user):
 
 
 def get_pid_for_data(data_id, user):
-    """ Retrieve PID matching the document ID provided.
+    """Retrieve PID matching the document ID provided.
 
     Args:
         data_id:

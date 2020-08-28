@@ -8,7 +8,7 @@ from xml_utils.xsd_tree.xsd_tree import XSDTree
 
 
 def get_xpath_from_dot_notation(dot_notation_path):
-    """ Transform MongoDB dot notation to XPath
+    """Transform MongoDB dot notation to XPath
 
     Params:
         dot_notation_path:
@@ -26,7 +26,7 @@ def get_xpath_from_dot_notation(dot_notation_path):
 
 
 def get_xpath_with_target_namespace(xpath, xsd_string):
-    """ Adds target namespace to a given XPath
+    """Adds target namespace to a given XPath
 
     Params:
         xpath:
@@ -51,7 +51,7 @@ def get_xpath_with_target_namespace(xpath, xsd_string):
 
 
 def set_value_at_xpath(xml_tree, xpath, value, namespaces):
-    """ Set value for a given XPath
+    """Set value for a given XPath
 
     Params:
         xml_tree:
@@ -73,7 +73,7 @@ def set_value_at_xpath(xml_tree, xpath, value, namespaces):
 
 
 def get_value_at_xpath(xml_tree, xpath, namespaces):
-    """ Retrieve value in XML given a XPath
+    """Retrieve value in XML given a XPath
 
     Params:
         xml_tree:

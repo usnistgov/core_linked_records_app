@@ -9,13 +9,12 @@ from core_linked_records_app.settings import AUTO_SET_PID
 
 
 class LinkedRecordsAppConfig(AppConfig):
-    """ Core application settings
-    """
+    """Core application settings"""
 
     name = "core_linked_records_app"
 
     def ready(self):
-        """ Run when the app is ready
+        """Run when the app is ready
 
         Returns:
 

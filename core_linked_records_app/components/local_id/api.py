@@ -7,7 +7,7 @@ from core_main_app.commons.exceptions import NotUniqueError
 
 
 def get_by_name(record_name):
-    """ Retrieve the record by name.
+    """Retrieve the record by name.
 
     Args:
         record_name:
@@ -19,7 +19,7 @@ def get_by_name(record_name):
 
 
 def insert(record):
-    """ Insert the record in the collection.
+    """Insert the record in the collection.
 
     Args:
         record:
@@ -34,7 +34,7 @@ def insert(record):
 
 
 def delete(record):
-    """ Delete the record.
+    """Delete the record.
 
     Args:
         record:

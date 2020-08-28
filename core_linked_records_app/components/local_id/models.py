@@ -8,8 +8,7 @@ from core_main_app.commons import exceptions
 
 
 class LocalId(Document):
-    """ Handle object
-    """
+    """Handle object"""
 
     record_name = fields.StringField(
         blank=False, unique=True, regex=NOT_EMPTY_OR_WHITESPACES

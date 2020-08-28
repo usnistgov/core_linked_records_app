@@ -3,7 +3,7 @@
 
 
 def get_dict_value_from_key_list(dictionary, key_list):
-    """ Browse dictionary content given an ordered list of keys.
+    """Browse dictionary content given an ordered list of keys.
 
     Params:
         dictionary:

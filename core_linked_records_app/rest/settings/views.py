@@ -8,8 +8,7 @@ from core_linked_records_app import settings
 
 
 class PidSettings(APIView):
-    """ Retrieve PID settings
-    """
+    """Retrieve PID settings"""
 
     def get(self, request):
         return Response(

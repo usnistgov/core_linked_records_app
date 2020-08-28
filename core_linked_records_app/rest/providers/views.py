@@ -61,7 +61,7 @@ class ProviderRecord(APIView):
         return self.id_provider_instances[system]
 
     def post(self, request, provider, record):
-        """ Create a handle record
+        """Create a handle record
 
         Args:
             request:
@@ -95,7 +95,7 @@ class ProviderRecord(APIView):
         return Response(provider_content, status=provider_response.status_code)
 
     def put(self, request, provider, record):
-        """ Update the value of a given handle record
+        """Update the value of a given handle record
 
         Args:
             request:
@@ -112,7 +112,7 @@ class ProviderRecord(APIView):
         return Response(provider_content, status=provider_response.status_code)
 
     def get(self, request, provider, record):
-        """ Retrieve the local data of a given handle record
+        """Retrieve the local data of a given handle record
 
         Args:
             request:
@@ -145,7 +145,7 @@ class ProviderRecord(APIView):
             return Response(content, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, provider, record):
-        """ Delete a handle record
+        """Delete a handle record
 
         Args:
             request:

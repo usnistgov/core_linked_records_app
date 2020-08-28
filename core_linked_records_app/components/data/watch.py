@@ -30,13 +30,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 def init():
-    """ Connect to Data object events.
-    """
+    """Connect to Data object events."""
     connector.connect(set_data_pid, signals.pre_save, sender=Data)
 
 
 def set_data_pid(sender, document, **kwargs):
-    """ Set the PID in the XML field specified in the settings. If the PID
+    """Set the PID in the XML field specified in the settings. If the PID
     already exists and is valid, it is not reset.
 
     Params:

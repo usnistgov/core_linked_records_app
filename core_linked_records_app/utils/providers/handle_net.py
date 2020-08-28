@@ -18,8 +18,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class HandleNetSystem(AbstractIdProvider):
-    """
-    """
+    """"""
 
     registration_api = "api/handles"
     response_code_messages = {
@@ -60,7 +59,7 @@ class HandleNetSystem(AbstractIdProvider):
         return b64encode(user_pass.encode("utf-8")).decode("utf-8")
 
     def get(self, record):
-        """ Retrieve an existring handle.net handle.
+        """Retrieve an existring handle.net handle.
 
         Args:
             record:
@@ -69,14 +68,16 @@ class HandleNetSystem(AbstractIdProvider):
         """
         response = send_get_request(
             "%s/%s/%s" % (self.provider_url, self.registration_api, record),
-            headers={"Content-Type": "application/json",},
+            headers={
+                "Content-Type": "application/json",
+            },
         )
 
         response._content = self._update_response_content(response)
         return response
 
     def create(self, prefix, record=None):
-        """ Create a new handle for a handle.net system.
+        """Create a new handle for a handle.net system.
 
         Args:
             prefix:
@@ -138,7 +139,7 @@ class HandleNetSystem(AbstractIdProvider):
             return response
 
     def update(self, record):
-        """ Update a handle for a handle.net system.
+        """Update a handle for a handle.net system.
 
         Args:
             record:

@@ -5,7 +5,7 @@ from core_main_app.components.data.models import Data
 
 
 def is_pid_defined_for_document(pid, document_id):
-    """ Determine if a given PID match the document ID provided.
+    """Determine if a given PID match the document ID provided.
 
     Params:
         pid:
@@ -20,7 +20,7 @@ def is_pid_defined_for_document(pid, document_id):
 
 
 def is_pid_defined(pid):
-    """ Determine if a given PID already exists.
+    """Determine if a given PID already exists.
 
     Params:
         pid:

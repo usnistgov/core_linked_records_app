@@ -5,7 +5,11 @@ from django.conf import settings
 if not settings.configured:
     settings.configure()
 
-INSTALLED_APPS = getattr(settings, "INSTALLED_APPS", [],)
+INSTALLED_APPS = getattr(
+    settings,
+    "INSTALLED_APPS",
+    [],
+)
 SERVER_URI = getattr(settings, "SERVER_URI", "http://localhost")
 
 PID_XPATH = getattr(settings, "PID_XPATH", "Resource.@localid")

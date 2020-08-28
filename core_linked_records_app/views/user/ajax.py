@@ -16,8 +16,7 @@ from core_main_app.utils.requests_utils.requests_utils import send_get_request
 
 
 class RetrieveDataPID(View):
-    """ Retrieve PIDs for a given data IDs.
-    """
+    """Retrieve PIDs for a given data IDs."""
 
     def post(self, request):
         return JsonResponse(
@@ -26,8 +25,7 @@ class RetrieveDataPID(View):
 
 
 class RetrieveListPID(View):
-    """ Retrieve PIDs for a given list of data IDs.
-    """
+    """Retrieve PIDs for a given list of data IDs."""
 
     def post(self, request):
         try:

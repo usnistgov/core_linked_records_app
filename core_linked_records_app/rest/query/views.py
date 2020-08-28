@@ -18,7 +18,7 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
     def build_query(
         self, query, workspaces=None, templates=None, options=None, title=None
     ):
-        """ Build the query by adding an extra filter to limit to document with
+        """Build the query by adding an extra filter to limit to document with
         PID fields.
 
         Args:
@@ -42,7 +42,7 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
         return pid_query
 
     def execute_raw_query(self, raw_query, order_by_field):
-        """ Execute the raw query in database
+        """Execute the raw query in database
 
         Args:
 
@@ -59,7 +59,7 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
         return data_api.aggregate(pipeline, self.request.user)
 
     def build_response(self, data_list):
-        """ Build the list of PIDs
+        """Build the list of PIDs
 
         Args:
 
@@ -70,7 +70,10 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
             Paginated list of data
         """
         # Send list of PID as JSON
-        return Response([data["pid"] for data in data_list], status=status.HTTP_200_OK,)
+        return Response(
+            [data["pid"] for data in data_list],
+            status=status.HTTP_200_OK,
+        )
 
 
 if (
@@ -87,7 +90,7 @@ if (
         pid_xpath = None
 
         def build_query(self, query, templates, registries):
-            """ Build the query by adding an extra filter to limit to document with
+            """Build the query by adding an extra filter to limit to document with
             PID fields.
 
             Args:
@@ -122,7 +125,7 @@ if (
             return pid_query
 
         def execute_raw_query(self, raw_query, order_by_field):
-            """ Execute the raw query in database
+            """Execute the raw query in database
 
             Args:
 
@@ -142,7 +145,7 @@ if (
             return oai_record_api.aggregate(pipeline)
 
         def build_response(self, data_list):
-            """ Build the list of PIDs
+            """Build the list of PIDs
 
             Args:
 
@@ -154,5 +157,6 @@ if (
             """
             # Send list of PID as JSON
             return Response(
-                [data["pid"] for data in data_list], status=status.HTTP_200_OK,
+                [data["pid"] for data in data_list],
+                status=status.HTTP_200_OK,
             )

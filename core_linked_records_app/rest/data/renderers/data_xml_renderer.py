@@ -11,7 +11,7 @@ class DataXmlRenderer(renderers.BaseRenderer):
     charset = "utf-8"
 
     def render(self, data, media_type=None, renderer_context=None):
-        """ Render the data object by just returning the xml_content field
+        """Render the data object by just returning the xml_content field
 
         Args:
             data:
