@@ -7,6 +7,7 @@ from rest_framework import renderers, status
 from rest_framework.exceptions import APIException
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
+from core_main_app.components.data import api as data_api
 from core_main_app.utils.rendering import render
 from core_main_app.utils.view_builders import data as data_view_builder
 
@@ -50,22 +51,10 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
                     "Wrong data format parameter.", status.HTTP_404_NOT_FOUND
                 )
 
-            page_info = data_view_builder.build_page(data["id"], request.user)
+            data_object = data_api.get_by_id(data["id"], request.user)
+            page_context = data_view_builder.build_page(data_object)
 
-            if page_info["error"] is None:
-                return render(
-                    request,
-                    "core_main_app/user/data/detail.html",
-                    context=page_info["context"],
-                    assets=page_info["assets"],
-                    modals=page_info["modals"],
-                )
-            else:
-                render(
-                    request,
-                    "core_main_app/common/commons/error.html",
-                    context={"error": page_info["error"]},
-                )
+            return data_view_builder.render_page(request, render, page_context)
         except APIException as api_error:
             return render(
                 request,
