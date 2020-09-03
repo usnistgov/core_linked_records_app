@@ -46,7 +46,10 @@ class RetrieveListPID(View):
                 "order_by_field": data_source.order_by_field,
             }
 
-            if "url_pid" not in data_source.capabilities.keys():
+            if (
+                getattr(data_source, "capabilities", False)
+                and "url_pid" not in data_source.capabilities.keys()
+            ):
                 return JsonResponse(
                     {"error": "The remote does not have PID capabilities."},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
