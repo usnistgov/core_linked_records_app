@@ -4,6 +4,7 @@ import json
 
 from django.http import JsonResponse
 from django.utils import timezone
+from django.utils.datastructures import MultiValueDictKeyError
 from django.views import View
 from rest_framework import status
 
@@ -12,6 +13,7 @@ from core_explore_common_app.utils.protocols.oauth2 import (
     send_post_request as oauth2_request,
 )
 from core_linked_records_app.components.data import api as data_api
+from core_linked_records_app.components.oai_record import api as oai_record_api
 from core_main_app.utils.requests_utils.requests_utils import send_get_request
 
 
@@ -19,9 +21,18 @@ class RetrieveDataPID(View):
     """Retrieve PIDs for a given data IDs."""
 
     def post(self, request):
-        return JsonResponse(
-            {"pid": data_api.get_pid_for_data(request.POST["data_id"], request.user)}
-        )
+        try:
+            return JsonResponse(
+                {
+                    "pid": data_api.get_pid_for_data(
+                        request.POST["data_id"], request.user
+                    )
+                }
+            )
+        except MultiValueDictKeyError:  # data_id key doesn't exist in request.POST
+            return JsonResponse(
+                {"pid": oai_record_api.get_pid_for_data(request.POST["oai_data_id"])}
+            )
 
 
 class RetrieveListPID(View):

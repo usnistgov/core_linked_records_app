@@ -11,10 +11,15 @@ $(document).ready(function() {
 
 let configurePIDDataSharingModal = function() {
     let hasError = false;
+    let ajaxData = {"data_id": dataId};
+
+    if(dataId === "") {
+        ajaxData = {"oai_data_id": oaiDataId};
+    }
 
     $.ajax({
         url: retrieveDataPidUrl,
-        data: {"data_id": dataId},
+        data: ajaxData,
         type: "POST",
         dataType: 'json',
         success: function(data){
