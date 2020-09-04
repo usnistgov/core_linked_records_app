@@ -29,15 +29,16 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
 
         Returns: html page
         """
-        # If the data retrieved contains an error
-        if "status" in data and data["status"] == "error":
-            if data["code"] == HTTP_404_NOT_FOUND:
-                return HttpResponse(status=HTTP_404_NOT_FOUND)
-            else:
-                return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
-
         # Build the request object or set it up to None if undefined
         request = renderer_context["request"] if "request" in renderer_context else None
+
+        # If the data retrieved contains an error
+        if "status" in data and data["status"] == "error":
+            return render(
+                request,
+                "core_main_app/common/commons/error.html",
+                context={"error": data["message"]},
+            )
 
         try:
             # Check the renderer format
