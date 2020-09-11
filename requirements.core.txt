@@ -1,4 +1,4 @@
-core_explore_common_app==1.11.*
-core_main_app==1.11.*
+core_explore_common_app==1.12.*
+core_main_app==1.12.*
 signals_utils==1.8.*
 xml_utils==1.10.*

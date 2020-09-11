@@ -22,7 +22,7 @@ chdir(normpath(join(abspath(__file__), pardir)))
 
 setup(
     name="core_linked_records_app",
-    version="1.0.0-beta2",
+    version="1.0.0-beta3",
     description="Linked records for the core project",
     long_description=long_desc,
     author="NIST IT Lab",
