@@ -14,13 +14,20 @@ let configurePIDDataSharingModal = function() {
     let ajaxData = {"data_id": dataId};
 
     if(dataId === "") {
-        ajaxData = {"oai_data_id": oaiDataId};
+        if (oaiDataId !== "") {
+            ajaxData = {"oai_data_id": oaiDataId};
+        } else {
+            ajaxData = {
+                "fede_data_id": fedeDataId,
+                "fede_origin": window.location.search.substring(1)
+            };
+        }
     }
 
     $.ajax({
         url: retrieveDataPidUrl,
         data: ajaxData,
-        type: "POST",
+        type: "GET",
         dataType: 'json',
         success: function(data){
             $("#pid-sharing-link").val(

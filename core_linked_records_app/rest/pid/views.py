@@ -1,41 +1,57 @@
 """ Ajax views accessible by users.
 """
 import json
+from urllib.parse import urljoin
 
 from django.http import JsonResponse
+from django.urls import reverse
 from django.utils import timezone
-from django.utils.datastructures import MultiValueDictKeyError
-from django.views import View
 from rest_framework import status
+from rest_framework.views import APIView
 
 from core_explore_common_app.components.query import api as query_api
 from core_explore_common_app.utils.protocols.oauth2 import (
-    send_post_request as oauth2_request,
+    send_post_request as oauth2_post_request,
+    send_get_request as oauth2_get_request,
 )
+from core_federated_search_app.components.instance import api as instance_api
 from core_linked_records_app.components.data import api as data_api
 from core_linked_records_app.components.oai_record import api as oai_record_api
 from core_main_app.utils.requests_utils.requests_utils import send_get_request
 
 
-class RetrieveDataPID(View):
+class RetrieveDataPID(APIView):
     """Retrieve PIDs for a given data IDs."""
 
-    def post(self, request):
-        try:
+    def get(self, request):
+        if "data_id" in request.GET:
             return JsonResponse(
-                {
-                    "pid": data_api.get_pid_for_data(
-                        request.POST["data_id"], request.user
-                    )
-                }
+                {"pid": data_api.get_pid_for_data(request.GET["data_id"], request.user)}
             )
-        except MultiValueDictKeyError:  # data_id key doesn't exist in request.POST
+        elif "oai_data_id" in request.GET:
             return JsonResponse(
-                {"pid": oai_record_api.get_pid_for_data(request.POST["oai_data_id"])}
+                {"pid": oai_record_api.get_pid_for_data(request.GET["oai_data_id"])}
             )
+        elif "fede_data_id" in request.GET and "fede_origin" in request.GET:
+            fede_origin_keys = request.GET["fede_origin"].split("&")
+            instance_name = fede_origin_keys[1].split("=")[1]
+            instance = instance_api.get_by_name(instance_name)
+
+            url_get_data = "%s?data_id=%s" % (
+                reverse(
+                    "core_linked_record_retrieve_data_pid_url",
+                ),
+                request.GET["fede_data_id"],
+            )
+            data_response = oauth2_get_request(
+                urljoin(instance.endpoint, url_get_data), instance.access_token
+            )
+            return JsonResponse(json.loads(data_response.text))
+        else:
+            return JsonResponse({}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class RetrieveListPID(View):
+class RetrieveListPID(APIView):
     """Retrieve PIDs for a given list of data IDs."""
 
     def post(self, request):
@@ -73,7 +89,7 @@ class RetrieveListPID(View):
                     cookies={"sessionid": request.session.session_key},
                 )
             elif data_source.authentication.type == "oauth2":
-                response = oauth2_request(
+                response = oauth2_post_request(
                     data_source.capabilities["url_pid"],
                     json_query,
                     data_source.authentication.params["access_token"],
@@ -84,7 +100,8 @@ class RetrieveListPID(View):
 
             if response.status_code == 200:
                 return JsonResponse(
-                    {"pids": response.json()}, status=response.status_code
+                    {"pids": [pid for pid in response.json() if pid is not None]},
+                    status=response.status_code,
                 )
             else:
                 return JsonResponse(
