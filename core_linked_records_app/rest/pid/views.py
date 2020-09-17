@@ -14,10 +14,9 @@ from core_explore_common_app.utils.protocols.oauth2 import (
     send_post_request as oauth2_post_request,
     send_get_request as oauth2_get_request,
 )
-from core_federated_search_app.components.instance import api as instance_api
 from core_linked_records_app.components.data import api as data_api
-from core_linked_records_app.components.oai_record import api as oai_record_api
 from core_main_app.utils.requests_utils.requests_utils import send_get_request
+from core_linked_records_app import settings
 
 
 class RetrieveDataPID(APIView):
@@ -28,11 +27,27 @@ class RetrieveDataPID(APIView):
             return JsonResponse(
                 {"pid": data_api.get_pid_for_data(request.GET["data_id"], request.user)}
             )
-        elif "oai_data_id" in request.GET:
+        elif (
+            "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
+            and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
+            and "oai_data_id" in request.GET
+        ):
+            from core_linked_records_app.components.oai_record import (
+                api as oai_record_api,
+            )
+
             return JsonResponse(
                 {"pid": oai_record_api.get_pid_for_data(request.GET["oai_data_id"])}
             )
-        elif "fede_data_id" in request.GET and "fede_origin" in request.GET:
+        elif (
+            "core_federated_search_app" in settings.INSTALLED_APPS
+            and "fede_data_id" in request.GET
+            and "fede_origin" in request.GET
+        ):
+            from core_federated_search_app.components.instance import (
+                api as instance_api,
+            )
+
             fede_origin_keys = request.GET["fede_origin"].split("&")
             instance_name = fede_origin_keys[1].split("=")[1]
             instance = instance_api.get_by_name(instance_name)
