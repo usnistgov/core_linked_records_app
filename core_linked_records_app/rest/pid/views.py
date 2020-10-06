@@ -72,7 +72,7 @@ class RetrieveListPID(APIView):
     def post(self, request):
         try:
             # FIXME duplicated code with core_explore_common.utils.query.send
-            query = query_api.get_by_id(request.POST["query_id"])
+            query = query_api.get_by_id(request.POST["query_id"], request.user)
             data_source = query.data_sources[int(request.POST["data_source_index"])]
 
             # Build serialized query to send to data source
