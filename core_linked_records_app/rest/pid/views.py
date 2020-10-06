@@ -37,7 +37,11 @@ class RetrieveDataPID(APIView):
             )
 
             return JsonResponse(
-                {"pid": oai_record_api.get_pid_for_data(request.GET["oai_data_id"])}
+                {
+                    "pid": oai_record_api.get_pid_for_data(
+                        request.GET["oai_data_id"], request.user
+                    )
+                }
             )
         elif (
             "core_federated_search_app" in settings.INSTALLED_APPS

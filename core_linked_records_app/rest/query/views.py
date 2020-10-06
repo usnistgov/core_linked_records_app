@@ -142,7 +142,7 @@ if (
                 {"$match": raw_query},
                 {"$project": {"pid": "$dict_content.%s" % self.pid_xpath}},
             ]
-            return oai_record_api.aggregate(pipeline)
+            return oai_record_api.aggregate(pipeline, self.request.user)
 
         def build_response(self, data_list):
             """Build the list of PIDs
