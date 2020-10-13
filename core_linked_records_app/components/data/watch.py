@@ -4,6 +4,7 @@ import logging
 import re
 
 from django.urls import reverse
+from rest_framework import status
 
 from core_linked_records_app.settings import (
     ID_PROVIDER_SYSTEMS,
@@ -125,6 +126,13 @@ def set_data_pid(sender, document, **kwargs):
 
     # Register the PID and return the URL provided
     document_pid_response = send_post_request("%s?format=json" % document_pid)
+
+    if (
+        document_pid_response.status_code != status.HTTP_201_CREATED
+        and system_api.get_data_by_pid(document_pid).pk != document.pk
+    ):
+        raise exceptions.ModelError("Invalid PID provided")
+
     document_pid = document_pid_response.json()["url"]
 
     # Set the document PID into XML data and update `xml_content`

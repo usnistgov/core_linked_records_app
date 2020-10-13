@@ -1,6 +1,7 @@
 """ System API for core_linked_records
 """
 from core_linked_records_app.settings import PID_XPATH
+from core_main_app.commons.exceptions import DoesNotExist, ApiError
 from core_main_app.components.data.models import Data
 
 
@@ -31,3 +32,24 @@ def is_pid_defined(pid):
     query_result = Data.execute_query({json_pid_path: pid}, order_by_field=[])
 
     return len(query_result) == 1
+
+
+def get_data_by_pid(pid):
+    """Return data object with the given pid.
+
+    Parameters:
+        pid:
+        user:
+
+    Returns: data object
+    """
+    json_pid_path = "dict_content.%s" % PID_XPATH
+    query_result = Data.execute_query({json_pid_path: pid}, order_by_field=[])
+    query_result_length = len(query_result)
+
+    if query_result_length == 0:
+        raise DoesNotExist("No result found")
+    elif query_result_length != 1:
+        raise ApiError("PID must be unique")
+    else:
+        return query_result[0]
