@@ -2,7 +2,7 @@
 """
 import json
 import logging
-from importlib import import_module
+import re
 
 from rest_framework import status
 from rest_framework.parsers import JSONParser
@@ -10,6 +10,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core_linked_records_app import settings
 from core_linked_records_app.components.data.api import get_data_by_pid
 from core_linked_records_app.rest.data.renderers.data_html_user_renderer import (
     DataHtmlUserRenderer,
@@ -17,11 +18,7 @@ from core_linked_records_app.rest.data.renderers.data_html_user_renderer import 
 from core_linked_records_app.rest.data.renderers.data_xml_renderer import (
     DataXmlRenderer,
 )
-from core_linked_records_app.settings import (
-    ID_PROVIDER_SYSTEMS,
-    ID_PROVIDER_PREFIX_DEFAULT,
-    ID_PROVIDER_PREFIXES,
-)
+from core_linked_records_app.utils.providers import ProviderManager
 from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.rest.data.serializers import DataSerializer
 
@@ -33,28 +30,8 @@ class ProviderRecord(APIView):
     renderer_classes = (DataHtmlUserRenderer, JSONRenderer, DataXmlRenderer)
 
     def __init__(self):
-        self.id_provider_instances = {
-            id_provider: None for id_provider in ID_PROVIDER_SYSTEMS.keys()
-        }
+        self.provider_manager = ProviderManager()
         super().__init__()
-
-    def _get_provider_instance(self, system):
-        if self.id_provider_instances[system] is None:
-            # Retrieve class name and module path
-            id_provider_classpath = ID_PROVIDER_SYSTEMS[system]["class"].split(".")
-            id_provider_classname = id_provider_classpath[-1]
-            id_provider_modpath = ".".join(id_provider_classpath[:-1])
-
-            # Import module and class
-            id_provider_module = import_module(id_provider_modpath)
-            id_provider_class = getattr(id_provider_module, id_provider_classname)
-
-            # Initialize handel system instance
-            self.id_provider_instances[system] = id_provider_class(
-                *ID_PROVIDER_SYSTEMS[system]["args"]
-            )
-
-        return self.id_provider_instances[system]
 
     def post(self, request, provider, record):
         """Create a handle record
@@ -81,7 +58,7 @@ class ProviderRecord(APIView):
 
         # Assign default prefix if the prefix is undefined or not in the list of
         # authorized ones.
-        if prefix == "" or prefix not in ID_PROVIDER_PREFIXES:
+        if prefix == "" or prefix not in settings.ID_PROVIDER_PREFIXES:
             return Response(
                 {
                     "record": "/".join(prefix_record_list),
@@ -91,7 +68,21 @@ class ProviderRecord(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        id_provider = self._get_provider_instance(provider)
+        if (
+            record is not None
+            and record != ""
+            and re.match(r"^(%s|)$" % settings.PID_FORMAT, record) is None
+        ):
+            return Response(
+                {
+                    "record": "/".join(prefix_record_list),
+                    "url": request.build_absolute_uri("?"),
+                    "message": "Invalid record format",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        id_provider = self.provider_manager.get(provider)
         provider_response = id_provider.create(prefix, record)
 
         provider_content = json.loads(provider_response.content)
@@ -107,7 +98,7 @@ class ProviderRecord(APIView):
 
         Returns:
         """
-        id_provider = self._get_provider_instance(provider)
+        id_provider = self.provider_manager.get(provider)
         provider_response = id_provider.update(record)
 
         provider_content = json.loads(provider_response.content)
@@ -124,7 +115,7 @@ class ProviderRecord(APIView):
 
         Returns:
         """
-        id_provider = self._get_provider_instance(provider)
+        id_provider = self.provider_manager.get(provider)
         provider_response = id_provider.get(record)
 
         try:
@@ -159,7 +150,7 @@ class ProviderRecord(APIView):
 
         Returns:
         """
-        id_provider = self._get_provider_instance(provider)
+        id_provider = self.provider_manager.get(provider)
         provider_response = id_provider.delete(record)
 
         provider_content = json.loads(provider_response.content)

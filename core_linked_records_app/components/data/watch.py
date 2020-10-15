@@ -1,18 +1,16 @@
 """ Signals to trigger before Data save
 """
 import logging
-import re
+from os.path import join
 
-from django.urls import reverse
 from rest_framework import status
 
+from core_linked_records_app import settings
 from core_linked_records_app.settings import (
-    ID_PROVIDER_SYSTEMS,
     PID_XPATH,
-    SERVER_URI,
-    PID_FORMAT,
 )
 from core_linked_records_app.system import api as system_api
+from core_linked_records_app.utils.providers import ProviderManager
 from core_linked_records_app.utils.xml import (
     get_xpath_from_dot_notation,
     get_xpath_with_target_namespace,
@@ -20,7 +18,6 @@ from core_linked_records_app.utils.xml import (
     set_value_at_xpath,
 )
 from core_main_app.commons import exceptions
-
 from core_main_app.components.data.models import Data
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
 from signals_utils.signals.mongo import signals, connector
@@ -46,9 +43,6 @@ def set_data_pid(sender, document, **kwargs):
 
     Returns:
     """
-    # FIXME remove hard-coded variables
-    default_system = list(ID_PROVIDER_SYSTEMS.keys())[0]
-
     pid_xpath = get_xpath_from_dot_notation(PID_XPATH)
 
     # Retrieve namespaces
@@ -81,58 +75,55 @@ def set_data_pid(sender, document, **kwargs):
             LOGGER.warning("Cannot create PID at %s: %s" % (pid_xpath, str(exc)))
             return
 
-    # Generate the default URL for the default system and remove the final '/'
-    pid_generation_url = (
-        "%s%s"
-        % (
-            SERVER_URI,
-            reverse(
-                "core_linked_records_app_rest_provider_record_view",
-                kwargs={"provider": default_system, "record": ""},
-            ),
-        )
-    )[:-1]
+    # Identify provider name for registration and ensure the PID has not been
+    # already defined in another document.
+    provider_manager = ProviderManager()
 
-    # Generate new PID if none has been specified or need prefix and record generated
-    if document_pid is None or document_pid == "":
-        document_pid = "%s/" % pid_generation_url
-    elif (
-        re.match(r"^%s(/%s)?$" % (pid_generation_url, PID_FORMAT), document_pid)
-        is not None
-    ):
-        # PID specified with only prefix (record to be generated)
-        document_pid = "%s/" % document_pid
-    elif (
-        re.match(
-            r"^%s/%s/%s$" % (pid_generation_url, PID_FORMAT, PID_FORMAT), document_pid
+    if document_pid is None or document_pid == "":  # PID field left blank
+        # Select the default provider if no PID has been chosen.
+        provider_name = list(settings.ID_PROVIDER_SYSTEMS.keys())[0]
+        document_pid = join(
+            provider_manager.get(provider_name).provider_url,
+            settings.ID_PROVIDER_PREFIX_DEFAULT,
         )
-        is not None
-    ):  # PID has been specified (prefix + record)
-        # Check that PID is not assigned to another document
-        # * Check 1: document is already registered in database
-        if (
-            document.pk is not None
-            and not system_api.is_pid_defined_for_document(document_pid, document.pk)
-            and system_api.is_pid_defined(document_pid)
+    else:  # PID specified in document.
+        # Check that the PID is not defined for a document other than the current
+        # document.
+        if system_api.is_pid_defined(document_pid) and (
+            document.pk is None
+            or not system_api.is_pid_defined_for_document(document_pid, document.pk)
         ):
             raise exceptions.ModelError("PID already defined for another document")
 
-        # * Check 2: registering a new document in the database
-        if document.pk is None and system_api.is_pid_defined(document_pid):
-            raise exceptions.ModelError("PID already defined for another document")
-    else:
-        # PID specified but not matching any possible URLs for the generation
+        provider_name = provider_manager.find_provider_from_pid(document_pid)
+
+    # PID specified but not matching any possible provider URLs for the
+    # generation.
+    if provider_name is None:
         raise exceptions.ModelError("Invalid PID provided")
 
-    # Register the PID and return the URL provided
-    document_pid_response = send_post_request("%s?format=json" % document_pid)
+    provider = provider_manager.get(provider_name)
+    registration_url = document_pid.replace(provider.provider_url, provider.local_url)
+
+    document_pid_response = send_post_request("%s?format=json" % registration_url)
+
+    if document_pid_response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR:
+        default_error_message = "An error occured while creating the PID"
+        try:
+            raise exceptions.ModelError(
+                document_pid_response.json().get("message", default_error_message)
+            )
+        except ValueError:  # If the response is not JSON parsable
+            raise exceptions.ModelError(default_error_message)
 
     if (
         document_pid_response.status_code != status.HTTP_201_CREATED
+        and document_pid_response.status_code != status.HTTP_200_OK
         and system_api.get_data_by_pid(document_pid).pk != document.pk
     ):
         raise exceptions.ModelError("Invalid PID provided")
 
+    # FIXME assert the value is not changed when saving
     document_pid = document_pid_response.json()["url"]
 
     # Set the document PID into XML data and update `xml_content`

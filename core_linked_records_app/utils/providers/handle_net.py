@@ -2,10 +2,7 @@
 """
 import json
 import logging
-
 from base64 import b64encode
-
-from django.urls import reverse
 
 from core_linked_records_app.utils.providers import AbstractIdProvider
 from core_main_app.utils.requests_utils.requests_utils import (
@@ -110,17 +107,7 @@ class HandleNetSystem(AbstractIdProvider):
                             "type": "URL",
                             "data": {
                                 "format": "string",
-                                "value": "%s%s"
-                                % (
-                                    self.local_url,
-                                    reverse(
-                                        "core_linked_records_app_rest_provider_record_view",
-                                        kwargs={
-                                            "provider": "handle.net",
-                                            "record": record,
-                                        },
-                                    ),
-                                ),
+                                "value": "%s/%s/%s" % (self.local_url, prefix, record),
                             },
                         }
                     ]
@@ -158,17 +145,7 @@ class HandleNetSystem(AbstractIdProvider):
                             "type": "URL",
                             "data": {
                                 "format": "string",
-                                "value": "%s%s"
-                                % (
-                                    self.local_url,
-                                    reverse(
-                                        "core_linked_records_app_rest_provider_record_view",
-                                        kwargs={
-                                            "provider": "handle.net",
-                                            "record": record,
-                                        },
-                                    ),
-                                ),
+                                "value": "%s/%s" % (self.local_url, record),
                             },
                         }
                     ],

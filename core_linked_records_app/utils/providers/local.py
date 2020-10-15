@@ -4,7 +4,6 @@ import json
 import random
 import string
 
-from django.urls import reverse
 from requests import Response
 from rest_framework import status
 
@@ -16,16 +15,9 @@ from core_main_app.commons.exceptions import NotUniqueError
 
 
 class LocalIdProvider(AbstractIdProvider):
-    def __init__(self, base_url):
-        api_url = "%s%s" % (
-            base_url,
-            reverse(
-                "core_linked_records_app_rest_provider_record_view",
-                kwargs={"provider": "local", "record": "@record@"},
-            ),
-        )
-
-        super().__init__(api_url, base_url, None, None)
+    def __init__(self, provider_name):
+        super().__init__(provider_name, None, None, None)
+        self.provider_url = self.local_url
 
     def encode_token(self, username, password):
         return None
@@ -42,7 +34,8 @@ class LocalIdProvider(AbstractIdProvider):
 
     def get(self, record):
         response = Response()
-        response_url = self.provider_url.replace("@record@", record)
+
+        record_url = "%s/%s" % (self.provider_url, record)
 
         try:
             record_api.get_by_name(record)
@@ -51,13 +44,13 @@ class LocalIdProvider(AbstractIdProvider):
                 {
                     "message": "Successful operation",
                     "record": record,
-                    "url": response_url,
+                    "url": record_url,
                 }
             )
         except exceptions.DoesNotExist:
             response.status_code = status.HTTP_404_NOT_FOUND
             response._content = json.dumps(
-                {"message": "record not found", "record": record, "url": response_url}
+                {"message": "record not found", "record": record, "url": record_url}
             )
 
         return response
@@ -73,11 +66,12 @@ class LocalIdProvider(AbstractIdProvider):
                 record = self._generate_id()
 
         record = "%s/%s" % (prefix, record)
+        record_url = "%s/%s" % (self.provider_url, record)
 
         response = Response()
         response_content = {
             "record": record,
-            "url": self.provider_url.replace("@record@", record),
+            "url": record_url,
         }
 
         try:
@@ -97,12 +91,14 @@ class LocalIdProvider(AbstractIdProvider):
     def update(self, record):
         self.create(record)
 
+        record_url = "%s/%s" % (self.provider_url, record)
+
         response = Response()
         response._content = json.dumps(
             {
                 "record": record,
                 "message": "Successful operation",
-                "url": self.provider_url.replace("@record@", record),
+                "url": record_url,
             }
         )
 
@@ -110,6 +106,8 @@ class LocalIdProvider(AbstractIdProvider):
 
     def delete(self, record):
         response = Response()
+
+        record_url = "%s/%s" % (self.provider_url, record)
 
         try:
             record_object = record_api.get_by_name(record)
@@ -119,7 +117,7 @@ class LocalIdProvider(AbstractIdProvider):
                 {
                     "record": record,
                     "message": "Successful operation",
-                    "url": self.provider_url.replace("@record@", record),
+                    "url": record_url,
                 }
             )
         except exceptions.DoesNotExist:
@@ -128,7 +126,7 @@ class LocalIdProvider(AbstractIdProvider):
                 {
                     "record": record,
                     "message": "record not found",
-                    "url": self.provider_url.replace("@record@", record),
+                    "url": record_url,
                 }
             )
 
