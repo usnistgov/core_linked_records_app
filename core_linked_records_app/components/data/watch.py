@@ -19,6 +19,7 @@ from core_linked_records_app.utils.xml import (
 )
 from core_main_app.commons import exceptions
 from core_main_app.components.data.models import Data
+from core_main_app.utils.requests_utils.access_control import SYSTEM_REQUEST
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
 from signals_utils.signals.mongo import signals, connector
 from xml_utils.xpath import create_tree_from_xpath
@@ -67,7 +68,7 @@ def set_data_pid(sender, document, **kwargs):
                 modified_xml_tree, pid_xpath, "http://sample_pid.org", namespaces
             )
             document.xml_content = XSDTree.tostring(modified_xml_tree)
-            data_api.check_xml_file_is_valid(document)
+            data_api.check_xml_file_is_valid(document, request=SYSTEM_REQUEST)
 
             xml_tree = modified_xml_tree
             document_pid = None
