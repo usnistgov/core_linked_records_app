@@ -4,6 +4,7 @@ import logging
 from os.path import join
 
 from rest_framework import status
+from rest_framework.status import HTTP_200_OK
 
 from core_linked_records_app import settings
 from core_linked_records_app.settings import (
@@ -20,7 +21,10 @@ from core_linked_records_app.utils.xml import (
 from core_main_app.commons import exceptions
 from core_main_app.components.data.models import Data
 from core_main_app.utils.requests_utils.access_control import SYSTEM_REQUEST
-from core_main_app.utils.requests_utils.requests_utils import send_post_request
+from core_main_app.utils.requests_utils.requests_utils import (
+    send_post_request,
+    send_delete_request,
+)
 from signals_utils.signals.mongo import signals, connector
 from xml_utils.xpath import create_tree_from_xpath
 from xml_utils.xsd_tree.xsd_tree import XSDTree
@@ -70,6 +74,8 @@ def set_data_pid(sender, document, **kwargs):
             document.xml_content = XSDTree.tostring(modified_xml_tree)
             data_api.check_xml_file_is_valid(document, request=SYSTEM_REQUEST)
 
+            # Replace the current by the modified tree (containing mock PID) and
+            # force document PID to be regenerated.
             xml_tree = modified_xml_tree
             document_pid = None
         except Exception as exc:  # Cannot create PID at given XPath
@@ -79,6 +85,27 @@ def set_data_pid(sender, document, **kwargs):
     # Identify provider name for registration and ensure the PID has not been
     # already defined in another document.
     provider_manager = ProviderManager()
+
+    # Retrieve previous PID and remove it from DB.
+    if document.pk is not None:
+        previous_pid = system_api.get_pid_for_data(document.pk)
+
+        previous_provider_name = provider_manager.find_provider_from_pid(previous_pid)
+        previous_provider = provider_manager.get(previous_provider_name)
+        previous_pid_url = previous_pid.replace(
+            previous_provider.provider_url, previous_provider.local_url
+        )
+
+        previous_pid_delete_response = send_delete_request(
+            "%s?format=json" % previous_pid_url
+        )
+
+        # Log any error that happen during PID deletion
+        if previous_pid_delete_response.status_code != HTTP_200_OK:
+            LOGGER.warning(
+                "Deletion of PID %s returned %s"
+                % (previous_pid, previous_pid_delete_response.status_code)
+            )
 
     if document_pid is None or document_pid == "":  # PID field left blank
         # Select the default provider if no PID has been chosen.

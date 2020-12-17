@@ -21,9 +21,9 @@ def get_data_by_pid(pid, user):
     query_result_length = len(query_result)
 
     if query_result_length == 0:
-        raise DoesNotExist("No result found")
+        raise DoesNotExist("PID is not attached to any data.")
     elif query_result_length != 1:
-        raise ApiError("PID must be unique")
+        raise ApiError("PID must be unique.")
     else:
         return query_result[0]
 

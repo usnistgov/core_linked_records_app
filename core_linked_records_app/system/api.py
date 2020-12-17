@@ -1,6 +1,7 @@
 """ System API for core_linked_records
 """
 from core_linked_records_app.settings import PID_XPATH
+from core_linked_records_app.utils.dict import get_dict_value_from_key_list
 from core_main_app.commons.exceptions import DoesNotExist, ApiError
 from core_main_app.components.data.models import Data
 
@@ -39,7 +40,6 @@ def get_data_by_pid(pid):
 
     Parameters:
         pid:
-        user:
 
     Returns: data object
     """
@@ -48,8 +48,23 @@ def get_data_by_pid(pid):
     query_result_length = len(query_result)
 
     if query_result_length == 0:
-        raise DoesNotExist("No result found")
+        raise DoesNotExist("PID is not attached to any data.")
     elif query_result_length != 1:
-        raise ApiError("PID must be unique")
+        raise ApiError("PID must be unique.")
     else:
         return query_result[0]
+
+
+def get_pid_for_data(data_id):
+    """Retrieve PID matching the document ID provided.
+
+    Args:
+        data_id:
+
+    Returns:
+    """
+    # Retrieve the document passed as input and extra the PID field.
+    data = Data.get_by_id(data_id)
+
+    # Return PID value from the document and the PID_XPATH
+    return get_dict_value_from_key_list(data["dict_content"], PID_XPATH.split("."))

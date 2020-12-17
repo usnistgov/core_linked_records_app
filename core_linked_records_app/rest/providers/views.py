@@ -63,7 +63,7 @@ class ProviderRecord(APIView):
                 {
                     "record": "/".join(prefix_record_list),
                     "url": request.build_absolute_uri("?"),
-                    "message": "Prefix not existing",
+                    "message": "Invalid prefix specified",
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
