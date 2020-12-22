@@ -55,7 +55,9 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
             data_object = data_api.get_by_id(data["id"], request.user)
             page_context = data_view_builder.build_page(data_object)
 
-            return data_view_builder.render_page(request, render, page_context)
+            return data_view_builder.render_page(
+                request, render, "core_main_app/user/data/detail.html", page_context
+            )
         except APIException as api_error:
             return render(
                 request,
