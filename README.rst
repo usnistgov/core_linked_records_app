@@ -101,6 +101,7 @@ document with a PID would look like in this case:
 Settings.py:
 
 .. code:: python
+
     SERVER_URI = "http://localhost:8000"
     ID_PROVIDER_SYSTEMS = {
         "local": {
