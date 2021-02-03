@@ -20,7 +20,6 @@ from core_linked_records_app.utils.xml import (
 )
 from core_main_app.commons import exceptions
 from core_main_app.components.data.models import Data
-from core_main_app.utils.requests_utils.access_control import SYSTEM_REQUEST
 from core_main_app.utils.requests_utils.requests_utils import (
     send_post_request,
     send_delete_request,
@@ -72,7 +71,7 @@ def set_data_pid(sender, document, **kwargs):
                 modified_xml_tree, pid_xpath, "http://sample_pid.org", namespaces
             )
             document.xml_content = XSDTree.tostring(modified_xml_tree)
-            data_api.check_xml_file_is_valid(document, request=SYSTEM_REQUEST)
+            data_api.check_xml_file_is_valid(document)
 
             # Replace the current by the modified tree (containing mock PID) and
             # force document PID to be regenerated.
@@ -136,7 +135,7 @@ def set_data_pid(sender, document, **kwargs):
     document_pid_response = send_post_request("%s?format=json" % registration_url)
 
     if document_pid_response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR:
-        default_error_message = "An error occured while creating the PID"
+        default_error_message = "An error occurred while creating the PID"
         try:
             raise exceptions.ModelError(
                 document_pid_response.json().get("message", default_error_message)
