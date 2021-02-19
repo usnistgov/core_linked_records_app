@@ -65,7 +65,6 @@ Add the necessary keys at the end of the file.
             "class": "core_linked_records_app.utils.providers.handle_net.HandleNetSystem",
             "args": [
                 "https://handle-net.domain/api/handles",
-                SERVER_URI,
                 "300%3ACDCS/ADMIN",
                 "admin",
             ],
