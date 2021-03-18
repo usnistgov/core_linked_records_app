@@ -14,7 +14,7 @@ class AbstractIdProvider(ABC):
         self.local_url = "%s%s" % (
             settings.SERVER_URI,
             reverse(
-                "core_linked_records_app_rest_provider_record_view",
+                "core_linked_records_provider_record",
                 kwargs={"provider": provider_name, "record": ""},
             ),
         )

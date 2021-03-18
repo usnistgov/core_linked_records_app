@@ -1,12 +1,10 @@
 """ REST views for the query API
 """
 import json
-from urllib.parse import urljoin
-
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.response import Response
+from urllib.parse import urljoin
 
 from core_linked_records_app import settings
 from core_main_app.components.data import api as data_api

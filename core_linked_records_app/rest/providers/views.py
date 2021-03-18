@@ -3,7 +3,6 @@
 import json
 import logging
 import re
-
 from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
@@ -11,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core_linked_records_app import settings
+from core_linked_records_app.components.blob.api import get_blob_by_pid
 from core_linked_records_app.components.data.api import get_data_by_pid
 from core_linked_records_app.rest.data.renderers.data_html_user_renderer import (
     DataHtmlUserRenderer,
@@ -19,8 +19,10 @@ from core_linked_records_app.rest.data.renderers.data_xml_renderer import (
     DataXmlRenderer,
 )
 from core_linked_records_app.utils.providers import ProviderManager
+from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.rest.data.serializers import DataSerializer
+from core_main_app.utils.file import get_file_http_response
 
 LOGGER = logging.getLogger(__name__)
 
@@ -126,12 +128,23 @@ class ProviderRecord(APIView):
                 DataSerializer(query_result).data, status=status.HTTP_200_OK
             )
         except DoesNotExist:
-            content = {
-                "status": "error",
-                "code": status.HTTP_404_NOT_FOUND,
-                "message": "No data with specified handle found",
-            }
-            return Response(content, status=status.HTTP_404_NOT_FOUND)
+            # Try to find PID in blobs
+            try:
+                query_result = get_blob_by_pid(
+                    json.loads(provider_response.content)["url"], request.user
+                )
+
+                return get_file_http_response(query_result.blob, query_result.filename)
+            except AccessControlError as e:
+                content = {"message": str(e)}
+                return Response(content, status=status.HTTP_403_FORBIDDEN)
+            except DoesNotExist:
+                content = {
+                    "status": "error",
+                    "code": status.HTTP_404_NOT_FOUND,
+                    "message": "No document with specified handle found",
+                }
+                return Response(content, status=status.HTTP_404_NOT_FOUND)
         except Exception as ex:
             content = {
                 "status": "error",

@@ -14,9 +14,10 @@ from core_explore_common_app.utils.protocols.oauth2 import (
     send_post_request as oauth2_post_request,
     send_get_request as oauth2_get_request,
 )
+from core_linked_records_app import settings
+from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.data import api as data_api
 from core_main_app.utils.requests_utils.requests_utils import send_get_request
-from core_linked_records_app import settings
 
 
 class RetrieveDataPID(APIView):
@@ -58,7 +59,7 @@ class RetrieveDataPID(APIView):
 
             url_get_data = "%s?data_id=%s" % (
                 reverse(
-                    "core_linked_record_retrieve_data_pid_url",
+                    "core_linked_records_retrieve_data_pid",
                 ),
                 request.GET["fede_data_id"],
             )
@@ -67,7 +68,34 @@ class RetrieveDataPID(APIView):
             )
             return JsonResponse(json.loads(data_response.text))
         else:
-            return JsonResponse({}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse(
+                {
+                    "message": "Impossible to retrieve PID for data with the given "
+                    "parameters"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class RetrieveBlobPID(APIView):
+    """Retrieve PIDs for a given blob ID."""
+
+    def get(self, request):
+        if "blob_id" in request.GET:
+            blob_pid = blob_api.get_pid_for_blob(request.GET["blob_id"])
+            sub_url = reverse(
+                "core_linked_records_provider_record",
+                kwargs={"provider": "local", "record": ""},
+            )
+
+            return JsonResponse(
+                {"pid": f"{settings.SERVER_URI}{sub_url}{blob_pid.record_name}"}
+            )
+        else:
+            return JsonResponse(
+                {"message": "Missing parameter 'blob_id'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class RetrieveListPID(APIView):

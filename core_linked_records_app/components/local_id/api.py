@@ -17,27 +17,39 @@ def get_by_name(record_name):
     return LocalId.get_by_name(record_name)
 
 
-def insert(record):
+def get_by_class_and_id(record_object_class, record_object_id):
+    """Retrieve LocalID using linked object class and ID
+
+    Args:
+        record_object_class:
+        record_object_id:
+
+    Returns:
+    """
+    return LocalId.get_by_class_and_id(record_object_class, record_object_id)
+
+
+def insert(local_id_object):
     """Insert the record in the collection.
 
     Args:
-        record:
+        local_id_object:
 
     Returns:
     """
     try:
-        return record.save()
+        return local_id_object.save()
     except MongoNotUniqueError as e:
         raise NotUniqueError(e)
 
 
-def delete(record):
+def delete(local_id_object):
     """Delete the record.
 
     Args:
-        record:
+        local_id_object:
 
     Returns:
 
     """
-    return record.delete()
+    return local_id_object.delete()

@@ -15,7 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class HandleNetSystem(AbstractIdProvider):
-    """"""
+    """Provider implemented using Handle.Net."""
 
     registration_api = "api/handles"
     response_code_messages = {
