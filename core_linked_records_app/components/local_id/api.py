@@ -14,7 +14,6 @@ def get_by_name(record_name):
 
     Returns:
     """
-    record_name = record_name.lower()
     return LocalId.get_by_name(record_name)
 
 
@@ -27,7 +26,6 @@ def insert(record):
     Returns:
     """
     try:
-        record.record_name = record.record_name.lower()
         return record.save()
     except MongoNotUniqueError as e:
         raise NotUniqueError(e)
