@@ -1,5 +1,5 @@
-Django==2.2.20
-django-mongoengine==0.4.1
-djangorestframework==3.12.2
+Django
+django-mongoengine
+djangorestframework
 djangorestframework-xml==2.0.0
-requests==2.25.1
+requests
