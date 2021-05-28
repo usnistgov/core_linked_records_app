@@ -2,4 +2,5 @@ Django
 django-mongoengine
 djangorestframework
 djangorestframework-xml==2.0.0
+mongoengine
 requests

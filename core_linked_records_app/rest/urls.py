@@ -6,7 +6,7 @@ from core_linked_records_app import settings
 from core_linked_records_app.rest.pid import views as pid_views
 from core_linked_records_app.rest.providers import views as providers_views
 from core_linked_records_app.rest.query import views as query_views
-from core_linked_records_app.rest.settings import views as settings_views
+from core_linked_records_app.rest.pid_settings import views as settings_views
 
 from core_linked_records_app.rest.blob import views as blob_views
 
@@ -33,7 +33,7 @@ if (
 urlpatterns += [
     url(
         r"^settings$",
-        settings_views.PidSettings.as_view(),
+        settings_views.PidSettingsView.as_view(),
         name="core_linked_records_app_settings",
     ),
     url(

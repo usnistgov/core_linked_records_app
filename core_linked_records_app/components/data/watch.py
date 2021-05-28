@@ -27,6 +27,7 @@ from core_main_app.utils.requests_utils.requests_utils import (
 from signals_utils.signals.mongo import signals, connector
 from xml_utils.xpath import create_tree_from_xpath
 from xml_utils.xsd_tree.xsd_tree import XSDTree
+from core_linked_records_app.components.pid_settings import api as pid_settings_api
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,6 +48,9 @@ def set_data_pid(sender, document, **kwargs):
 
     Returns:
     """
+    if not pid_settings_api.get().auto_set_pid:
+        return
+
     pid_xpath = get_xpath_from_dot_notation(PID_XPATH)
 
     # Retrieve namespaces
