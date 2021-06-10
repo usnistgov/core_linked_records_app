@@ -1,4 +1,4 @@
-Django==2.2.20
+Django==2.2.24
 django-mongoengine==0.4.1
 djangorestframework==3.12.2
 djangorestframework-xml==2.0.0
