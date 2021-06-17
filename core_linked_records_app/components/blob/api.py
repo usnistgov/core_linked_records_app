@@ -68,8 +68,7 @@ def set_pid_for_blob(blob_id, blob_pid):
         local_id_object = get_pid_for_blob(blob_id)
     except exceptions.DoesNotExist:
         try:
-            local_id_api.get_by_name(record_name)
-            raise ApiError(f"PID {blob_pid} is already assigned.")
+            local_id_object = local_id_api.get_by_name(record_name)
         except exceptions.DoesNotExist:
             local_id_object = None
 
