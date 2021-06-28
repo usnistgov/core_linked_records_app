@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from urllib.parse import urljoin
 
 from core_linked_records_app import settings
+from core_linked_records_app.components.pid_settings import api as pid_settings_api
 from core_main_app.components.data import api as data_api
 from core_main_app.rest.data.abstract_views import AbstractExecuteLocalQueryView
 from core_main_app.utils.requests_utils.requests_utils import send_get_request
@@ -79,9 +80,6 @@ if (
     and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
 ):
     from core_oaipmh_harvester_app.components.oai_record import api as oai_record_api
-    from core_oaipmh_harvester_app.components.oai_registry import (
-        api as oai_registry_api,
-    )
     from core_explore_oaipmh_app.rest.query.views import ExecuteQueryView
 
     class ExecuteOaiPmhPIDQueryView(ExecuteQueryView):
@@ -99,18 +97,7 @@ if (
             Returns:
                 Query with additional PID filter
             """
-            registry_info = oai_registry_api.get_by_id(json.loads(registries)[0])
-            pid_xpath_request = send_get_request(
-                urljoin(
-                    registry_info.url.replace("/oaipmh/server", ""),
-                    reverse("core_linked_records_app_settings"),
-                )
-            )
-
-            if pid_xpath_request.status_code != status.HTTP_200_OK:
-                raise Exception("Impossible to retrieve remote PID settings.")
-
-            self.pid_xpath = pid_xpath_request.json()["xpath"]
+            self.pid_xpath = settings.PID_XPATH
 
             pid_query = {"$and": [{"dict_content.%s" % self.pid_xpath: {"$exists": 1}}]}
             query = super().build_query(query, templates, registries)

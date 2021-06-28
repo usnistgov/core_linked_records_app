@@ -1,7 +1,7 @@
 """ Rest API views to retrieve PID settings
 """
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,7 +13,7 @@ from core_linked_records_app.rest.pid_settings.serializers import PidSettingsSer
 class PidSettingsView(APIView):
     """Retrieve PID settings"""
 
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         """Retrieve the settings for the PID system
