@@ -1,4 +1,4 @@
-core-main-app==1.16.*
-core-explore-common-app==1.16.*
-signals-utils==1.10.*
-xml-utils==1.14.*
+core-main-app==1.17.*
+core-explore-common-app==1.17.*
+signals-utils==1.11.*
+xml-utils==1.15.*
