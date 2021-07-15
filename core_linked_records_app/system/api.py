@@ -1,6 +1,7 @@
 """ System API for core_linked_records
 """
-from core_linked_records_app.settings import PID_XPATH
+from core_linked_records_app import settings
+from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_linked_records_app.utils.dict import get_dict_value_from_key_list
 from core_main_app.commons.exceptions import DoesNotExist, ApiError
 from core_main_app.components.data.models import Data
@@ -15,7 +16,12 @@ def is_pid_defined_for_document(pid, document_id):
 
     Returns:
     """
-    json_pid_path = "dict_content.%s" % PID_XPATH
+    data = Data.get_by_id(document_id)
+
+    pid_xpath_object = PidXpath.get_by_template_id(data.template.pk)
+    pid_xpath = pid_xpath_object.xpath
+
+    json_pid_path = f"dict_content.{pid_xpath}"
     query_result = Data.execute_query({json_pid_path: pid}, order_by_field=[])
 
     return len(query_result) == 1 and query_result[0].pk == document_id
@@ -29,10 +35,11 @@ def is_pid_defined(pid):
 
     Returns:
     """
-    json_pid_path = "dict_content.%s" % PID_XPATH
-    query_result = Data.execute_query({json_pid_path: pid}, order_by_field=[])
-
-    return len(query_result) == 1
+    try:
+        get_data_by_pid(pid)
+        return True
+    except (DoesNotExist, ApiError):
+        return False
 
 
 def get_data_by_pid(pid):
@@ -43,8 +50,14 @@ def get_data_by_pid(pid):
 
     Returns: data object
     """
-    json_pid_path = "dict_content.%s" % PID_XPATH
-    query_result = Data.execute_query({json_pid_path: pid}, order_by_field=[])
+    pid_xpath_list = [
+        pid_xpath_object.xpath for pid_xpath_object in PidXpath.get_all()
+    ] + [settings.PID_XPATH]
+    json_pid_xpaths = [f"dict_content.{pid_xpath}" for pid_xpath in pid_xpath_list]
+    query_result = Data.execute_query(
+        {"$or": [{json_pid_xpath: pid} for json_pid_xpath in json_pid_xpaths]},
+        order_by_field=[],
+    )
     query_result_length = len(query_result)
 
     if query_result_length == 0:
@@ -67,4 +80,28 @@ def get_pid_for_data(data_id):
     data = Data.get_by_id(data_id)
 
     # Return PID value from the document and the PID_XPATH
-    return get_dict_value_from_key_list(data["dict_content"], PID_XPATH.split("."))
+    pid_xpath_object = PidXpath.get_by_template_id(data.template.pk)
+    pid_xpath = pid_xpath_object.xpath
+
+    return get_dict_value_from_key_list(
+        data["dict_content"],
+        pid_xpath.split("."),
+    )
+
+
+def get_pid_xpath_by_template_id(template_id):
+    """Retrieve XPath associated with a specific template ID
+
+    Args:
+        template_id: ObjectId
+        user: User
+
+    Returns:
+        str - XPath for the given template ID
+    """
+    pid_xpath_object = PidXpath.get_by_template_id(template_id)
+
+    if pid_xpath_object is None:
+        return PidXpath(template=template_id, xpath=settings.PID_XPATH)
+    else:
+        return pid_xpath_object

@@ -3,7 +3,6 @@
 import json
 import random
 import string
-
 from requests import Response
 from rest_framework import status
 

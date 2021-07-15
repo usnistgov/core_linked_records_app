@@ -7,9 +7,7 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 
 from core_linked_records_app import settings
-from core_linked_records_app.settings import (
-    PID_XPATH,
-)
+from core_linked_records_app.components.pid_settings import api as pid_settings_api
 from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils.providers import ProviderManager
 from core_linked_records_app.utils.xml import (
@@ -27,7 +25,6 @@ from core_main_app.utils.requests_utils.requests_utils import (
 from signals_utils.signals.mongo import signals, connector
 from xml_utils.xpath import create_tree_from_xpath
 from xml_utils.xsd_tree.xsd_tree import XSDTree
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
 
 LOGGER = logging.getLogger(__name__)
 
@@ -51,7 +48,10 @@ def set_data_pid(sender, document, **kwargs):
     if not pid_settings_api.get().auto_set_pid:
         return
 
-    pid_xpath = get_xpath_from_dot_notation(PID_XPATH)
+    # Retrieve PID XPath from `PidSettings.xpath_list`. Skip PID assignment
+    # if the PID XPath is not defined for the template.
+    template_pid_xpath = system_api.get_pid_xpath_by_template_id(document.template.pk)
+    pid_xpath = get_xpath_from_dot_notation(template_pid_xpath.xpath)
 
     # Retrieve namespaces
     xml_tree = XSDTree.build_tree(document.xml_content)

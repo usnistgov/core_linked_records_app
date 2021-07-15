@@ -1,11 +1,8 @@
 """ Data HTML renderer for django REST API
 """
 import logging
-
-from django.http import HttpResponse
 from rest_framework import renderers, status
 from rest_framework.exceptions import APIException
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from core_main_app.components.data import api as data_api
 from core_main_app.utils.rendering import render

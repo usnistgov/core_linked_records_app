@@ -3,12 +3,12 @@
 from django.conf.urls import url
 
 from core_linked_records_app import settings
+from core_linked_records_app.rest.blob import views as blob_views
 from core_linked_records_app.rest.pid import views as pid_views
+from core_linked_records_app.rest.pid_settings import views as settings_views
+from core_linked_records_app.rest.pid_xpath import views as xpath_views
 from core_linked_records_app.rest.providers import views as providers_views
 from core_linked_records_app.rest.query import views as query_views
-from core_linked_records_app.rest.pid_settings import views as settings_views
-
-from core_linked_records_app.rest.blob import views as blob_views
 
 urlpatterns = [
     url(
@@ -37,28 +37,38 @@ urlpatterns += [
         name="core_linked_records_app_settings",
     ),
     url(
+        r"^settings/xpath/$",
+        xpath_views.PidXpathListView.as_view(),
+        name="core_linked_records_app_settings",
+    ),
+    url(
+        r"^settings/xpath/(?P<id>[^/]+)/$",
+        xpath_views.PidXpathDetailView.as_view(),
+        name="core_linked_records_app_settings",
+    ),
+    url(
         r"^retrieve-list-pid",
-        pid_views.RetrieveListPID.as_view(),
+        pid_views.RetrieveListPIDView.as_view(),
         name="core_linked_records_retrieve_list_pid",
     ),
     url(
         r"^retrieve-data-pid",
-        pid_views.RetrieveDataPID.as_view(),
+        pid_views.RetrieveDataPIDView.as_view(),
         name="core_linked_records_retrieve_data_pid",
     ),
     url(
         r"^retrieve-blob-pid",
-        pid_views.RetrieveBlobPID.as_view(),
+        pid_views.RetrieveBlobPIDView.as_view(),
         name="core_linked_records_retrieve_blob_pid",
     ),
     url(
         r"^upload-blob-pid",
-        blob_views.BlobUploadWithPID.as_view(),
+        blob_views.BlobUploadWithPIDView.as_view(),
         name="core_linked_records_upload_blob_pid",
     ),
     url(
         r"^(?P<provider>[^/]+)/(?P<record>.*)$",
-        providers_views.ProviderRecord.as_view(),
+        providers_views.ProviderRecordView.as_view(),
         name="core_linked_records_provider_record",
     ),
 ]

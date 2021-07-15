@@ -7,7 +7,9 @@ from rest_framework.views import APIView
 
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_settings import api as pid_settings_api
-from core_linked_records_app.rest.pid_settings.serializers import PidSettingsSerializer
+from core_linked_records_app.rest.pid_settings.serializers import (
+    PidSettingsSerializer,
+)
 
 
 class PidSettingsView(APIView):
@@ -24,15 +26,18 @@ class PidSettingsView(APIView):
         Returns:
         """
         pid_settings = pid_settings_api.get()
+        pid_settings_data = PidSettingsSerializer(pid_settings).data
+
+        response_data = {
+            "format": settings.PID_FORMAT,
+            "systems": list(settings.ID_PROVIDER_SYSTEMS.keys()),
+            "prefixes": settings.ID_PROVIDER_PREFIXES,
+        }
+
+        pid_settings_data.update(response_data)
 
         return Response(
-            {
-                "xpath": settings.PID_XPATH,
-                "format": settings.PID_FORMAT,
-                "systems": list(settings.ID_PROVIDER_SYSTEMS.keys()),
-                "prefixes": settings.ID_PROVIDER_PREFIXES,
-                "auto_set_pid": pid_settings.auto_set_pid,
-            },
+            pid_settings_data,
             status=status.HTTP_200_OK,
         )
 

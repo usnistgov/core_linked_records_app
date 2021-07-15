@@ -5,10 +5,10 @@ from django.urls import reverse
 
 from core_linked_records_app import settings
 from core_linked_records_app.components.blob import api as blob_api
+from core_linked_records_app.components.pid_settings import api as pid_settings_api
 from core_main_app.components.blob.models import Blob
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
 from signals_utils.signals.mongo import connector, signals
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
 
 
 def init():

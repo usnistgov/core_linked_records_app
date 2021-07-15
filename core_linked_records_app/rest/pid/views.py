@@ -1,13 +1,12 @@
 """ Ajax views accessible by users.
 """
 import json
-from urllib.parse import urljoin
-
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
+from urllib.parse import urljoin
 
 from core_explore_common_app.components.query import api as query_api
 from core_explore_common_app.utils.protocols.oauth2 import (
@@ -17,16 +16,18 @@ from core_explore_common_app.utils.protocols.oauth2 import (
 from core_linked_records_app import settings
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.data import api as data_api
-from core_main_app.utils.requests_utils.requests_utils import send_get_request
+from core_main_app.utils.requests_utils.requests_utils import (
+    send_get_request,
+)
 
 
-class RetrieveDataPID(APIView):
+class RetrieveDataPIDView(APIView):
     """Retrieve PIDs for a given data IDs."""
 
     def get(self, request):
         if "data_id" in request.GET:
             return JsonResponse(
-                {"pid": data_api.get_pid_for_data(request.GET["data_id"], request.user)}
+                {"pid": data_api.get_pid_for_data(request.GET["data_id"], request)}
             )
         elif (
             "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
@@ -40,7 +41,7 @@ class RetrieveDataPID(APIView):
             return JsonResponse(
                 {
                     "pid": oai_record_api.get_pid_for_data(
-                        request.GET["oai_data_id"], request.user
+                        request.GET["oai_data_id"], request
                     )
                 }
             )
@@ -77,7 +78,7 @@ class RetrieveDataPID(APIView):
             )
 
 
-class RetrieveBlobPID(APIView):
+class RetrieveBlobPIDView(APIView):
     """Retrieve PIDs for a given blob ID."""
 
     def get(self, request):
@@ -98,7 +99,7 @@ class RetrieveBlobPID(APIView):
             )
 
 
-class RetrieveListPID(APIView):
+class RetrieveListPIDView(APIView):
     """Retrieve PIDs for a given list of data IDs."""
 
     def post(self, request):
@@ -132,8 +133,10 @@ class RetrieveListPID(APIView):
             if data_source.authentication.type == "session":
                 response = send_get_request(
                     data_source.capabilities["url_pid"],
-                    data=json_query,
-                    cookies={"sessionid": request.session.session_key},
+                    json=json_query,
+                    cookies={
+                        "sessionid": request.session.session_key,
+                    },
                 )
             elif data_source.authentication.type == "oauth2":
                 response = oauth2_post_request(

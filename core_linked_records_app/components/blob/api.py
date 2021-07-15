@@ -7,7 +7,6 @@ from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.components.local_id.models import LocalId
 from core_linked_records_app.utils.path import get_api_path_from_object
 from core_main_app.commons import exceptions
-from core_main_app.commons.exceptions import ApiError
 from core_main_app.components.blob.models import Blob
 
 

@@ -1,8 +1,8 @@
 """ Handle system abstract class
 """
-from abc import ABC, abstractmethod
 from importlib import import_module
 
+from abc import ABC, abstractmethod
 from django.urls import reverse
 
 from core_linked_records_app import settings

@@ -1,5 +1,6 @@
 from os import chdir, pardir
 from os.path import join, exists, dirname, normpath, abspath
+
 from setuptools import find_packages, setup
 
 reqs_default = join(dirname(__file__), "requirements.txt")

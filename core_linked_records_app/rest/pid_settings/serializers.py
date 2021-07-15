@@ -2,8 +2,10 @@
 """
 from rest_framework_mongoengine import serializers
 
-from core_linked_records_app.components.pid_settings.models import PidSettings
 from core_linked_records_app.components.pid_settings import api as pid_settings_api
+from core_linked_records_app.components.pid_settings.models import (
+    PidSettings,
+)
 
 
 class PidSettingsSerializer(serializers.DocumentSerializer):

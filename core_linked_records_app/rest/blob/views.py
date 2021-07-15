@@ -7,15 +7,12 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 
 from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.blob.watch import set_blob_pid
 from core_linked_records_app.components.local_id import api as local_id_api
 from core_main_app.commons.exceptions import CoreError, DoesNotExist
-from core_main_app.components.blob.models import Blob
 from core_main_app.rest.blob.views import BlobList
-from signals_utils.signals.mongo import signals, connector
 
 
-class BlobUploadWithPID(BlobList):
+class BlobUploadWithPIDView(BlobList):
     permission_classes = (IsAdminUser,)
 
     def post(self, request):

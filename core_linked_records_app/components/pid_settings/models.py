@@ -9,7 +9,7 @@ from core_main_app.commons import exceptions
 
 
 class PidSettings(Document):
-    auto_set_pid = fields.BooleanField(default=settings.AUTO_SET_PID, required=True)
+    auto_set_pid = fields.BooleanField(default=settings.AUTO_SET_PID)
 
     @staticmethod
     def get():

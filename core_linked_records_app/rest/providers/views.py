@@ -27,7 +27,7 @@ from core_main_app.utils.file import get_file_http_response
 LOGGER = logging.getLogger(__name__)
 
 
-class ProviderRecord(APIView):
+class ProviderRecordView(APIView):
     parser_classes = (JSONParser,)
     renderer_classes = (DataHtmlUserRenderer, JSONRenderer, DataXmlRenderer)
 
@@ -122,7 +122,7 @@ class ProviderRecord(APIView):
 
         try:
             query_result = get_data_by_pid(
-                json.loads(provider_response.content)["url"], request.user
+                json.loads(provider_response.content)["url"], request
             )
             return Response(
                 DataSerializer(query_result).data, status=status.HTTP_200_OK

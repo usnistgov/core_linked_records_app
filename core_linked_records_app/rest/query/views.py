@@ -1,16 +1,13 @@
 """ REST views for the query API
 """
-import json
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.response import Response
-from urllib.parse import urljoin
 
 from core_linked_records_app import settings
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
+from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.utils.dict import get_dict_value_from_key_list
 from core_main_app.components.data import api as data_api
 from core_main_app.rest.data.abstract_views import AbstractExecuteLocalQueryView
-from core_main_app.utils.requests_utils.requests_utils import send_get_request
 
 
 class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
@@ -30,7 +27,20 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
         Returns:
             Query with additional PID filter
         """
-        pid_query = {"$and": [{"dict_content.%s" % settings.PID_XPATH: {"$exists": 1}}]}
+        pid_xpath_list = [
+            pid_xpath_object.xpath
+            for pid_xpath_object in pid_xpath_api.get_all(self.request)
+        ] + [settings.PID_XPATH]
+        pid_query = {
+            "$and": [
+                {
+                    "$or": [
+                        {f"dict_content.{pid_xpath}": {"$exists": 1}}
+                        for pid_xpath in pid_xpath_list
+                    ]
+                }
+            ]
+        }
         query = super().build_query(query, workspaces, templates, options, title)
 
         if "$and" in query.keys():
@@ -51,11 +61,26 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
         Returns:
             Results of the query
         """
-        pipeline = [
-            {"$match": raw_query},
-            {"$project": {"pid": "$dict_content.%s" % settings.PID_XPATH}},
-        ]
-        return data_api.aggregate(pipeline, self.request.user)
+        pid_list = list()
+        data_list = data_api.execute_query(raw_query, self.request.user)
+
+        for data in data_list:
+            pid_xpath_object = pid_xpath_api.get_by_template_id(
+                data.template.pk, self.request
+            )
+            pid_xpath = pid_xpath_object.xpath
+
+            data_pid = get_dict_value_from_key_list(
+                data["dict_content"],
+                pid_xpath.split("."),
+            )
+
+            if not data_pid:
+                continue
+
+            pid_list.append({"pid": data_pid})
+
+        return pid_list
 
     def build_response(self, data_list):
         """Build the list of PIDs
@@ -83,7 +108,7 @@ if (
     from core_explore_oaipmh_app.rest.query.views import ExecuteQueryView
 
     class ExecuteOaiPmhPIDQueryView(ExecuteQueryView):
-        pid_xpath = None
+        pid_xpath_list = None
 
         def build_query(self, query, templates, registries):
             """Build the query by adding an extra filter to limit to document with
@@ -97,9 +122,20 @@ if (
             Returns:
                 Query with additional PID filter
             """
-            self.pid_xpath = settings.PID_XPATH
-
-            pid_query = {"$and": [{"dict_content.%s" % self.pid_xpath: {"$exists": 1}}]}
+            self.pid_xpath_list = [
+                pid_xpath_object.xpath
+                for pid_xpath_object in pid_xpath_api.get_all(self.request)
+            ] + [settings.PID_XPATH]
+            pid_query = {
+                "$and": [
+                    {
+                        "$or": [
+                            {f"dict_content.{pid_xpath}": {"$exists": 1}}
+                            for pid_xpath in self.pid_xpath_list
+                        ]
+                    }
+                ]
+            }
             query = super().build_query(query, templates, registries)
 
             if "$and" in query.keys():
@@ -120,14 +156,29 @@ if (
             Returns:
                 Results of the query
             """
-            if self.pid_xpath is None:
+            if self.pid_xpath_list is None:
                 raise Exception("Undefined PID xpath from remote server.")
 
-            pipeline = [
-                {"$match": raw_query},
-                {"$project": {"pid": "$dict_content.%s" % self.pid_xpath}},
-            ]
-            return oai_record_api.aggregate(pipeline, self.request.user)
+            pid_list = list()
+            data_list = oai_record_api.execute_query(raw_query, self.request.user)
+
+            for data in data_list:
+                pid_xpath_object = pid_xpath_api.get_by_template_id(
+                    data.harvester_metadata_format.template.pk, self.request
+                )
+                pid_xpath = pid_xpath_object.xpath
+
+                data_pid = get_dict_value_from_key_list(
+                    data["dict_content"],
+                    pid_xpath.split("."),
+                )
+
+                if not data_pid:
+                    continue
+
+                pid_list.append({"pid": data_pid})
+
+            return pid_list
 
         def build_response(self, data_list):
             """Build the list of PIDs
