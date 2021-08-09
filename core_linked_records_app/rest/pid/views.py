@@ -25,56 +25,65 @@ class RetrieveDataPIDView(APIView):
     """Retrieve PIDs for a given data IDs."""
 
     def get(self, request):
-        if "data_id" in request.GET:
-            return JsonResponse(
-                {"pid": data_api.get_pid_for_data(request.GET["data_id"], request)}
-            )
-        elif (
-            "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
-            and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
-            and "oai_data_id" in request.GET
-        ):
-            from core_linked_records_app.components.oai_record import (
-                api as oai_record_api,
-            )
+        try:
+            if "data_id" in request.GET:
+                return JsonResponse(
+                    {"pid": data_api.get_pid_for_data(request.GET["data_id"], request)}
+                )
+            elif (
+                "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
+                and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
+                and "oai_data_id" in request.GET
+            ):
+                from core_linked_records_app.components.oai_record import (
+                    api as oai_record_api,
+                )
 
+                return JsonResponse(
+                    {
+                        "pid": oai_record_api.get_pid_for_data(
+                            request.GET["oai_data_id"], request
+                        )
+                    }
+                )
+            elif (
+                "core_federated_search_app" in settings.INSTALLED_APPS
+                and "fede_data_id" in request.GET
+                and "fede_origin" in request.GET
+            ):
+                from core_federated_search_app.components.instance import (
+                    api as instance_api,
+                )
+
+                fede_origin_keys = request.GET["fede_origin"].split("&")
+                instance_name = fede_origin_keys[1].split("=")[1]
+                instance = instance_api.get_by_name(instance_name)
+
+                url_get_data = "%s?data_id=%s" % (
+                    reverse(
+                        "core_linked_records_retrieve_data_pid",
+                    ),
+                    request.GET["fede_data_id"],
+                )
+                data_response = oauth2_get_request(
+                    urljoin(instance.endpoint, url_get_data), instance.access_token
+                )
+                return JsonResponse(json.loads(data_response.text))
+            else:
+                return JsonResponse(
+                    {
+                        "message": "Impossible to retrieve PID for data with the given "
+                        "parameters"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except Exception as exc:
             return JsonResponse(
                 {
-                    "pid": oai_record_api.get_pid_for_data(
-                        request.GET["oai_data_id"], request
-                    )
-                }
-            )
-        elif (
-            "core_federated_search_app" in settings.INSTALLED_APPS
-            and "fede_data_id" in request.GET
-            and "fede_origin" in request.GET
-        ):
-            from core_federated_search_app.components.instance import (
-                api as instance_api,
-            )
-
-            fede_origin_keys = request.GET["fede_origin"].split("&")
-            instance_name = fede_origin_keys[1].split("=")[1]
-            instance = instance_api.get_by_name(instance_name)
-
-            url_get_data = "%s?data_id=%s" % (
-                reverse(
-                    "core_linked_records_retrieve_data_pid",
-                ),
-                request.GET["fede_data_id"],
-            )
-            data_response = oauth2_get_request(
-                urljoin(instance.endpoint, url_get_data), instance.access_token
-            )
-            return JsonResponse(json.loads(data_response.text))
-        else:
-            return JsonResponse(
-                {
-                    "message": "Impossible to retrieve PID for data with the given "
-                    "parameters"
+                    "message": f"An unexpected exception occurred while retrieving data "
+                    f"PID: {str(exc)}"
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -83,15 +92,24 @@ class RetrieveBlobPIDView(APIView):
 
     def get(self, request):
         if "blob_id" in request.GET:
-            blob_pid = blob_api.get_pid_for_blob(request.GET["blob_id"])
-            sub_url = reverse(
-                "core_linked_records_provider_record",
-                kwargs={"provider": "local", "record": ""},
-            )
+            try:
+                blob_pid = blob_api.get_pid_for_blob(request.GET["blob_id"])
+                sub_url = reverse(
+                    "core_linked_records_provider_record",
+                    kwargs={"provider": "local", "record": ""},
+                )
 
-            return JsonResponse(
-                {"pid": f"{settings.SERVER_URI}{sub_url}{blob_pid.record_name}"}
-            )
+                return JsonResponse(
+                    {"pid": f"{settings.SERVER_URI}{sub_url}{blob_pid.record_name}"}
+                )
+            except Exception as exc:
+                return JsonResponse(
+                    {
+                        "message": f"An unexpected exception occurred while retrieving "
+                        f"blob PID: {str(exc)}"
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
         else:
             return JsonResponse(
                 {"message": "Missing parameter 'blob_id'."},
@@ -105,8 +123,13 @@ class RetrieveListPIDView(APIView):
     def post(self, request):
         try:
             # FIXME duplicated code with core_explore_common.utils.query.send
-            query = query_api.get_by_id(request.POST["query_id"], request.user)
-            data_source = query.data_sources[int(request.POST["data_source_index"])]
+            query = query_api.get_by_id(
+                request.POST.get("query_id", None),
+                request.user,
+            )
+            data_source = query.data_sources[
+                int(request.POST.get("data_source_index", 0))
+            ]
 
             # Build serialized query to send to data source
             json_query = {
@@ -122,7 +145,7 @@ class RetrieveListPIDView(APIView):
             }
 
             if (
-                getattr(data_source, "capabilities", False)
+                getattr(data_source, "capabilities", False) is not False
                 and "url_pid" not in data_source.capabilities.keys()
             ):
                 return JsonResponse(

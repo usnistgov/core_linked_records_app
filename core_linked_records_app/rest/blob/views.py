@@ -37,12 +37,16 @@ class BlobUploadWithPIDView(BlobList):
             )
 
         try:
-            if "pid" not in request.POST:
+            pid = request.POST.get("pid", None)
+
+            if "pid" is None:
                 raise CoreError("Missing PID field in POST data.")
 
-            # Check that the PID has not yet been assigned
+            # Check that the PID has not yet been assigned.
             try:
-                local_id_api.get_by_name("/".join(request.POST["pid"].split("/")[-2:]))
+                # Rebuild the PID 'prefix/record' by extracting the last 2 items
+                # of the PID path and performs the lookup.
+                local_id_api.get_by_name("/".join(pid.split("/")[-2:]))
                 raise CoreError("PID has already been assigned.")
             except DoesNotExist:
                 pass
@@ -54,7 +58,7 @@ class BlobUploadWithPIDView(BlobList):
                 return blob_upload_response
 
             serialized_data = blob_upload_response.data
-            serialized_data["pid"] = request.POST["pid"]
+            serialized_data["pid"] = pid
 
             # Assign PID to blob
             blob_api.set_pid_for_blob(serialized_data["id"], serialized_data["pid"])

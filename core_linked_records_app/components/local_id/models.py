@@ -36,3 +36,12 @@ class LocalId(Document):
             raise exceptions.DoesNotExist(str(dne))
         except Exception as exc:
             raise exceptions.ModelError(str(exc))
+
+    @staticmethod
+    def upsert(local_id_object):
+        try:
+            return local_id_object.save()
+        except mongoengine_errors.NotUniqueError as nue:
+            raise exceptions.NotUniqueError(str(nue))
+        except Exception as exc:
+            raise exceptions.ModelError(str(exc))

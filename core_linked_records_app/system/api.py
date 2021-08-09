@@ -1,10 +1,17 @@
 """ System API for core_linked_records
 """
+import logging
+from rest_framework import status
+
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_linked_records_app.utils.dict import get_dict_value_from_key_list
+from core_linked_records_app.utils.providers import ProviderManager
 from core_main_app.commons.exceptions import DoesNotExist, ApiError
 from core_main_app.components.data.models import Data
+from core_main_app.utils.requests_utils.requests_utils import send_delete_request
+
+logger = logging.getLogger(__name__)
 
 
 def is_pid_defined_for_document(pid, document_id):
@@ -18,7 +25,7 @@ def is_pid_defined_for_document(pid, document_id):
     """
     data = Data.get_by_id(document_id)
 
-    pid_xpath_object = PidXpath.get_by_template_id(data.template.pk)
+    pid_xpath_object = get_pid_xpath_by_template_id(data.template.pk)
     pid_xpath = pid_xpath_object.xpath
 
     json_pid_path = f"dict_content.{pid_xpath}"
@@ -80,7 +87,7 @@ def get_pid_for_data(data_id):
     data = Data.get_by_id(data_id)
 
     # Return PID value from the document and the PID_XPATH
-    pid_xpath_object = PidXpath.get_by_template_id(data.template.pk)
+    pid_xpath_object = get_pid_xpath_by_template_id(data.template.pk)
     pid_xpath = pid_xpath_object.xpath
 
     return get_dict_value_from_key_list(
@@ -94,10 +101,9 @@ def get_pid_xpath_by_template_id(template_id):
 
     Args:
         template_id: ObjectId
-        user: User
 
     Returns:
-        str - XPath for the given template ID
+        PidXpath - PidXpath object, linking template ID and XPath
     """
     pid_xpath_object = PidXpath.get_by_template_id(template_id)
 
@@ -105,3 +111,35 @@ def get_pid_xpath_by_template_id(template_id):
         return PidXpath(template=template_id, xpath=settings.PID_XPATH)
     else:
         return pid_xpath_object
+
+
+def delete_pid_for_data(data):
+    """Deletes the PID assigned to the data passed in parameter. If no PID has
+    been assigned, the function simply exits.
+
+    Args:
+        data:
+    """
+    provider_manager = ProviderManager()
+    previous_pid = get_pid_for_data(data.pk)
+
+    if previous_pid is None:  # If there is no previous PID assigned
+        logger.info(f"No PID assigned to the data {str(data.pk)}")
+        return
+
+    previous_provider_name = provider_manager.find_provider_from_pid(previous_pid)
+    previous_provider = provider_manager.get(previous_provider_name)
+    previous_pid_url = previous_pid.replace(
+        previous_provider.provider_url, previous_provider.local_url
+    )
+
+    previous_pid_delete_response = send_delete_request(
+        "%s?format=json" % previous_pid_url
+    )
+
+    # Log any error that happen during PID deletion
+    if previous_pid_delete_response.status_code != status.HTTP_200_OK:
+        logger.warning(
+            "Deletion of PID %s returned %s"
+            % (previous_pid, previous_pid_delete_response.status_code)
+        )

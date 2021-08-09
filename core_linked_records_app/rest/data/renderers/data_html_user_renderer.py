@@ -8,7 +8,7 @@ from core_main_app.components.data import api as data_api
 from core_main_app.utils.rendering import render
 from core_main_app.utils.view_builders import data as data_view_builder
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DataHtmlUserRenderer(renderers.BaseRenderer):
@@ -62,7 +62,7 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
                 context={"error": str(api_error)},
             )
         except Exception as e:
-            LOGGER.error("Error while building data page: %s" % str(e))
+            logger.error("Error while building data page: %s" % str(e))
 
             if "kwargs" in renderer_context and "record" in renderer_context["kwargs"]:
                 error_msg = (

@@ -25,21 +25,30 @@ class PidSettingsView(APIView):
 
         Returns:
         """
-        pid_settings = pid_settings_api.get()
-        pid_settings_data = PidSettingsSerializer(pid_settings).data
+        try:
+            pid_settings = pid_settings_api.get()
+            pid_settings_data = PidSettingsSerializer(pid_settings).data
 
-        response_data = {
-            "format": settings.PID_FORMAT,
-            "systems": list(settings.ID_PROVIDER_SYSTEMS.keys()),
-            "prefixes": settings.ID_PROVIDER_PREFIXES,
-        }
+            response_data = {
+                "format": settings.PID_FORMAT,
+                "systems": list(settings.ID_PROVIDER_SYSTEMS.keys()),
+                "prefixes": settings.ID_PROVIDER_PREFIXES,
+            }
 
-        pid_settings_data.update(response_data)
+            pid_settings_data.update(response_data)
 
-        return Response(
-            pid_settings_data,
-            status=status.HTTP_200_OK,
-        )
+            return Response(
+                pid_settings_data,
+                status=status.HTTP_200_OK,
+            )
+        except Exception as exc:
+            return Response(
+                {
+                    "message": f"An unexpected error occurred while displaying "
+                    f"PidSettings: {str(exc)}"
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def patch(self, request):
         """Update settings for the PID system. Current, only works for automatically
@@ -56,15 +65,25 @@ class PidSettingsView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        pid_settings_serializer = PidSettingsSerializer(data=request.data)
+        try:
+            pid_settings_serializer = PidSettingsSerializer(data=request.data)
 
-        if not pid_settings_serializer.is_valid():
-            return Response(
-                {"message": "Invalid data provided"}, status=status.HTTP_400_BAD_REQUEST
+            if not pid_settings_serializer.is_valid():
+                return Response(
+                    {"message": "Invalid data provided"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            pid_settings_serializer.update(
+                pid_settings_api.get(), pid_settings_serializer.validated_data
             )
 
-        pid_settings_serializer.update(
-            pid_settings_api.get(), pid_settings_serializer.validated_data
-        )
-
-        return self.get(request)
+            return self.get(request)
+        except Exception as exc:
+            return Response(
+                {
+                    "message": f"An unexpected error occurred while modifying "
+                    f"PidSettings: {str(exc)}"
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

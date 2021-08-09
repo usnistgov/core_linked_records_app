@@ -71,7 +71,7 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
             pid_xpath = pid_xpath_object.xpath
 
             data_pid = get_dict_value_from_key_list(
-                data["dict_content"],
+                data.dict_content,
                 pid_xpath.split("."),
             )
 

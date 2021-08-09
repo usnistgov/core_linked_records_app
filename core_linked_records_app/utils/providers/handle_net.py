@@ -11,7 +11,7 @@ from core_main_app.utils.requests_utils.requests_utils import (
     send_get_request,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class HandleNetSystem(AbstractIdProvider):

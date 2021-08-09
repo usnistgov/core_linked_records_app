@@ -1,9 +1,11 @@
 """ Local record API
 """
-from mongoengine import NotUniqueError as MongoNotUniqueError
+import logging
 
 from core_linked_records_app.components.local_id.models import LocalId
-from core_main_app.commons.exceptions import NotUniqueError
+from core_main_app.commons.exceptions import ApiError
+
+logger = logging.getLogger(__name__)
 
 
 def get_by_name(record_name):
@@ -14,7 +16,13 @@ def get_by_name(record_name):
 
     Returns:
     """
-    return LocalId.get_by_name(record_name)
+    try:
+        return LocalId.get_by_name(record_name)
+    except Exception as exc:
+        error_message = "An unexpected error occurred while retrieving LocalId by name"
+
+        logger.error(f"{error_message}: {str(exc)}")
+        raise ApiError(f"{error_message}.")
 
 
 def get_by_class_and_id(record_object_class, record_object_id):
@@ -26,7 +34,15 @@ def get_by_class_and_id(record_object_class, record_object_id):
 
     Returns:
     """
-    return LocalId.get_by_class_and_id(record_object_class, record_object_id)
+    try:
+        return LocalId.get_by_class_and_id(record_object_class, record_object_id)
+    except Exception as exc:
+        error_message = (
+            "An unexpected error occurred while retrieving LocalId by class and id"
+        )
+
+        logger.error(f"{error_message}: {str(exc)}")
+        raise ApiError(f"{error_message}.")
 
 
 def insert(local_id_object):
@@ -38,9 +54,12 @@ def insert(local_id_object):
     Returns:
     """
     try:
-        return local_id_object.save()
-    except MongoNotUniqueError as e:
-        raise NotUniqueError(e)
+        return LocalId.upsert(local_id_object)
+    except Exception as exc:
+        error_message = "An unexpected error occurred while inserting LocalId"
+
+        logger.error(f"{error_message}: {str(exc)}")
+        raise ApiError(f"{error_message}.")
 
 
 def delete(local_id_object):
@@ -52,4 +71,10 @@ def delete(local_id_object):
     Returns:
 
     """
-    return local_id_object.delete()
+    try:
+        return local_id_object.delete()
+    except Exception as exc:
+        error_message = "An unexpected error occurred while deleting LocalId"
+
+        logger.error(f"{error_message}: {str(exc)}")
+        raise ApiError(f"{error_message}.")
