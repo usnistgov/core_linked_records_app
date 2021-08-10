@@ -1,12 +1,14 @@
 """ Utilities related to blobs with PID
 """
+import logging
 import re
-from core_linked_records_app.components.local_id import api as local_id_api
-from core_linked_records_app.components.blob import api as blob_api
 
 from django.urls import reverse
 
-from core_main_app.commons.exceptions import DoesNotExist
+from core_linked_records_app.components.blob import api as blob_api
+from core_linked_records_app.components.local_id import api as local_id_api
+
+logger = logging.getLogger(__name__)
 
 
 def get_blob_download_regex(xml_string):
@@ -36,13 +38,13 @@ def get_blob_download_regex(xml_string):
     blob_urls = list()
 
     for document_pid in document_pid_list:
-        record_name = "/".join(document_pid.split("/")[-2:])
-        record_object = local_id_api.get_by_name(record_name)
-
         try:
+            record_name = "/".join(document_pid.split("/")[-2:])
+            record_object = local_id_api.get_by_name(record_name)
             blob_api.get_pid_for_blob(record_object.record_object_id)
             blob_urls.append(document_pid)
-        except DoesNotExist:
+        except Exception as exc:
+            logger.warning(f"Retrieving blob URL raised an exception: {str(exc)}")
             continue
 
     return blob_urls
