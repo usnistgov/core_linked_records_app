@@ -25,11 +25,11 @@ class TestGetBlobByPid(TestCase):
             blob_api.get_blob_by_pid(mock_valid_pid, self.user)
 
     @patch.object(local_id_api, "get_by_name")
-    def test_undefined_classpath_raises_api_error(self, mock_get_by_name):
+    def test_undefined_classpath_raises_does_not_exist(self, mock_get_by_name):
         mock_valid_pid = "https://websi.te/provider/record"
         mock_get_by_name.return_value = LocalId(record_name=mock_valid_pid)
 
-        with self.assertRaises(exceptions.ApiError):
+        with self.assertRaises(exceptions.DoesNotExist):
             blob_api.get_blob_by_pid(mock_valid_pid, self.user)
 
     @patch.object(blob_api, "import_module")
@@ -37,7 +37,9 @@ class TestGetBlobByPid(TestCase):
     def test_failed_import_raises_api_error(self, mock_get_by_name, mock_import_module):
         mock_valid_pid = "https://websi.te/provider/record"
         mock_get_by_name.return_value = LocalId(
-            record_name=mock_valid_pid, record_object_class="", record_object_id=""
+            record_name=mock_valid_pid,
+            record_object_class="mock_record_object_class",
+            record_object_id="mock_record_object_id",
         )
         mock_import_module.side_effect = Exception("mock_import_module_exception")
 
@@ -52,7 +54,9 @@ class TestGetBlobByPid(TestCase):
     ):
         mock_valid_pid = "https://websi.te/provider/record"
         mock_get_by_name.return_value = LocalId(
-            record_name=mock_valid_pid, record_object_class="", record_object_id=""
+            record_name=mock_valid_pid,
+            record_object_class="mock_record_object_class",
+            record_object_id="mock_record_object_id",
         )
         mock_import_module.return_value = None
         mock_getattr.side_effect = Exception("mock_getattr_exception")
@@ -68,7 +72,9 @@ class TestGetBlobByPid(TestCase):
     ):
         mock_valid_pid = "https://websi.te/provider/record"
         mock_get_by_name.return_value = LocalId(
-            record_name=mock_valid_pid, record_object_class="", record_object_id=""
+            record_name=mock_valid_pid,
+            record_object_class="mock_record_object_class",
+            record_object_id="mock_record_object_id",
         )
         mock_import_module.return_value = None
         mock_getattr.return_value = mocks.MockModule()

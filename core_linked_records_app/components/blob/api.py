@@ -29,6 +29,9 @@ def get_blob_by_pid(pid, user):
         pid_internal_name = "/".join(pid.split("/")[-2:])
         local_id_object = local_id_api.get_by_name(pid_internal_name)
 
+        # Ensure the LocalID object refers to a Blob
+        assert local_id_object.record_object_class and local_id_object.record_object_id
+
         # From the local ID object, retrieve record module, separating import path
         # and module name.
         record_object_classpath = local_id_object.record_object_class
@@ -41,6 +44,11 @@ def get_blob_by_pid(pid, user):
         return getattr(module, api_module_name).get_by_id(
             local_id_object.record_object_id, user
         )
+    except (AssertionError, exceptions.DoesNotExist):
+        error_message = f"PID '{pid}' not assigned to blob"
+
+        logger.error(error_message)
+        raise exceptions.DoesNotExist(error_message)
     except Exception as exc:
         error_message = (
             f"An error occurred while looking up blob assigned to PID '{pid}'"
