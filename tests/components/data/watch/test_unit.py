@@ -277,7 +277,7 @@ class TestSetDataPid(TestCase):
     @patch.object(data_watch, "get_xpath_from_dot_notation")
     @patch.object(system_api, "get_pid_xpath_by_template_id")
     @patch.object(pid_settings_api, "get")
-    def test_pid_already_defined_raise_core_error(
+    def test_pid_already_defined_raise_model_error(
         self,
         mock_pid_settings_get,
         mock_get_pid_xpath_by_template_id,
@@ -301,7 +301,7 @@ class TestSetDataPid(TestCase):
         mock_is_pid_defined.return_value = True
         mock_is_pid_defined_for_document.return_value = False
 
-        with self.assertRaises(exceptions.CoreError):
+        with self.assertRaises(exceptions.ModelError):
             data_watch.set_data_pid(**self.mock_kwargs)
 
     @patch.object(providers_utils, "register_pid_for_data_id")

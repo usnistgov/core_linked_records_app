@@ -84,6 +84,9 @@ def set_data_pid(sender, document, **kwargs):
             provider_name, pid_value, document.pk
         )
         data_utils.set_pid_value_for_data(document, pid_xpath, pid_value)
+    except exceptions.ModelError as model_error:
+        logger.error(f"An error occurred while assigning PID: {str(model_error)}")
+        raise exceptions.ModelError(str(model_error))
     except Exception as exc:
         error_message = f"An error occurred while assigning PID to data '{document.id}"
 
