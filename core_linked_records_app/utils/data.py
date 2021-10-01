@@ -6,6 +6,7 @@ from core_linked_records_app.utils.xml import (
     get_value_at_xpath,
     can_create_value_at_xpath,
 )
+from xml_utils.xpath import create_tree_from_xpath
 from xml_utils.xsd_tree.xsd_tree import XSDTree
 
 
@@ -20,6 +21,7 @@ def set_pid_value_for_data(data, pid_xpath, pid_value):
     target_namespace = get_target_namespace_for_xsd_string(data.template.content)
     xml_tree = XSDTree.build_tree(data.xml_content)
 
+    xml_tree = create_tree_from_xpath(pid_xpath, xml_tree, target_namespace)
     set_value_at_xpath(xml_tree, pid_xpath, pid_value, target_namespace)
     data.xml_content = XSDTree.tostring(xml_tree)
 

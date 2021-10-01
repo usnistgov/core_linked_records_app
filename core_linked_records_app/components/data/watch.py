@@ -88,7 +88,12 @@ def set_data_pid(sender, document, **kwargs):
         logger.error(f"An error occurred while assigning PID: {str(model_error)}")
         raise exceptions.ModelError(str(model_error))
     except Exception as exc:
-        error_message = f"An error occurred while assigning PID to data '{document.id}"
+        if not document.id:
+            data_definition = "new data"
+        else:
+            data_definition = f"data '{document.id}'"
+
+        error_message = f"An error occurred while assigning PID to {data_definition}"
 
         logger.error(f"{error_message}: {str(exc)}")
         raise exceptions.CoreError(f"{error_message}.")
