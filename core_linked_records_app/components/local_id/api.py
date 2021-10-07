@@ -38,6 +38,8 @@ def get_by_class_and_id(record_object_class, record_object_id):
     """
     try:
         return LocalId.get_by_class_and_id(record_object_class, record_object_id)
+    except exceptions.DoesNotExist as dne:
+        raise exceptions.DoesNotExist(str(dne))
     except Exception as exc:
         error_message = (
             "An unexpected error occurred while retrieving LocalId by class and id"

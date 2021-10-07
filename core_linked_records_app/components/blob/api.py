@@ -72,6 +72,8 @@ def get_pid_for_blob(blob_id):
             record_object_class=get_api_path_from_object(Blob()),
             record_object_id=blob_id,
         )
+    except exceptions.DoesNotExist as dne:
+        raise exceptions.DoesNotExist(str(dne))
     except Exception as exc:
         error_message = (
             f"An error occurred while looking up PID assigned to blob '{blob_id}'"
