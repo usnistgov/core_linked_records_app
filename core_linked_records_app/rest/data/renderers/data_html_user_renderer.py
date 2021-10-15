@@ -1,6 +1,7 @@
 """ Data HTML renderer for django REST API
 """
 import logging
+
 from rest_framework import renderers, status
 from rest_framework.exceptions import APIException
 

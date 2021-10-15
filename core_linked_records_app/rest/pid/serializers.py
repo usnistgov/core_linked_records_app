@@ -1,11 +1,11 @@
 """ Serializer classes for LocalID object
 """
-from rest_framework_mongoengine.serializers import DocumentSerializer
+from rest_framework.serializers import ModelSerializer
 
 from core_linked_records_app.components.local_id.models import LocalId
 
 
-class LocalIdSerializer(DocumentSerializer):
+class LocalIdSerializer(ModelSerializer):
     """LocalId serializer"""
 
     class Meta(object):

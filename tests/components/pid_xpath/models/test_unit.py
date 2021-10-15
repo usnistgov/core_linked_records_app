@@ -1,9 +1,9 @@
 """ Unit tests for core_linked_records_app.components.pid_xpath.models
 """
 from unittest import TestCase
-
-from mongoengine import errors as mongoengine_errors
 from unittest.mock import patch
+
+from django.core.exceptions import ObjectDoesNotExist
 
 from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_main_app.commons.exceptions import ModelError
@@ -46,7 +46,7 @@ class TestPidXpathGetByTemplateList(TestCase):
 class TestPidXpathGetByTemplateId(TestCase):
     @patch.object(PidXpath, "objects")
     def test_pid_xpath_get_does_not_exists_returns_none(self, mock_pid_xpath):
-        mock_pid_xpath.get.side_effect = mongoengine_errors.DoesNotExist()
+        mock_pid_xpath.get.side_effect = ObjectDoesNotExist()
 
         self.assertIsNone(PidXpath.get_by_template_id("mock_template_id"))
 

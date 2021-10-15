@@ -1,6 +1,6 @@
 """ Serializers for calls related to `PidSettings` model.
 """
-from rest_framework_mongoengine import serializers
+from rest_framework import serializers
 
 from core_linked_records_app.components.pid_settings import api as pid_settings_api
 from core_linked_records_app.components.pid_settings.models import (
@@ -8,9 +8,10 @@ from core_linked_records_app.components.pid_settings.models import (
 )
 
 
-class PidSettingsSerializer(serializers.DocumentSerializer):
+class PidSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PidSettings
+        fields = "__all__"
 
     def update(self, instance: PidSettings, validated_data):
         """Update a PidSetting instance

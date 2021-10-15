@@ -1,9 +1,9 @@
 """ Unit tests for core_linked_records_app.rest.blob.views
 """
 from unittest import TestCase
+from unittest.mock import patch
 
 from rest_framework import status
-from unittest.mock import patch
 
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.local_id import api as local_id_api

@@ -1,9 +1,9 @@
 """ Handle system abstract class
 """
-from importlib import import_module
-
 import logging
 from abc import ABC, abstractmethod
+from importlib import import_module
+
 from django.urls import reverse
 from rest_framework import status
 

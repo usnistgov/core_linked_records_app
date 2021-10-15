@@ -1,7 +1,6 @@
 """ Unit tests for core_linked_records_app.components.pid_settings.api
 """
 from unittest import TestCase
-
 from unittest.mock import patch
 
 from core_linked_records_app.components.pid_settings import api as pid_settings_api
@@ -22,11 +21,10 @@ class TestUpsert(TestCase):
 
     @patch.object(PidSettings, "save")
     def test_returns_save_method_output(self, mock_save):
-        expected_result = "mock_save"
-        mock_save.return_value = expected_result
+        mock_save.return_value = None
 
         self.assertEquals(
-            pid_settings_api.upsert(self.mock_pid_settings), expected_result
+            pid_settings_api.upsert(self.mock_pid_settings), self.mock_pid_settings
         )
 
 

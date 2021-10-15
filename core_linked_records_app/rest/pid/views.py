@@ -1,12 +1,13 @@
 """ Ajax views accessible by users.
 """
 import json
+from urllib.parse import urljoin
+
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
-from urllib.parse import urljoin
 
 from core_explore_common_app.components.query import api as query_api
 from core_explore_common_app.utils.protocols.oauth2 import (
@@ -137,35 +138,35 @@ class RetrieveListPIDView(APIView):
                 "templates": json.dumps(
                     [
                         {"id": str(template.id), "hash": template.hash}
-                        for template in query.templates
+                        for template in query.templates.all()
                     ]
                 ),
-                "options": json.dumps(data_source.query_options),
-                "order_by_field": data_source.order_by_field,
+                "options": json.dumps(data_source["query_options"]),
+                "order_by_field": data_source["order_by_field"],
             }
 
             if (
-                getattr(data_source, "capabilities", False) is not False
-                and "url_pid" not in data_source.capabilities.keys()
+                "capabilities" in data_source.keys()
+                and "url_pid" not in data_source["capabilities"].keys()
             ):
                 return JsonResponse(
                     {"error": "The remote does not have PID capabilities."},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
-            if data_source.authentication.type == "session":
+            if data_source["authentication"]["auth_type"] == "session":
                 response = send_get_request(
-                    data_source.capabilities["url_pid"],
+                    data_source["capabilities"]["url_pid"],
                     json=json_query,
                     cookies={
                         "sessionid": request.session.session_key,
                     },
                 )
-            elif data_source.authentication.type == "oauth2":
+            elif data_source["authentication"]["auth_type"] == "oauth2":
                 response = oauth2_post_request(
-                    data_source.capabilities["url_pid"],
+                    data_source["capabilities"]["url_pid"],
                     json_query,
-                    data_source.authentication.params["access_token"],
+                    data_source["authentication"]["params"]["access_token"],
                     session_time_zone=timezone.get_current_timezone(),
                 )
             else:

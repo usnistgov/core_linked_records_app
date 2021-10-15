@@ -1,7 +1,6 @@
 """ Unit tests for core_linked_records_app.components.local_id.api
 """
 from unittest import TestCase
-
 from unittest.mock import patch
 
 from core_linked_records_app.components.local_id import api as local_id_api
@@ -60,10 +59,9 @@ class TestInsert(TestCase):
 
     @patch.object(LocalId, "upsert")
     def test_returns_save_output(self, mock_save):
-        expected_result = "mock_save"
-        mock_save.return_value = expected_result
+        mock_save.return_value = None
 
-        self.assertEquals(local_id_api.insert(self.mock_local_id), expected_result)
+        self.assertEquals(local_id_api.insert(self.mock_local_id), self.mock_local_id)
 
 
 class TestDelete(TestCase):

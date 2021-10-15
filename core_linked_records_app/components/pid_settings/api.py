@@ -18,7 +18,8 @@ def upsert(pid_settings_object):
         Saved PidSettings object
     """
     try:
-        return pid_settings_object.save()
+        pid_settings_object.save()
+        return pid_settings_object
     except Exception as exc:
         error_message = "An unexpected error occurred while saving PidSettings"
 

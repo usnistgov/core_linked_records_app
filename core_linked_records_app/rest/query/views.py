@@ -62,7 +62,7 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
             Results of the query
         """
         pid_list = list()
-        data_list = data_api.execute_query(raw_query, self.request.user)
+        data_list = data_api.execute_json_query(raw_query, self.request.user)
 
         for data in data_list:
             pid_xpath_object = pid_xpath_api.get_by_template_id(

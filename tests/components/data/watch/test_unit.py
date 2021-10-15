@@ -1,7 +1,6 @@
 """ Unit tests for core_linked_records_app.components.data.watch
 """
 from unittest import TestCase
-
 from unittest.mock import patch
 
 from core_linked_records_app.components.data import watch as data_watch
@@ -18,7 +17,7 @@ class TestSetDataPid(TestCase):
         mock_sender = None
         mock_document = mocks.MockData()
 
-        self.mock_kwargs = {"sender": mock_sender, "document": mock_document}
+        self.mock_kwargs = {"sender": mock_sender, "instance": mock_document}
 
     @patch.object(pid_settings_api, "get")
     def test_pid_settings_get_failure_raises_core_error(self, mock_pid_settings_get):
@@ -228,7 +227,7 @@ class TestSetDataPid(TestCase):
         with self.assertRaises(exceptions.CoreError):
             data_watch.set_data_pid(**self.mock_kwargs)
 
-    @patch.object(system_api, "is_pid_defined_for_document")
+    @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
     @patch.object(providers_utils, "retrieve_provider_name")
@@ -238,7 +237,7 @@ class TestSetDataPid(TestCase):
     @patch.object(data_watch, "get_xpath_from_dot_notation")
     @patch.object(system_api, "get_pid_xpath_by_template_id")
     @patch.object(pid_settings_api, "get")
-    def test_is_pid_defined_for_document_failure_raise_core_error(
+    def test_is_pid_defined_for_data_failure_raise_core_error(
         self,
         mock_pid_settings_get,
         mock_get_pid_xpath_by_template_id,
@@ -249,7 +248,7 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name,
         mock_provider_manager_get,
         mock_is_pid_defined,
-        mock_is_pid_defined_for_document,
+        mock_is_pid_defined_for_data,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
         mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
@@ -260,14 +259,14 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name.return_value = "mock_provider_name"
         mock_provider_manager_get.return_value = mocks.MockProviderManager()
         mock_is_pid_defined.return_value = True
-        mock_is_pid_defined_for_document.side_effect = Exception(
-            "mock_is_pid_defined_for_document_exception"
+        mock_is_pid_defined_for_data.side_effect = Exception(
+            "mock_is_pid_defined_for_data_exception"
         )
 
         with self.assertRaises(exceptions.CoreError):
             data_watch.set_data_pid(**self.mock_kwargs)
 
-    @patch.object(system_api, "is_pid_defined_for_document")
+    @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
     @patch.object(providers_utils, "retrieve_provider_name")
@@ -288,7 +287,7 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name,
         mock_provider_manager_get,
         mock_is_pid_defined,
-        mock_is_pid_defined_for_document,
+        mock_is_pid_defined_for_data,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
         mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
@@ -299,13 +298,13 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name.return_value = "mock_provider_name"
         mock_provider_manager_get.return_value = mocks.MockProviderManager()
         mock_is_pid_defined.return_value = True
-        mock_is_pid_defined_for_document.return_value = False
+        mock_is_pid_defined_for_data.return_value = False
 
         with self.assertRaises(exceptions.ModelError):
             data_watch.set_data_pid(**self.mock_kwargs)
 
     @patch.object(providers_utils, "register_pid_for_data_id")
-    @patch.object(system_api, "is_pid_defined_for_document")
+    @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
     @patch.object(providers_utils, "retrieve_provider_name")
@@ -326,7 +325,7 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name,
         mock_provider_manager_get,
         mock_is_pid_defined,
-        mock_is_pid_defined_for_document,
+        mock_is_pid_defined_for_data,
         mock_register_pid_for_data_id,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
@@ -338,7 +337,7 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name.return_value = "mock_provider_name"
         mock_provider_manager_get.return_value = mocks.MockProviderManager()
         mock_is_pid_defined.return_value = True
-        mock_is_pid_defined_for_document.return_value = True
+        mock_is_pid_defined_for_data.return_value = True
         mock_register_pid_for_data_id.side_effect = Exception(
             "mock_register_pid_for_data_id_exception"
         )
@@ -348,7 +347,7 @@ class TestSetDataPid(TestCase):
 
     @patch.object(data_utils, "set_pid_value_for_data")
     @patch.object(providers_utils, "register_pid_for_data_id")
-    @patch.object(system_api, "is_pid_defined_for_document")
+    @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
     @patch.object(providers_utils, "retrieve_provider_name")
@@ -369,7 +368,7 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name,
         mock_provider_manager_get,
         mock_is_pid_defined,
-        mock_is_pid_defined_for_document,
+        mock_is_pid_defined_for_data,
         mock_register_pid_for_data_id,
         mock_set_pid_value_for_data,
     ):
@@ -382,7 +381,7 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name.return_value = "mock_provider_name"
         mock_provider_manager_get.return_value = mocks.MockProviderManager()
         mock_is_pid_defined.return_value = True
-        mock_is_pid_defined_for_document.return_value = True
+        mock_is_pid_defined_for_data.return_value = True
         mock_register_pid_for_data_id.return_value = "mock_pid_value"
         mock_set_pid_value_for_data.side_effect = Exception(
             "mock_set_pid_value_for_data_exception"
@@ -393,7 +392,7 @@ class TestSetDataPid(TestCase):
 
     @patch.object(data_utils, "set_pid_value_for_data")
     @patch.object(providers_utils, "register_pid_for_data_id")
-    @patch.object(system_api, "is_pid_defined_for_document")
+    @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
     @patch.object(providers_utils, "retrieve_provider_name")
@@ -414,7 +413,7 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name,
         mock_provider_manager_get,
         mock_is_pid_defined,
-        mock_is_pid_defined_for_document,
+        mock_is_pid_defined_for_data,
         mock_register_pid_for_data_id,
         mock_set_pid_value_for_data,
     ):
@@ -427,7 +426,7 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name.return_value = "mock_provider_name"
         mock_provider_manager_get.return_value = mocks.MockProviderManager()
         mock_is_pid_defined.return_value = True
-        mock_is_pid_defined_for_document.return_value = True
+        mock_is_pid_defined_for_data.return_value = True
         mock_register_pid_for_data_id.return_value = "mock_pid_value"
         mock_set_pid_value_for_data.return_value = None
 

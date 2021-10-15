@@ -1,7 +1,6 @@
 """ Unit tests for core_linked_records_app.components.pid_xpath.api
 """
 from unittest import TestCase
-
 from unittest.mock import patch
 
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api

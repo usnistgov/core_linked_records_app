@@ -1,6 +1,8 @@
 """ System API for core_linked_records
 """
 import logging
+
+from django.db.models import Q
 from rest_framework import status
 
 from core_linked_records_app import settings
@@ -14,7 +16,7 @@ from core_main_app.utils.requests_utils.requests_utils import send_delete_reques
 logger = logging.getLogger(__name__)
 
 
-def is_pid_defined_for_document(pid, document_id):
+def is_pid_defined_for_data(pid, document_id):
     """Determine if a given PID match the document ID provided.
 
     Params:
@@ -28,8 +30,9 @@ def is_pid_defined_for_document(pid, document_id):
     pid_xpath_object = get_pid_xpath_by_template_id(data.template.pk)
     pid_xpath = pid_xpath_object.xpath
 
-    json_pid_path = f"dict_content.{pid_xpath}"
-    query_result = Data.execute_query({json_pid_path: pid}, order_by_field=[])
+    query_result = Data.execute_query(
+        Q(**{f"dict_content__{pid_xpath.replace('.', '__')}": pid}), order_by_field=[]
+    )
 
     return len(query_result) == 1 and query_result[0].pk == document_id
 
@@ -57,15 +60,19 @@ def get_data_by_pid(pid):
 
     Returns: data object
     """
-    pid_xpath_list = [
-        pid_xpath_object.xpath for pid_xpath_object in PidXpath.get_all()
-    ] + [settings.PID_XPATH]
-    json_pid_xpaths = [f"dict_content.{pid_xpath}" for pid_xpath in pid_xpath_list]
-    query_result = Data.execute_query(
-        {"$or": [{json_pid_xpath: pid} for json_pid_xpath in json_pid_xpaths]},
-        order_by_field=[],
+    pid_xpath_query = Q(
+        **{f"dict_content__{settings.PID_XPATH.replace('.', '__')}": pid}
     )
-    query_result_length = len(query_result)
+
+    # Create the or query with all the different PID Xpath available.
+    for pid_xpath_object in PidXpath.get_all():
+        pid_xpath_query |= Q(
+            **{f"dict_content__{pid_xpath_object.xpath.replace('.', '__')}": pid}
+        )
+
+    # Execute built query and retrieve number of items returned.
+    query_result = Data.execute_query(pid_xpath_query, order_by_field=[])
+    query_result_length = query_result.count()
 
     if query_result_length == 0:
         raise DoesNotExist("PID is not attached to any data.")
@@ -91,7 +98,7 @@ def get_pid_for_data(data_id):
     pid_xpath = pid_xpath_object.xpath
 
     return get_dict_value_from_key_list(
-        data["dict_content"],
+        data.dict_content,
         pid_xpath.split("."),
     )
 

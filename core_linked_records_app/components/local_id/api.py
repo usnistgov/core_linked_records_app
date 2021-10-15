@@ -58,7 +58,8 @@ def insert(local_id_object):
     Returns:
     """
     try:
-        return LocalId.upsert(local_id_object)
+        LocalId.upsert(local_id_object)
+        return local_id_object
     except Exception as exc:
         error_message = "An unexpected error occurred while inserting LocalId"
 

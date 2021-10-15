@@ -1,21 +1,33 @@
 """ Linked Records Settings
 """
-from django_mongoengine import Document
-from mongoengine import errors as mongoengine_errors
-from mongoengine import fields
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 
 from core_linked_records_app import settings
 from core_main_app.commons import exceptions
 
 
-class PidSettings(Document):
-    auto_set_pid = fields.BooleanField(default=settings.AUTO_SET_PID)
+class PidSettings(models.Model):
+    auto_set_pid = models.BooleanField(default=settings.AUTO_SET_PID)
 
     @staticmethod
     def get():
+        """Retrieve the PidSettings.
+
+        Returns:
+             PidSettings - first PidSettings object
+        """
         try:
             return PidSettings.objects.first()
-        except mongoengine_errors.DoesNotExist:
+        except ObjectDoesNotExist:
             return None
         except Exception as exc:
             raise exceptions.ModelError(str(exc))
+
+    def __str__(self):
+        """LocalId object as string.
+
+        Returns:
+            str - String representation of PidSettings object.
+        """
+        return f"PidSettings {{ id:{self.pk}; auto_set_pid:{self.auto_set_pid} }}"

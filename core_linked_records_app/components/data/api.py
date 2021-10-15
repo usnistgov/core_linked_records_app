@@ -2,6 +2,8 @@
 """
 from logging import getLogger
 
+from django.db.models import Q
+
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_linked_records_app.utils.dict import get_dict_value_from_key_list
@@ -21,15 +23,18 @@ def get_data_by_pid(pid, request):
     Returns: data object
     """
     try:
-        pid_xpath_list = [
-            pid_xpath_object.xpath
-            for pid_xpath_object in pid_xpath_api.get_all(request)
-        ] + [settings.PID_XPATH]
-        json_pid_xpaths = [f"dict_content.{pid_xpath}" for pid_xpath in pid_xpath_list]
-        query_result = data_api.execute_query(
-            {"$or": [{json_pid_xpath: pid} for json_pid_xpath in json_pid_xpaths]},
-            request.user,
+        pid_xpath_query = Q(
+            **{f"dict_content__{settings.PID_XPATH.replace('.', '__')}": pid}
         )
+
+        # Create the or query with all the different PID Xpath available.
+        for pid_xpath_object in pid_xpath_api.get_all(request):
+            pid_xpath_query |= Q(
+                **{f"dict_content__{pid_xpath_object.xpath.replace('.', '__')}": pid}
+            )
+
+        # Execute built query and retrieve number of items returned.
+        query_result = data_api.execute_query(pid_xpath_query, request.user)
         query_result_length = len(query_result)
     except Exception as exc:
         error_message = (

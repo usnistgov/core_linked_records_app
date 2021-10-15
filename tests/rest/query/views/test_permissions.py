@@ -1,10 +1,10 @@
 """ Permission tests for core_linked_records_app.rest.query.views
 """
 from unittest import TestCase
+from unittest.mock import patch
 
 from rest_framework import status
 from rest_framework.response import Response
-from unittest.mock import patch
 
 from core_linked_records_app.rest.query import views as query_views
 from core_main_app.rest.data.abstract_views import AbstractExecuteLocalQueryView

@@ -1,8 +1,7 @@
 """ Unit tests for core_linked_records_app.components.blob.watch
 """
-from unittest import TestCase
-
 import json
+from unittest import TestCase
 from unittest.mock import patch
 
 from core_linked_records_app.components.blob import api as blob_api

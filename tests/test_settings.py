@@ -1,5 +1,3 @@
-from core_main_app.utils.databases.mongoengine_database import Database
-
 SECRET_KEY = "fake-key"
 INSTALLED_APPS = [
     # Django apps
@@ -17,10 +15,10 @@ INSTALLED_APPS = [
     # Local apps
     "xml_utils",
     "core_main_app",
+    "core_explore_common_app",
     "core_federated_search_app",
     "core_oaipmh_common_app",
-    # "core_oaipmh_harvester_app",
-    # "core_explore_oaipmh_app",
+    "core_oaipmh_harvester_app",
     "core_linked_records_app",
     "tests",
 ]
@@ -62,12 +60,6 @@ DATABASES = {
     },
 }
 
-MOCK_DATABASE_NAME = "db_mock"
-MOCK_DATABASE_HOST = "mongomock://localhost"
-
 CUSTOM_NAME = "mock_custom_name"
 
 ROOT_URLCONF = "core_linked_records_app.urls"
-
-database = Database(MOCK_DATABASE_HOST, MOCK_DATABASE_NAME)
-database.connect()

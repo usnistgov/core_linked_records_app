@@ -1,9 +1,9 @@
 """ Unit tests for core_linked_records_app.components.data.api
 """
 from unittest import TestCase
+from unittest.mock import patch, Mock
 
 from django.http import HttpRequest
-from unittest.mock import patch, Mock
 
 from core_linked_records_app.components.data import api as pid_data_api
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api

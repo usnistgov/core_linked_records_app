@@ -1,10 +1,10 @@
 """ REST views for PidXPath collection
 """
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_mongoengine.generics import (
+from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
+from rest_framework.permissions import IsAuthenticated
 
 from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_linked_records_app.rest.pid_xpath.serializers import PidXpathSerializer

@@ -1,14 +1,14 @@
 """ Permission tests for core_linked_records_app.rest.pid_xpath.views
 """
 from unittest import TestCase
+from unittest.mock import patch
 
 from rest_framework import status
-from rest_framework.response import Response
-from rest_framework_mongoengine.generics import (
+from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from unittest.mock import patch
+from rest_framework.response import Response
 
 from core_linked_records_app.rest.pid_xpath import views as pid_xpath_views
 from core_main_app.utils.tests_tools.MockUser import create_mock_user

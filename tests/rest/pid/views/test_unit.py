@@ -1,8 +1,7 @@
 """ Unit tests for core_linked_records_app.rest.pid.views
 """
-from unittest import TestCase
-
 import json
+from unittest import TestCase
 from unittest.mock import patch
 
 from core_explore_common_app.components.query import api as query_api
@@ -218,10 +217,12 @@ class TestRetrieveListPidPost(TestCase):
     def test_status_200_returns_200(self, mock_get_by_id, mock_oauth2_post_request):
         mock_get_by_id.return_value = mocks.MockQuery(
             data_sources=[
-                mocks.MockDataSource(
+                dict(
+                    query_options=dict(),
+                    order_by_field="",
                     capabilities={"url_pid": "mock_url_pid"},
-                    authentication=mocks.MockAuthentication(
-                        type="oauth2",
+                    authentication=dict(
+                        auth_type="oauth2",
                         params={"access_token": "mock_access_token"},
                     ),
                 )
@@ -239,14 +240,16 @@ class TestRetrieveListPidPost(TestCase):
     def test_status_400_returns_400(self, mock_get_by_id, mock_oauth2_post_request):
         mock_get_by_id.return_value = mocks.MockQuery(
             data_sources=[
-                mocks.MockDataSource(
+                dict(
+                    query_options=dict(),
+                    order_by_field="",
                     capabilities={"url_pid": "mock_url_pid"},
-                    authentication=mocks.MockAuthentication(
-                        type="oauth2",
+                    authentication=dict(
+                        auth_type="oauth2",
                         params={"access_token": "mock_access_token"},
                     ),
                 )
-            ]
+            ],
         )
         mock_oauth2_post_request.return_value = mocks.MockResponse(status_code=400)
 

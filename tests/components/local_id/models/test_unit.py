@@ -1,9 +1,10 @@
 """ Unit tests for core_linked_records_app.components.local_id.models
 """
 from unittest import TestCase
-
-from mongoengine import errors as mongoengine_errors
 from unittest.mock import patch
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 
 from core_linked_records_app.components.local_id.models import LocalId
 from core_main_app.commons import exceptions
@@ -14,7 +15,7 @@ class TestGetByName(TestCase):
     def test_local_id_get_does_not_exist_raises_does_not_exist_error(
         self, mock_objects
     ):
-        mock_objects.get.side_effect = mongoengine_errors.DoesNotExist(
+        mock_objects.get.side_effect = ObjectDoesNotExist(
             "mock_objects_get_does_not_exist"
         )
 
@@ -41,7 +42,7 @@ class TestGetByClassAndId(TestCase):
     def test_local_id_get_does_not_exist_raises_does_not_exist_error(
         self, mock_objects
     ):
-        mock_objects.get.side_effect = mongoengine_errors.DoesNotExist(
+        mock_objects.get.side_effect = ObjectDoesNotExist(
             "mock_objects_get_does_not_exist"
         )
 
@@ -72,9 +73,7 @@ class TestUpdate(TestCase):
 
     @patch.object(LocalId, "save")
     def test_local_id_save_not_unique_error_raises_not_unique_error(self, mock_save):
-        mock_save.side_effect = mongoengine_errors.NotUniqueError(
-            "mock_save_not_unique_error"
-        )
+        mock_save.side_effect = IntegrityError("mock_save_not_unique_error")
 
         with self.assertRaises(exceptions.NotUniqueError):
             LocalId.upsert(self.mock_local_id)
@@ -88,10 +87,9 @@ class TestUpdate(TestCase):
 
     @patch.object(LocalId, "save")
     def test_returns_local_id_get_output(self, mock_save):
-        expected_result = "mock_get_by_name"
-        mock_save.return_value = expected_result
+        mock_save.return_value = None
 
         self.assertEquals(
             LocalId.upsert(self.mock_local_id),
-            expected_result,
+            self.mock_local_id,
         )

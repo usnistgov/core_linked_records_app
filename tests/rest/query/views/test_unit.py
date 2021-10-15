@@ -1,7 +1,6 @@
 """ Unit tests for core_linked_records_app.rest.query.views
 """
 from unittest import TestCase
-
 from unittest.mock import patch
 
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
@@ -42,7 +41,7 @@ class TestExecuteLocalPIDQueryViewBuildQuery(TestCase):
 
 
 class TestExecuteLocalPIDQueryViewExecuteRawQuery(TestCase):
-    @patch.object(data_api, "execute_query")
+    @patch.object(data_api, "execute_json_query")
     def test_no_data_returns_empty_list(self, mock_execute_query):
         mock_execute_query.return_value = []
 
@@ -54,7 +53,7 @@ class TestExecuteLocalPIDQueryViewExecuteRawQuery(TestCase):
 
     @patch.object(query_views, "get_dict_value_from_key_list")
     @patch.object(pid_xpath_api, "get_by_template_id")
-    @patch.object(data_api, "execute_query")
+    @patch.object(data_api, "execute_json_query")
     def test_returns_data_with_pid(
         self,
         mock_execute_query,

@@ -1,10 +1,10 @@
 """ Permission tests for core_linked_records_app.rest.providers.views
 """
-from unittest import TestCase
-
 import json
-from rest_framework import status
+from unittest import TestCase
 from unittest.mock import patch
+
+from rest_framework import status
 
 from core_linked_records_app import settings
 from core_linked_records_app.rest.providers import views as providers_views

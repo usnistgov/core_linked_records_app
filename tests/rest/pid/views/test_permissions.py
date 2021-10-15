@@ -1,9 +1,9 @@
 """ Permission tests for core_linked_records_app.rest.pid.views
 """
 from unittest import TestCase
+from unittest.mock import patch
 
 from rest_framework import status
-from unittest.mock import patch
 
 from core_explore_common_app.components.query import api as query_api
 from core_linked_records_app.components.blob import api as blob_api
@@ -100,9 +100,11 @@ class TestRetrieveBlobPidGet(TestCase):
 
 class TestRetrieveListPidPost(TestCase):
     def setUp(self) -> None:
-        self.mock_data_source = mocks.MockDataSource(
-            authentication=mocks.MockAuthentication(
-                type="oauth2", params={"access_token": "mock_access_token"}
+        self.mock_data_source = dict(
+            query_options=dict(),
+            order_by_field="",
+            authentication=dict(
+                auth_type="oauth2", params={"access_token": "mock_access_token"}
             ),
             capabilities={"url_pid": True},
         )

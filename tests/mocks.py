@@ -1,8 +1,8 @@
 """ Mock classes for objects used within core_linked_records_app
 """
-from bson import ObjectId
-from rest_framework import status
 from unittest.mock import Mock
+
+from rest_framework import status
 
 
 class MockModule(Mock):
@@ -17,8 +17,8 @@ class MockLocalId(Mock):
 
 
 class MockDocument(Mock):
-    id = ObjectId()
-    pk = ObjectId()
+    id = 1234
+    pk = 1234
 
 
 class MockData(MockDocument):
@@ -31,7 +31,7 @@ class MockPidSettings(Mock):
 
 class MockPidXpath(MockDocument):
     xpath = "mock.xpath"
-    template = ObjectId()
+    template = 1234
 
 
 class MockResponse(Mock):
@@ -85,9 +85,15 @@ class MockProviderManager(Mock):
 
 
 class MockQuery(Mock):
+    class MockTemplates(Mock):
+        templates = list()
+
+        def all(self):
+            return self.templates
+
     data_sources = list()
     content = ""
-    templates = list()
+    templates = MockTemplates()
 
 
 class MockDataSource(Mock):
