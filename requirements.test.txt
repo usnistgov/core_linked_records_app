@@ -1,0 +1,2 @@
+core-federated-search-app==1.18.*
+core-explore-oaipmh-app==1.18.*
