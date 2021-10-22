@@ -8,7 +8,6 @@ from django.urls import reverse
 from rest_framework import status
 
 from core_linked_records_app import settings
-from core_linked_records_app.system import api as system_api
 from core_main_app.commons import exceptions
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
 
@@ -122,6 +121,8 @@ def register_pid_for_data_id(provider_name, pid_value, data_id):
     Returns:
         str - Persistent identifier
     """
+    from core_linked_records_app.system import api as system_api
+
     provider_manager = ProviderManager()
     provider = provider_manager.get(provider_name)
     registration_url = pid_value.replace(provider.provider_url, provider.local_url)
