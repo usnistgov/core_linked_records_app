@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("core_main_app", "0002_site_update"),
+        ("core_main_app", "0001_initial"),
     ]
 
     operations = [
