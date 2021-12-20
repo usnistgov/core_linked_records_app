@@ -68,32 +68,30 @@ class TestGetPidsForDataList(TestCase):
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
 
-    @patch.object(pid_xpath_api, "get_by_template_id")
+    @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id_list")
-    def test_get_by_template_id_failure_raises_api_error(
+    def test_get_by_template_failure_raises_api_error(
         self,
         mock_get_by_id_list,
-        mock_get_by_template_id,
+        mock_get_by_template,
     ):
         mock_get_by_id_list.return_value = [mocks.MockData()]
-        mock_get_by_template_id.side_effect = Exception(
-            "mock_get_by_template_id_exception"
-        )
+        mock_get_by_template.side_effect = Exception("mock_get_by_template_exception")
 
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
 
     @patch.object(pid_data_api, "get_dict_value_from_key_list")
-    @patch.object(pid_xpath_api, "get_by_template_id")
+    @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id_list")
     def test_get_dict_value_from_key_list_failure_raises_api_error(
         self,
         mock_get_by_id_list,
-        mock_get_by_template_id,
+        mock_get_by_template,
         mock_get_dict_value_from_key_list,
     ):
         mock_get_by_id_list.return_value = [mocks.MockData()]
-        mock_get_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_by_template.return_value = mocks.MockPidXpath()
         mock_get_dict_value_from_key_list.side_effect = Exception(
             "mock_get_dict_value_from_key_list_exception"
         )
@@ -102,34 +100,34 @@ class TestGetPidsForDataList(TestCase):
             pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
 
     @patch.object(pid_data_api, "get_dict_value_from_key_list")
-    @patch.object(pid_xpath_api, "get_by_template_id")
+    @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id_list")
     def test_list_of_pid_does_not_contain_none_values(
         self,
         mock_get_by_id_list,
-        mock_get_by_template_id,
+        mock_get_by_template,
         mock_get_dict_value_from_key_list,
     ):
         mock_get_by_id_list.return_value = [mocks.MockData()]
-        mock_get_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_by_template.return_value = mocks.MockPidXpath()
         mock_get_dict_value_from_key_list.return_value = None
 
         result = pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
         self.assertEquals(result, [])
 
     @patch.object(pid_data_api, "get_dict_value_from_key_list")
-    @patch.object(pid_xpath_api, "get_by_template_id")
+    @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id_list")
     def test_returns_list_of_pid(
         self,
         mock_get_by_id_list,
-        mock_get_by_template_id,
+        mock_get_by_template,
         mock_get_dict_value_from_key_list,
     ):
         mock_pid = "mock_pid"
         expected_result = [mock_pid for _ in range(5)]
         mock_get_by_id_list.return_value = [mocks.MockData() for _ in range(5)]
-        mock_get_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_by_template.return_value = mocks.MockPidXpath()
         mock_get_dict_value_from_key_list.return_value = mock_pid
 
         result = pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
@@ -154,27 +152,25 @@ class TestGetPidForData(TestCase):
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_pid_for_data(**self.mock_kwargs)
 
-    @patch.object(pid_xpath_api, "get_by_template_id")
+    @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id")
-    def test_get_by_template_id_failure_raises_api_error(
-        self, mock_get_by_id, mock_get_by_template_id
+    def test_get_by_template_failure_raises_api_error(
+        self, mock_get_by_id, mock_get_by_template
     ):
         mock_get_by_id.return_value = self.mock_global_data
-        mock_get_by_template_id.side_effect = Exception(
-            "mock_get_by_template_id_exception"
-        )
+        mock_get_by_template.side_effect = Exception("mock_get_by_template_exception")
 
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_pid_for_data(**self.mock_kwargs)
 
     @patch.object(pid_data_api, "get_dict_value_from_key_list")
-    @patch.object(pid_xpath_api, "get_by_template_id")
+    @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id")
     def test_get_dict_value_from_key_list_failure_raises_api_error(
-        self, mock_get_by_id, mock_get_by_template_id, mock_get_dict_value_from_key_list
+        self, mock_get_by_id, mock_get_by_template, mock_get_dict_value_from_key_list
     ):
         mock_get_by_id.return_value = self.mock_global_data
-        mock_get_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_by_template.return_value = mocks.MockPidXpath()
         mock_get_dict_value_from_key_list.side_effect = Exception(
             "mock_get_dict_value_from_key_list_exception"
         )
@@ -183,14 +179,14 @@ class TestGetPidForData(TestCase):
             pid_data_api.get_pid_for_data(**self.mock_kwargs)
 
     @patch.object(pid_data_api, "get_dict_value_from_key_list")
-    @patch.object(pid_xpath_api, "get_by_template_id")
+    @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id")
     def test_returns_get_dict_value_from_key_list_output(
-        self, mock_get_by_id, mock_get_by_template_id, mock_get_dict_value_from_key_list
+        self, mock_get_by_id, mock_get_by_template, mock_get_dict_value_from_key_list
     ):
         expected_result = "mock_pid"
         mock_get_by_id.return_value = self.mock_global_data
-        mock_get_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_by_template.return_value = mocks.MockPidXpath()
         mock_get_dict_value_from_key_list.return_value = expected_result
 
         result = pid_data_api.get_pid_for_data(**self.mock_kwargs)

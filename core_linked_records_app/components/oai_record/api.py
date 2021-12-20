@@ -23,8 +23,8 @@ def get_pid_for_data(oai_record_id, request):
         # Retrieve the document passed as input and extra the PID field.
         data = oai_record_data.get_by_id(oai_record_id, request.user)
 
-        pid_xpath_object = pid_xpath_api.get_by_template_id(
-            data.harvester_metadata_format.template.pk, request
+        pid_xpath_object = pid_xpath_api.get_by_template(
+            data.harvester_metadata_format.template, request
         )
         pid_xpath = pid_xpath_object.xpath
 

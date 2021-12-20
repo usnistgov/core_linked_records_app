@@ -13,26 +13,24 @@ from core_main_app.components.template import (
 logger = logging.getLogger(__name__)
 
 
-def get_by_template_id(template_id, request):
+def get_by_template(template, request):
     """Retrieve XPath associated with a specific template ID
 
     Args:
-        template_id: ObjectId
+        template: Template
         request: HttpRequest
 
     Returns:
         str - XPath for the given template ID
     """
     try:
-        if template_id not in [
-            template.pk for template in template_api.get_all(request=request)
-        ]:
-            raise AccessControlError("Template not accessible to the current user")
-
-        pid_xpath_object = PidXpath.get_by_template_id(template_id)
+        pid_xpath_object = PidXpath.get_by_template(template)
 
         if pid_xpath_object is None:
-            return PidXpath(template=template_id, xpath=settings.PID_XPATH)
+            return PidXpath(
+                template=template,
+                xpath=settings.PID_XPATH,
+            )
         else:
             return pid_xpath_object
     except AccessControlError as ace:
@@ -40,7 +38,7 @@ def get_by_template_id(template_id, request):
     except Exception as exc:
         error_message = (
             f"An unexpected error occurred while retrieving PidXpath "
-            f"assigned to template {template_id}"
+            f"assigned to template {template.pk}"
         )
 
         logger.error(f"{error_message}: {str(exc)}")

@@ -8,7 +8,7 @@ from core_main_app.commons import exceptions
 
 
 class PidSettings(models.Model):
-    auto_set_pid = models.BooleanField(default=settings.AUTO_SET_PID)
+    auto_set_pid = models.BooleanField(default=False)
 
     @staticmethod
     def get():

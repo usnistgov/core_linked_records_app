@@ -10,7 +10,7 @@ from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_linked_records_app.utils.dict import get_dict_value_from_key_list
 from core_linked_records_app.utils.providers import ProviderManager
 from core_main_app.commons.exceptions import DoesNotExist, ApiError
-from core_main_app.components.data.models import Data
+from core_main_app.components.data.models import Data, Template
 from core_main_app.utils.requests_utils.requests_utils import send_delete_request
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def is_pid_defined_for_data(pid, document_id):
     """
     data = Data.get_by_id(document_id)
 
-    pid_xpath_object = get_pid_xpath_by_template_id(data.template.pk)
+    pid_xpath_object = get_pid_xpath_by_template(data.template)
     pid_xpath = pid_xpath_object.xpath
 
     query_result = Data.execute_query(
@@ -94,7 +94,7 @@ def get_pid_for_data(data_id):
     data = Data.get_by_id(data_id)
 
     # Return PID value from the document and the PID_XPATH
-    pid_xpath_object = get_pid_xpath_by_template_id(data.template.pk)
+    pid_xpath_object = get_pid_xpath_by_template(data.template)
     pid_xpath = pid_xpath_object.xpath
 
     return get_dict_value_from_key_list(
@@ -103,19 +103,19 @@ def get_pid_for_data(data_id):
     )
 
 
-def get_pid_xpath_by_template_id(template_id):
+def get_pid_xpath_by_template(template):
     """Retrieve XPath associated with a specific template ID
 
     Args:
-        template_id: ObjectId
+        template: Template object
 
     Returns:
         PidXpath - PidXpath object, linking template ID and XPath
     """
-    pid_xpath_object = PidXpath.get_by_template_id(template_id)
+    pid_xpath_object = PidXpath.get_by_template(template)
 
     if pid_xpath_object is None:
-        return PidXpath(template=template_id, xpath=settings.PID_XPATH)
+        return PidXpath(template=template, xpath=settings.PID_XPATH)
     else:
         return pid_xpath_object
 

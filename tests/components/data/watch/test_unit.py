@@ -26,30 +26,30 @@ class TestSetDataPid(TestCase):
         with self.assertRaises(exceptions.CoreError):
             data_watch.set_data_pid(**self.mock_kwargs)
 
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
-    def test_get_pid_xpath_by_template_id_failure_raises_core_error(
-        self, mock_pid_settings_get, mock_get_pid_xpath_by_template_id
+    def test_get_pid_xpath_by_template_failure_raises_core_error(
+        self, mock_pid_settings_get, mock_get_pid_xpath_by_template
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.side_effect = Exception(
-            "mock_get_pid_xpath_by_template_id_exception"
+        mock_get_pid_xpath_by_template.side_effect = Exception(
+            "mock_get_pid_xpath_by_template_exception"
         )
 
         with self.assertRaises(exceptions.CoreError):
             data_watch.set_data_pid(**self.mock_kwargs)
 
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_get_xpath_from_dot_notation_failure_raises_core_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.side_effect = Exception(
             "mock_get_xpath_from_dot_notation_exception"
         )
@@ -59,17 +59,17 @@ class TestSetDataPid(TestCase):
 
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_get_xpath_with_target_namespace_failure_raises_core_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.side_effect = Exception(
             "mock_get_xpath_with_target_namespace_exception"
@@ -81,18 +81,18 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_get_pid_value_for_data_failure_returns_none(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.side_effect = Exception(
@@ -105,19 +105,19 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_delete_pid_for_data_raises_core_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.return_value = "mock_pid_value"
@@ -133,12 +133,12 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_retrieve_provider_name_failure_raise_core_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
@@ -146,7 +146,7 @@ class TestSetDataPid(TestCase):
         mock_retrieve_provider_name,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.return_value = "mock_pid_value"
@@ -164,12 +164,12 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_provider_manager_get_failure_raise_core_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
@@ -178,7 +178,7 @@ class TestSetDataPid(TestCase):
         mock_provider_manager_get,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.return_value = None
@@ -198,12 +198,12 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_is_pid_defined_failure_raise_core_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
@@ -213,7 +213,7 @@ class TestSetDataPid(TestCase):
         mock_is_pid_defined,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.return_value = None
@@ -235,12 +235,12 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_is_pid_defined_for_data_failure_raise_core_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
@@ -251,7 +251,7 @@ class TestSetDataPid(TestCase):
         mock_is_pid_defined_for_data,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.return_value = None
@@ -274,12 +274,12 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_pid_already_defined_raise_model_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
@@ -290,7 +290,7 @@ class TestSetDataPid(TestCase):
         mock_is_pid_defined_for_data,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.return_value = None
@@ -312,12 +312,12 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_register_pid_for_data_id_failure_raise_core_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
@@ -329,7 +329,7 @@ class TestSetDataPid(TestCase):
         mock_register_pid_for_data_id,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.return_value = None
@@ -355,12 +355,12 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_set_pid_value_for_data_failure_raise_core_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
@@ -373,7 +373,7 @@ class TestSetDataPid(TestCase):
         mock_set_pid_value_for_data,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.return_value = None
@@ -400,12 +400,12 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template_id")
+    @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
     def test_default_execution_returns_none(
         self,
         mock_pid_settings_get,
-        mock_get_pid_xpath_by_template_id,
+        mock_get_pid_xpath_by_template,
         mock_get_xpath_from_dot_notation,
         mock_get_xpath_with_target_namespace,
         mock_get_pid_value_for_data,
@@ -418,7 +418,7 @@ class TestSetDataPid(TestCase):
         mock_set_pid_value_for_data,
     ):
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_xpath_by_template_id.return_value = mocks.MockPidXpath()
+        mock_get_pid_xpath_by_template.return_value = mocks.MockPidXpath()
         mock_get_xpath_from_dot_notation.return_value = "mock_pid_xpath"
         mock_get_xpath_with_target_namespace.return_value = "mock_pid_xpath"
         mock_get_pid_value_for_data.return_value = None

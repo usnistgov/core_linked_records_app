@@ -43,7 +43,7 @@ def set_data_pid(sender, instance, **kwargs):
 
         # Retrieve PID XPath from `PidSettings.xpath_list`. Skip PID assignment
         # if the PID XPath is not defined for the template.
-        template_pid_xpath = system_api.get_pid_xpath_by_template_id(instance.template)
+        template_pid_xpath = system_api.get_pid_xpath_by_template(instance.template)
         pid_xpath = get_xpath_with_target_namespace(
             get_xpath_from_dot_notation(template_pid_xpath.xpath),
             instance.template.content,

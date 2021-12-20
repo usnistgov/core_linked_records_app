@@ -44,16 +44,16 @@ class PidXpath(models.Model):
             raise ModelError(str(exc))
 
     @staticmethod
-    def get_by_template_id(template_id):
-        """Return all PidXpath defined for a given template_id.
+    def get_by_template(template):
+        """Return all PidXpath defined for a given template.
 
         Args:
-            template_id:
+            template:
 
         Returns:
         """
         try:
-            return PidXpath.objects.get(template=template_id)
+            return PidXpath.objects.get(template=template)
         except ObjectDoesNotExist:
             return None
         except Exception as exc:

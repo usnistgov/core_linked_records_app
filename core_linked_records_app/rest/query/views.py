@@ -65,8 +65,8 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
         data_list = data_api.execute_json_query(raw_query, self.request.user)
 
         for data in data_list:
-            pid_xpath_object = pid_xpath_api.get_by_template_id(
-                data.template.pk, self.request
+            pid_xpath_object = pid_xpath_api.get_by_template(
+                data.template, self.request
             )
             pid_xpath = pid_xpath_object.xpath
 
@@ -163,8 +163,8 @@ if (
             data_list = oai_record_api.execute_query(raw_query, self.request.user)
 
             for data in data_list:
-                pid_xpath_object = pid_xpath_api.get_by_template_id(
-                    data.harvester_metadata_format.template.pk, self.request
+                pid_xpath_object = pid_xpath_api.get_by_template(
+                    data.harvester_metadata_format.template, self.request
                 )
                 pid_xpath = pid_xpath_object.xpath
 

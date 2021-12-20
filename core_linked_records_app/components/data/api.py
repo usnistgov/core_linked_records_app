@@ -70,9 +70,7 @@ def get_pids_for_data_list(data_id_list, request):
         pid_xpath_list = list()
 
         for data in data_list:
-            pid_xpath_object = pid_xpath_api.get_by_template_id(
-                data.template.pk, request
-            )
+            pid_xpath_object = pid_xpath_api.get_by_template(data.template, request)
             pid_xpath_list.append((data, pid_xpath_object.xpath))
 
         pid_list = [
@@ -107,7 +105,7 @@ def get_pid_for_data(data_id, request):
 
         # Return PID value from the document and the pid_xpath retrieved from
         # `PidSettings`
-        pid_xpath_object = pid_xpath_api.get_by_template_id(data.template.pk, request)
+        pid_xpath_object = pid_xpath_api.get_by_template(data.template, request)
         pid_xpath = pid_xpath_object.xpath
 
         return get_dict_value_from_key_list(data.dict_content, pid_xpath.split("."))

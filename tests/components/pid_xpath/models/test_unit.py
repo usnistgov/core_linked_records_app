@@ -48,20 +48,18 @@ class TestPidXpathGetByTemplateId(TestCase):
     def test_pid_xpath_get_does_not_exists_returns_none(self, mock_pid_xpath):
         mock_pid_xpath.get.side_effect = ObjectDoesNotExist()
 
-        self.assertIsNone(PidXpath.get_by_template_id("mock_template_id"))
+        self.assertIsNone(PidXpath.get_by_template("mock_template"))
 
     @patch.object(PidXpath, "objects")
     def test_pid_xpath_get_raises_model_error(self, mock_pid_xpath):
         mock_pid_xpath.get.side_effect = Exception("mock_pid_xpath_get_exception")
 
         with self.assertRaises(ModelError):
-            PidXpath.get_by_template_id("mock_template_id")
+            PidXpath.get_by_template("mock_template")
 
     @patch.object(PidXpath, "objects")
     def test_returns_pid_xpath_get_output(self, mock_pid_xpath):
         expected_result = "mock_pid_xpath_get"
         mock_pid_xpath.get.return_value = expected_result
 
-        self.assertEquals(
-            PidXpath.get_by_template_id("mock_template_id"), expected_result
-        )
+        self.assertEquals(PidXpath.get_by_template("mock_template"), expected_result)
