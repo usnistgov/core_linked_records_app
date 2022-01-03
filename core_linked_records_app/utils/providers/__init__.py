@@ -98,7 +98,7 @@ def retrieve_provider_name(pid_value):
 
     if pid_value is None or pid_value == "":  # PID field left blank
         # Select the default provider if no PID has been chosen.
-        provider_name = list(settings.ID_PROVIDER_SYSTEMS.keys())[0]
+        provider_name = settings.DEFAULT_ID_PROVIDER_SYSTEM
     else:  # PID specified in document.
         provider_name = ProviderManager().find_provider_from_pid(pid_value)
 

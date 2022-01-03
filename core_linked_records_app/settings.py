@@ -30,6 +30,10 @@ ID_PROVIDER_SYSTEMS = getattr(
     },
 )
 
+DEFAULT_ID_PROVIDER_SYSTEM = getattr(
+    settings, "DEFAULT_ID_PROVIDER_SYSTEM", list(ID_PROVIDER_SYSTEMS.keys())[0]
+)
+
 ID_PROVIDER_PREFIXES = getattr(settings, "ID_PROVIDER_PREFIXES", ["cdcs"])
 
 ID_PROVIDER_PREFIX_DEFAULT = getattr(
