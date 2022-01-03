@@ -33,7 +33,7 @@ def set_blob_pid(sender, document, **kwargs):
             sub_url = reverse(
                 "core_linked_records_provider_record",
                 kwargs={
-                    "provider": "local",
+                    "provider": settings.DEFAULT_ID_PROVIDER_SYSTEM,
                     "record": settings.ID_PROVIDER_PREFIX_BLOB,
                 },
             )

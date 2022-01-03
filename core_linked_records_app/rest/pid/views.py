@@ -96,7 +96,10 @@ class RetrieveBlobPIDView(APIView):
                 blob_pid = blob_api.get_pid_for_blob(request.GET["blob_id"])
                 sub_url = reverse(
                     "core_linked_records_provider_record",
-                    kwargs={"provider": "local", "record": ""},
+                    kwargs={
+                        "provider": settings.DEFAULT_ID_PROVIDER_SYSTEM,
+                        "record": "",
+                    },
                 )
 
                 return JsonResponse(
