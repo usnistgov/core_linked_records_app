@@ -44,4 +44,23 @@ ID_PROVIDER_PREFIX_BLOB = getattr(
     settings, "ID_PROVIDER_PREFIX_BLOB", ID_PROVIDER_PREFIXES[0]
 )
 
+HANDLE_NET_RECORD_INDEX = getattr(settings, "HANDLE_NET_RECORD_INDEX", 1)
+
+HANDLE_NET_ADMIN_DATA = getattr(
+    settings,
+    "HANDLE_NET_ADMIN_DATA",
+    {
+        "index": 100,
+        "type": "HS_ADMIN",
+        "data": {
+            "format": "admin",
+            "value": {
+                "handle": f"0.NA/{ID_PROVIDER_PREFIX_DEFAULT}",
+                "index": 200,
+                "permissions": "011111110011",
+            },
+        },
+    },
+)
+
 AUTO_SET_PID = getattr(settings, "AUTO_SET_PID", False)
