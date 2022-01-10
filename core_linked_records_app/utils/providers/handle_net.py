@@ -4,6 +4,7 @@ import json
 import logging
 from base64 import b64encode
 
+from core_linked_records_app import settings
 from core_linked_records_app.utils.providers import AbstractIdProvider
 from core_main_app.utils.requests_utils.requests_utils import (
     send_put_request,
@@ -50,6 +51,26 @@ class HandleNetSystem(AbstractIdProvider):
         )
 
         return json.dumps(json_response_content)
+
+    def _generate_record_data(self, record, include_handle=False):
+        record_data = {
+            "values": [
+                {
+                    "index": settings.HANDLE_NET_RECORD_INDEX,
+                    "type": "URL",
+                    "data": {
+                        "format": "string",
+                        "value": f"{self.local_url}/{record}",
+                    },
+                },
+                settings.HANDLE_NET_ADMIN_DATA,
+            ]
+        }
+
+        if include_handle:
+            record_data["handle"] = record
+
+        return json.dumps(record_data)
 
     def encode_token(self, username, password):
         user_pass = "%s:%s" % (username, password)
@@ -99,20 +120,7 @@ class HandleNetSystem(AbstractIdProvider):
 
         response = send_put_request(
             request_url,
-            json.dumps(
-                {
-                    "values": [
-                        {
-                            "index": 100,
-                            "type": "URL",
-                            "data": {
-                                "format": "string",
-                                "value": "%s/%s/%s" % (self.local_url, prefix, record),
-                            },
-                        }
-                    ]
-                }
-            ),
+            self._generate_record_data(f"{prefix}/{record}"),
             headers={
                 "Content-Type": "application/json",
                 "Authorization": "Basic %s" % str(self.auth_token),
@@ -134,23 +142,8 @@ class HandleNetSystem(AbstractIdProvider):
         Returns:
         """
         response = send_put_request(
-            "%s/%s/%s?overwrite=true"
-            % (self.provider_url, self.registration_api, record),
-            json.dumps(
-                {
-                    "handle": record,
-                    "values": [
-                        {
-                            "index": 100,
-                            "type": "URL",
-                            "data": {
-                                "format": "string",
-                                "value": "%s/%s" % (self.local_url, record),
-                            },
-                        }
-                    ],
-                }
-            ),
+            f"{self.provider_url}/{self.registration_api}/{record}?overwrite=true",
+            self._generate_record_data(record, include_handle=True),
             headers={
                 "Content-Type": "application/json",
                 "Authorization": "Basic %s" % str(self.auth_token),
