@@ -142,8 +142,7 @@ class HandleNetSystem(AbstractIdProvider):
         Returns:
         """
         response = send_put_request(
-            f"{self.provider_registration_url}/{self.registration_api}/"
-            f"{record}?overwrite=true",
+            f"{self.provider_url}/{self.registration_api}/{record}?overwrite=true",
             self._generate_record_data(record, include_handle=True),
             headers={
                 "Content-Type": "application/json",
