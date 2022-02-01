@@ -1,4 +1,5 @@
 SECRET_KEY = "fake-key"
+
 INSTALLED_APPS = [
     # Django apps
     "django.contrib.admin",
@@ -10,6 +11,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Extra apps
     "defender",
+    "django_celery_beat",
     "tz_detect",
     "menu",
     # Local apps
@@ -22,6 +24,18 @@ INSTALLED_APPS = [
     "core_linked_records_app",
     "tests",
 ]
+
+# IN-MEMORY TEST DATABASE
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",
+        "USER": "",
+        "PASSWORD": "",
+        "HOST": "",
+        "PORT": "",
+    },
+}
 
 MIDDLEWARE = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -48,18 +62,8 @@ TEMPLATES = [
     },
 ]
 
-# IN-MEMORY TEST DATABASE
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": ":memory:",
-        "USER": "",
-        "PASSWORD": "",
-        "HOST": "",
-        "PORT": "",
-    },
-}
-
 CUSTOM_NAME = "mock_custom_name"
 
 ROOT_URLCONF = "core_linked_records_app.urls"
+
+CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"

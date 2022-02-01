@@ -52,7 +52,7 @@ such:
       "core_linked_records_app",
     ]
 
-Add the necessary keys at the end of the file.
+Add the necessary setting keys at the end of the file.
 
 .. code:: python
 
@@ -64,21 +64,54 @@ Add the necessary keys at the end of the file.
         "handle.net": {  # Optional: if a Handle.net server is available.
             "class": "core_linked_records_app.utils.providers.handle_net.HandleNetSystem",
             "args": [
-                "https://handle-net.domain/api/handles",
+                "https://handle-net.domain",
                 "300%3ACDCS/ADMIN",
                 "admin",
             ],
         },
     }
-    """ dict: all the provider systems available for registering PIDs
+    """ dict: all the provider systems available for registering PIDs (first item is the
+    default system).
     """
 
     ID_PROVIDER_PREFIXES = ["cdcs"]
-    """ list<str>: accepted prefixes if manually specifying PIDs (first item is the default prefix)
+    """ list<str>: accepted prefixes if manually specifying PIDs (first item is the
+    default prefix).
+    """
+
+    ID_PROVIDER_PREFIX_DEFAULT = ID_PROVIDER_PREFIXES[0]
+    """ str: default prefix for records (optional).
+    """
+
+    ID_PROVIDER_PREFIX_BLOB = ID_PROVIDER_PREFIXES[0]
+    """ str: default prefix for blobs (optional).
     """
 
     PID_XPATH = "root.pid"
-    """ string: location of the PID in the document, specified as dot notation
+    """ string: location of the PID in the document, specified as dot notation.
+    """
+
+When using handle.net, additional optional settings keys are available:
+
+.. code:: python
+    HANDLE_NET_RECORD_INDEX = 1
+    """ int: index of record when using handle.net.
+    """
+
+    HANDLE_NET_ADMIN_DATA = {
+        "index": 100,
+        "type": "HS_ADMIN",
+        "data": {
+            "format": "admin",
+            "value": {
+                "handle": f"0.NA/{ID_PROVIDER_PREFIX_DEFAULT}",
+                "index": 200,
+                "permissions": "011111110011",
+            },
+        },
+    }
+    """ dict: datastructure to insert with the record in order to give the
+    handle.net user creation, edition and deletion rights.
     """
 
 Edit the urls.py file
@@ -94,10 +127,11 @@ Add the ``core_linked_records_app`` urls to the Django project as such.
 Example configuration and XML file:
 -----------------------------------
 
-The example below shows a configuration of a CDCS instance using the core_linked_records_app settings and what an XML
-document with a PID would look like in this case:
+The example below shows a configuration of a CDCS instance using the
+core_linked_records_app settings and what an XML document with a PID would look
+like in this case:
 
-Settings.py:
+1. Edit `settings.py`:
 
 .. code:: python
 
@@ -112,16 +146,19 @@ Settings.py:
     PID_XPATH = "root.pid"
 
 
-XML file:
+2. Upload the XML file:
 
 .. code:: XML
 
     <root><pid>http://localhost:8000/pid/rest/local/cdcs/0123ABCD</pid></root>
 
 
-Explanation:
-The pid is stored in the "pid" element under the "root" element like indicated in PID_XPATH (root.pid).
-The generated PID (http://localhost:8000/pid/rest/local/cdcs/0123ABCD) is composed of:
+3. Explanation:
+
+The pid is stored in the "pid" element under the "root" element like indicated
+in PID_XPATH (root.pid). The generated PID
+(http://localhost:8000/pid/rest/local/cdcs/0123ABCD) is composed of:
+
 - the SERVER_URI: http://localhost:8000
 - the route to core_linked_records_app as defined in urls.py: pid
 - the route to the rest endpoints of this app: rest
