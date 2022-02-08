@@ -94,6 +94,7 @@ Add the necessary setting keys at the end of the file.
 When using handle.net, additional optional settings keys are available:
 
 .. code:: python
+
     HANDLE_NET_RECORD_INDEX = 1
     """ int: index of record when using handle.net.
     """
