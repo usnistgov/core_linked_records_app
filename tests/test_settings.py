@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "tz_detect",
     "menu",
+    "django_celery_beat",
     # Local apps
     "xml_utils",
     "core_main_app",
