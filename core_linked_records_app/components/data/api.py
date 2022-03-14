@@ -75,7 +75,7 @@ def get_pids_for_data_list(data_id_list, request):
 
         pid_list = [
             get_dict_value_from_key_list(
-                data.dict_content,
+                data.get_dict_content(),
                 pid_xpath.split("."),
             )
             for data, pid_xpath in pid_xpath_list
@@ -108,7 +108,9 @@ def get_pid_for_data(data_id, request):
         pid_xpath_object = pid_xpath_api.get_by_template(data.template, request)
         pid_xpath = pid_xpath_object.xpath
 
-        return get_dict_value_from_key_list(data.dict_content, pid_xpath.split("."))
+        return get_dict_value_from_key_list(
+            data.get_dict_content(), pid_xpath.split(".")
+        )
     except Exception as exc:
         error_message = (
             f"An error occurred while looking up PID assigned to data '{data_id}'"

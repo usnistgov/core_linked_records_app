@@ -98,7 +98,7 @@ def get_pid_for_data(data_id):
     pid_xpath = pid_xpath_object.xpath
 
     return get_dict_value_from_key_list(
-        data.dict_content,
+        data.get_dict_content(),
         pid_xpath.split("."),
     )
 

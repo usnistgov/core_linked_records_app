@@ -71,7 +71,7 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
             pid_xpath = pid_xpath_object.xpath
 
             data_pid = get_dict_value_from_key_list(
-                data.dict_content,
+                data.get_dict_content(),
                 pid_xpath.split("."),
             )
 
@@ -104,7 +104,6 @@ if (
     "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
     and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
 ):
-    from core_oaipmh_harvester_app.components.oai_record import api as oai_record_api
     from core_explore_oaipmh_app.rest.query.views import ExecuteQueryView
 
     class ExecuteOaiPmhPIDQueryView(ExecuteQueryView):
@@ -144,41 +143,6 @@ if (
                 pid_query["$and"].append(query)
 
             return pid_query
-
-        def execute_raw_query(self, raw_query, order_by_field):
-            """Execute the raw query in database
-
-            Args:
-
-                raw_query: Query to execute
-                order_by_field:
-
-            Returns:
-                Results of the query
-            """
-            if self.pid_xpath_list is None:
-                raise Exception("Undefined PID xpath from remote server.")
-
-            pid_list = list()
-            data_list = oai_record_api.execute_query(raw_query, self.request.user)
-
-            for data in data_list:
-                pid_xpath_object = pid_xpath_api.get_by_template(
-                    data.harvester_metadata_format.template, self.request
-                )
-                pid_xpath = pid_xpath_object.xpath
-
-                data_pid = get_dict_value_from_key_list(
-                    data["dict_content"],
-                    pid_xpath.split("."),
-                )
-
-                if not data_pid:
-                    continue
-
-                pid_list.append({"pid": data_pid})
-
-            return pid_list
 
         def build_response(self, data_list):
             """Build the list of PIDs
