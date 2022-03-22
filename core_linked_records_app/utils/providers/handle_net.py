@@ -46,7 +46,7 @@ class HandleNetSystem(AbstractIdProvider):
         )
 
         json_response_content["url"] = "%s/%s" % (
-            self.provider_url,
+            self.provider_lookup_url,
             json_response_content["handle"],
         )
 
@@ -85,7 +85,7 @@ class HandleNetSystem(AbstractIdProvider):
         Returns:
         """
         response = send_get_request(
-            "%s/%s/%s" % (self.provider_url, self.registration_api, record),
+            "%s/%s/%s" % (self.provider_lookup_url, self.registration_api, record),
             headers={
                 "Content-Type": "application/json",
             },
@@ -106,14 +106,14 @@ class HandleNetSystem(AbstractIdProvider):
         # Create request url depending on handle value
         if record is not None:
             request_url = "%s/%s/%s/%s?overwrite=false" % (
-                self.provider_url,
+                self.provider_registration_url,
                 self.registration_api,
                 prefix,
                 record,
             )
         else:
             request_url = "%s/%s/%s/?overwrite=false&mintNewSuffix=true" % (
-                self.provider_url,
+                self.provider_registration_url,
                 self.registration_api,
                 prefix,
             )
@@ -142,7 +142,8 @@ class HandleNetSystem(AbstractIdProvider):
         Returns:
         """
         response = send_put_request(
-            f"{self.provider_url}/{self.registration_api}/{record}?overwrite=true",
+            f"{self.provider_registration_url}/{self.registration_api}/"
+            f"{record}?overwrite=true",
             self._generate_record_data(record, include_handle=True),
             headers={
                 "Content-Type": "application/json",
@@ -155,7 +156,8 @@ class HandleNetSystem(AbstractIdProvider):
 
     def delete(self, record):
         response = send_delete_request(
-            "%s/%s/%s" % (self.provider_url, self.registration_api, record),
+            "%s/%s/%s"
+            % (self.provider_registration_url, self.registration_api, record),
             headers={"Authorization": "Basic %s" % str(self.auth_token)},
         )
 

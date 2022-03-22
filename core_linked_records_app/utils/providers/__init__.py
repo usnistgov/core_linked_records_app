@@ -15,8 +15,16 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractIdProvider(ABC):
-    def __init__(self, provider_name, provider_url, username, password):
-        self.provider_url = provider_url
+    def __init__(
+        self,
+        provider_name,
+        provider_lookup_url,
+        provider_registration_url,
+        username,
+        password,
+    ):
+        self.provider_lookup_url = provider_lookup_url
+        self.provider_registration_url = provider_registration_url
         self.local_url = "%s%s" % (
             settings.SERVER_URI,
             reverse(
@@ -80,7 +88,7 @@ class ProviderManager(object):
         for provider_name in self._provider_instances.keys():
             provider = self.get(provider_name)
 
-            if pid.startswith(provider.provider_url):
+            if pid.startswith(provider.provider_lookup_url):
                 return provider_name
 
         return None
@@ -125,7 +133,9 @@ def register_pid_for_data_id(provider_name, pid_value, data_id):
 
     provider_manager = ProviderManager()
     provider = provider_manager.get(provider_name)
-    registration_url = pid_value.replace(provider.provider_url, provider.local_url)
+    registration_url = pid_value.replace(
+        provider.provider_lookup_url, provider.local_url
+    )
 
     document_pid_response = send_post_request("%s?format=json" % registration_url)
 

@@ -137,7 +137,7 @@ def delete_pid_for_data(data):
     previous_provider_name = provider_manager.find_provider_from_pid(previous_pid)
     previous_provider = provider_manager.get(previous_provider_name)
     previous_pid_url = previous_pid.replace(
-        previous_provider.provider_url, previous_provider.local_url
+        previous_provider.provider_lookup_url, previous_provider.local_url
     )
 
     previous_pid_delete_response = send_delete_request(
