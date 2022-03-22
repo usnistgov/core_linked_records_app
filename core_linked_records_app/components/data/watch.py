@@ -69,7 +69,9 @@ def set_data_pid(sender, document, **kwargs):
         # defined for a document other than the current document.
         if pid_value is None or pid_value == "":
             pid_value = join(
-                providers_utils.ProviderManager().get(provider_name).provider_url,
+                providers_utils.ProviderManager()
+                .get(provider_name)
+                .provider_lookup_url,
                 settings.ID_PROVIDER_PREFIX_DEFAULT,
             )
 

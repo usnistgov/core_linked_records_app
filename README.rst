@@ -2,8 +2,7 @@
 core_linked_records_app
 =======================
 
-This Django reusable app contains the PID functionalities for a
-CDCS project.
+This Django reusable app contains the PID functionalities for a CDCS project.
 
 Pre-requisites
 ==============
@@ -42,8 +41,7 @@ Configuration
 Edit the setting.py file
 ------------------------
 
-Add the ``"core_linked_records_app"`` under ``INSTALLED_APPS`` as
-such:
+Add the ``"core_linked_records_app"`` under ``INSTALLED_APPS`` as such:
 
 .. code:: python
 
@@ -64,14 +62,16 @@ Add the necessary setting keys at the end of the file.
         "handle.net": {  # Optional: if a Handle.net server is available.
             "class": "core_linked_records_app.utils.providers.handle_net.HandleNetSystem",
             "args": [
-                "https://handle-net.domain",
+                "https://hdl.handle.net",  # Lookup domain, displayed on the records.
+                "https://handle-net.domain",  # Regsitration domain, for CRUD operations.
                 "300%3ACDCS/ADMIN",
                 "admin",
             ],
         },
     }
-    """ dict: all the provider systems available for registering PIDs (first item is the
-    default system).
+    """ dict: all the provider systems available for resolving PIDs (first item is the
+    main system for CRUD operations on PIDs, other items will only be able to resolve
+    PIDs).
     """
 
     ID_PROVIDER_PREFIXES = ["cdcs"]

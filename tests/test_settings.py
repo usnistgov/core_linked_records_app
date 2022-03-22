@@ -64,6 +64,7 @@ DATABASES = {
 
 MOCK_DATABASE_NAME = "db_mock"
 MOCK_DATABASE_HOST = "mongomock://localhost"
+CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CUSTOM_NAME = "mock_custom_name"
 

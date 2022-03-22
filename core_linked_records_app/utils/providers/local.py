@@ -15,8 +15,7 @@ from core_main_app.commons.exceptions import NotUniqueError
 
 class LocalIdProvider(AbstractIdProvider):
     def __init__(self, provider_name):
-        super().__init__(provider_name, None, None, None)
-        self.provider_url = self.local_url
+        super().__init__(provider_name, self.local_url, None, None, None)
 
     def encode_token(self, username, password):
         return None
@@ -34,7 +33,7 @@ class LocalIdProvider(AbstractIdProvider):
     def get(self, record):
         response = Response()
 
-        record_url = "%s/%s" % (self.provider_url, record)
+        record_url = "%s/%s" % (self.provider_lookup_url, record)
 
         try:
             record_api.get_by_name(record)
@@ -65,7 +64,7 @@ class LocalIdProvider(AbstractIdProvider):
                 record = self._generate_id()
 
         record = "%s/%s" % (prefix, record)
-        record_url = "%s/%s" % (self.provider_url, record)
+        record_url = "%s/%s" % (self.provider_lookup_url, record)
 
         response = Response()
         response_content = {
@@ -90,7 +89,7 @@ class LocalIdProvider(AbstractIdProvider):
     def update(self, record):
         self.create(record)
 
-        record_url = "%s/%s" % (self.provider_url, record)
+        record_url = "%s/%s" % (self.provider_lookup_url, record)
 
         response = Response()
         response._content = json.dumps(
@@ -106,7 +105,7 @@ class LocalIdProvider(AbstractIdProvider):
     def delete(self, record):
         response = Response()
 
-        record_url = "%s/%s" % (self.provider_url, record)
+        record_url = "%s/%s" % (self.provider_lookup_url, record)
 
         try:
             record_object = record_api.get_by_name(record)

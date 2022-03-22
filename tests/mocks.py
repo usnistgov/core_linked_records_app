@@ -49,7 +49,7 @@ class MockRequest(Mock):
 
 
 class MockProviderManager(Mock):
-    provider_url = "mock_provider_url"
+    provider_lookup_url = "mock_provider_url"
     create_exc = None
     create_result = None
     update_exc = None
