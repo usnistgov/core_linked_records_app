@@ -23,8 +23,6 @@ class AbstractIdProvider(ABC):
         username,
         password,
     ):
-        self.provider_lookup_url = provider_lookup_url
-        self.provider_registration_url = provider_registration_url
         self.local_url = "%s%s" % (
             settings.SERVER_URI,
             reverse(
@@ -33,6 +31,10 @@ class AbstractIdProvider(ABC):
             ),
         )
         self.local_url = self.local_url[:-1]  # Removing the final /
+        self.provider_lookup_url = (
+            provider_lookup_url if provider_lookup_url else self.local_url
+        )
+        self.provider_registration_url = provider_registration_url
         self.auth_token = self.encode_token(username, password)
 
     @abstractmethod
@@ -60,16 +62,15 @@ class ProviderManager(object):
     """Manage provider instances from a given provider name"""
 
     def __init__(self):
-        self._provider_instances = {
-            provider_name: None for provider_name in settings.ID_PROVIDER_SYSTEMS.keys()
-        }
+        self._provider_instance = None
+
+        self.provider_name = settings.ID_PROVIDER_SYSTEM_NAME
+        self.provider_config = settings.ID_PROVIDER_SYSTEM_CONFIG
 
     def get(self, provider_name):
-        if self._provider_instances[provider_name] is None:
+        if self._provider_instance is None:
             # Retrieve class name and module path
-            id_provider_classpath = settings.ID_PROVIDER_SYSTEMS[provider_name][
-                "class"
-            ].split(".")
+            id_provider_classpath = self.provider_config["class"].split(".")
             id_provider_classname = id_provider_classpath[-1]
             id_provider_modpath = ".".join(id_provider_classpath[:-1])
 
@@ -78,20 +79,20 @@ class ProviderManager(object):
             id_provider_class = getattr(id_provider_module, id_provider_classname)
 
             # Initialize handel system instance
-            self._provider_instances[provider_name] = id_provider_class(
-                provider_name, *settings.ID_PROVIDER_SYSTEMS[provider_name]["args"]
+            self._provider_instance = id_provider_class(
+                provider_name, *settings.ID_PROVIDER_SYSTEM_CONFIG["args"]
             )
 
-        return self._provider_instances[provider_name]
+        return self._provider_instance
 
     def find_provider_from_pid(self, pid):
-        for provider_name in self._provider_instances.keys():
-            provider = self.get(provider_name)
+        provider = self.get(settings.ID_PROVIDER_SYSTEM_NAME)
 
-            if pid.startswith(provider.provider_lookup_url):
-                return provider_name
-
-        return None
+        return (
+            settings.ID_PROVIDER_SYSTEM_NAME
+            if pid.startswith(provider.provider_lookup_url)
+            else None
+        )
 
 
 def retrieve_provider_name(pid_value):
@@ -106,7 +107,7 @@ def retrieve_provider_name(pid_value):
 
     if pid_value is None or pid_value == "":  # PID field left blank
         # Select the default provider if no PID has been chosen.
-        provider_name = settings.DEFAULT_ID_PROVIDER_SYSTEM
+        provider_name = settings.ID_PROVIDER_SYSTEM_NAME
     else:  # PID specified in document.
         provider_name = ProviderManager().find_provider_from_pid(pid_value)
 

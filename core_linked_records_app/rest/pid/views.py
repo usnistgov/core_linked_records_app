@@ -97,7 +97,7 @@ class RetrieveBlobPIDView(APIView):
                 sub_url = reverse(
                     "core_linked_records_provider_record",
                     kwargs={
-                        "provider": settings.DEFAULT_ID_PROVIDER_SYSTEM,
+                        "provider": settings.ID_PROVIDER_SYSTEM_NAME,
                         "record": "",
                     },
                 )

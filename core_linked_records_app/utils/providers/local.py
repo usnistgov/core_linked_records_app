@@ -15,7 +15,7 @@ from core_main_app.commons.exceptions import NotUniqueError
 
 class LocalIdProvider(AbstractIdProvider):
     def __init__(self, provider_name):
-        super().__init__(provider_name, self.local_url, None, None, None)
+        super().__init__(provider_name, None, None, None, None)
 
     def encode_token(self, username, password):
         return None

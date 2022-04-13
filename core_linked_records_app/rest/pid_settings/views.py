@@ -31,7 +31,7 @@ class PidSettingsView(APIView):
 
             response_data = {
                 "format": settings.PID_FORMAT,
-                "systems": list(settings.ID_PROVIDER_SYSTEMS.keys()),
+                "system": settings.ID_PROVIDER_SYSTEM_NAME,
                 "prefixes": settings.ID_PROVIDER_PREFIXES,
             }
 
