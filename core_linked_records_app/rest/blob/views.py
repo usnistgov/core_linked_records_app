@@ -39,7 +39,7 @@ class BlobUploadWithPIDView(BlobList):
         try:
             pid = request.POST.get("pid", None)
 
-            if "pid" is None:
+            if pid is None:
                 raise CoreError("Missing PID field in POST data.")
 
             # Check that the PID has not yet been assigned.

@@ -51,20 +51,27 @@ class TestExecuteLocalPIDQueryViewExecuteRawQuery(TestCase):
 
         self.assertEquals(result, [])
 
-    @patch.object(query_views, "get_dict_value_from_key_list")
+    @patch.object(query_views, "is_valid_pid_value")
+    @patch.object(query_views, "get_value_from_dot_notation")
     @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(data_api, "execute_json_query")
-    def test_returns_data_with_pid(
+    def test_returns_data_with_valid_pid(
         self,
         mock_execute_query,
         mock_get_by_template,
-        mock_get_dict_value_from_key_list,
+        mock_get_value_from_dot_notation,
+        mock_is_valid_pid_value,
     ):
         mock_data_pid = "mock_data_pid"
         mock_execute_query.return_value = [mocks.MockData() for _ in range(5)]
         mock_get_by_template.return_value = mocks.MockPidXpath()
-        mock_get_dict_value_from_key_list.return_value = mock_data_pid
-        expected_result = [{"pid": mock_data_pid} for _ in range(5)]
+        mock_get_value_from_dot_notation.return_value = mock_data_pid
+        # Return True every time the call count is odd (3 times for a list of 5
+        # elements, at index 0, 2 and 4).
+        mock_is_valid_pid_value.side_effect = (
+            lambda p, n, f: mock_is_valid_pid_value.call_count % 2
+        )
+        expected_result = [{"pid": mock_data_pid} for _ in range(5) if _ % 2 == 0]
 
         test_view = query_views.ExecuteLocalPIDQueryView()
         test_view.request = mocks.MockRequest()

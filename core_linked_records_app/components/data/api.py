@@ -4,7 +4,11 @@ from logging import getLogger
 
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
-from core_linked_records_app.utils.dict import get_dict_value_from_key_list
+from core_linked_records_app.utils.dict import (
+    is_dot_notation_in_dictionary,
+    get_value_from_dot_notation,
+)
+from core_linked_records_app.utils.pid import is_valid_pid_value
 from core_main_app.commons.exceptions import ApiError, DoesNotExist
 from core_main_app.components.data import api as data_api
 
@@ -57,27 +61,7 @@ def get_pids_for_data_list(data_id_list, request):
     Returns:
     """
     try:
-        # Retrieve the document passed as input and extra the PID field.
-        data_list = data_api.get_by_id_list(data_id_list, request.user)
-
-        # Build the list of PID from the document and the pid_xpath retrieve from the
-        # `PidSettings`.
-        pid_xpath_list = list()
-
-        for data in data_list:
-            pid_xpath_object = pid_xpath_api.get_by_template(data.template, request)
-            pid_xpath_list.append((data, pid_xpath_object.xpath))
-
-        pid_list = [
-            get_dict_value_from_key_list(
-                data.get_dict_content(),
-                pid_xpath.split("."),
-            )
-            for data, pid_xpath in pid_xpath_list
-        ]
-
-        # Returns a list of PID available from the list.
-        return [pid for pid in pid_list if pid is not None]
+        return [get_pid_for_data(data_id, request) for data_id in data_id_list]
     except Exception as exc:
         error_message = "An error occurred while retrieving PIDs for data list"
 
@@ -103,9 +87,19 @@ def get_pid_for_data(data_id, request):
         pid_xpath_object = pid_xpath_api.get_by_template(data.template, request)
         pid_xpath = pid_xpath_object.xpath
 
-        return get_dict_value_from_key_list(
-            data.get_dict_content(), pid_xpath.split(".")
-        )
+        # If the pid_xpath does not exist in the document, exit early and return None
+        if not is_dot_notation_in_dictionary(data.get_dict_content(), pid_xpath):
+            return None
+
+        pid_value = get_value_from_dot_notation(data.get_dict_content(), pid_xpath)
+
+        # If the field has an invalid PID, raise an exception.
+        if not is_valid_pid_value(
+            pid_value, settings.ID_PROVIDER_SYSTEM_NAME, settings.PID_FORMAT
+        ):
+            raise ApiError(f"Invalid PID in data '{data_id}'")
+
+        return pid_value
     except Exception as exc:
         error_message = (
             f"An error occurred while looking up PID assigned to data '{data_id}'"

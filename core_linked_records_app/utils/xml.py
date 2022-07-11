@@ -119,7 +119,7 @@ def get_value_at_xpath(xml_tree, xpath, namespaces):
     except AttributeError:  # XPath points to an attribute
         xpath_value = xpath_element_list[0]
 
-    return xpath_value
+    return str(xpath_value) if xpath_value else xpath_value
 
 
 def can_create_value_at_xpath(xml_string, xsd_string, xpath, value):

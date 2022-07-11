@@ -61,77 +61,21 @@ class TestGetPidsForDataList(TestCase):
 
         self.mock_kwargs = {"data_id_list": mock_data_id_list, "request": mock_request}
 
-    @patch.object(main_data_api, "get_by_id_list")
-    def test_get_by_id_list_failure_raises_api_error(self, mock_get_by_id_list):
-        mock_get_by_id_list.side_effect = Exception("mock_get_by_id_list_exception")
+    @patch.object(pid_data_api, "get_pid_for_data")
+    def test_get_pid_for_data_failure_raises_api_error(self, mock_get_pid_for_data):
+        mock_get_pid_for_data.side_effect = Exception("mock_get_by_id_list_exception")
 
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
 
-    @patch.object(pid_xpath_api, "get_by_template")
-    @patch.object(main_data_api, "get_by_id_list")
-    def test_get_by_template_failure_raises_api_error(
-        self,
-        mock_get_by_id_list,
-        mock_get_by_template,
-    ):
-        mock_get_by_id_list.return_value = [mocks.MockData()]
-        mock_get_by_template.side_effect = Exception("mock_get_by_template_exception")
+    @patch.object(pid_data_api, "get_pid_for_data")
+    def test_get_pid_for_data_failure_raises_api_error(self, mock_get_pid_for_data):
+        mock_get_pid_for_data.side_effect = lambda data_id, req: f"{data_id}_pid"
 
-        with self.assertRaises(exceptions.ApiError):
-            pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
-
-    @patch.object(pid_data_api, "get_dict_value_from_key_list")
-    @patch.object(pid_xpath_api, "get_by_template")
-    @patch.object(main_data_api, "get_by_id_list")
-    def test_get_dict_value_from_key_list_failure_raises_api_error(
-        self,
-        mock_get_by_id_list,
-        mock_get_by_template,
-        mock_get_dict_value_from_key_list,
-    ):
-        mock_get_by_id_list.return_value = [mocks.MockData()]
-        mock_get_by_template.return_value = mocks.MockPidXpath()
-        mock_get_dict_value_from_key_list.side_effect = Exception(
-            "mock_get_dict_value_from_key_list_exception"
+        self.assertListEqual(
+            pid_data_api.get_pids_for_data_list(**self.mock_kwargs),
+            [f"{data_id}_pid" for data_id in self.mock_kwargs["data_id_list"]],
         )
-
-        with self.assertRaises(exceptions.ApiError):
-            pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
-
-    @patch.object(pid_data_api, "get_dict_value_from_key_list")
-    @patch.object(pid_xpath_api, "get_by_template")
-    @patch.object(main_data_api, "get_by_id_list")
-    def test_list_of_pid_does_not_contain_none_values(
-        self,
-        mock_get_by_id_list,
-        mock_get_by_template,
-        mock_get_dict_value_from_key_list,
-    ):
-        mock_get_by_id_list.return_value = [mocks.MockData()]
-        mock_get_by_template.return_value = mocks.MockPidXpath()
-        mock_get_dict_value_from_key_list.return_value = None
-
-        result = pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
-        self.assertEquals(result, [])
-
-    @patch.object(pid_data_api, "get_dict_value_from_key_list")
-    @patch.object(pid_xpath_api, "get_by_template")
-    @patch.object(main_data_api, "get_by_id_list")
-    def test_returns_list_of_pid(
-        self,
-        mock_get_by_id_list,
-        mock_get_by_template,
-        mock_get_dict_value_from_key_list,
-    ):
-        mock_pid = "mock_pid"
-        expected_result = [mock_pid for _ in range(5)]
-        mock_get_by_id_list.return_value = [mocks.MockData() for _ in range(5)]
-        mock_get_by_template.return_value = mocks.MockPidXpath()
-        mock_get_dict_value_from_key_list.return_value = mock_pid
-
-        result = pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
-        self.assertEquals(result, expected_result)
 
 
 class TestGetPidForData(TestCase):
@@ -163,31 +107,113 @@ class TestGetPidForData(TestCase):
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_pid_for_data(**self.mock_kwargs)
 
-    @patch.object(pid_data_api, "get_dict_value_from_key_list")
+    @patch.object(pid_data_api, "is_dot_notation_in_dictionary")
     @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id")
-    def test_get_dict_value_from_key_list_failure_raises_api_error(
-        self, mock_get_by_id, mock_get_by_template, mock_get_dict_value_from_key_list
+    def test_is_key_list_in_dictionary_failure_raises_api_error(
+        self, mock_get_by_id, mock_get_by_template, mock_is_dot_notation_in_dictionary
     ):
         mock_get_by_id.return_value = self.mock_global_data
         mock_get_by_template.return_value = mocks.MockPidXpath()
-        mock_get_dict_value_from_key_list.side_effect = Exception(
+        mock_is_dot_notation_in_dictionary.side_effect = Exception(
+            "mock_is_dot_notation_in_dictionary_exception"
+        )
+
+        with self.assertRaises(exceptions.ApiError):
+            pid_data_api.get_pid_for_data(**self.mock_kwargs)
+
+    @patch.object(pid_data_api, "is_dot_notation_in_dictionary")
+    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(main_data_api, "get_by_id")
+    def test_is_dot_notation_in_dictionary_failure_raises_api_error(
+        self,
+        mock_get_by_id,
+        mock_get_by_template,
+        mock_is_dot_notation_in_dictionary,
+    ):
+        mock_get_by_id.return_value = self.mock_global_data
+        mock_get_by_template.return_value = mocks.MockPidXpath()
+        mock_is_dot_notation_in_dictionary.side_effect = Exception(
+            "mock_is_dot_notation_in_dictionary_exception"
+        )
+
+        with self.assertRaises(exceptions.ApiError):
+            pid_data_api.get_pid_for_data(**self.mock_kwargs)
+
+    @patch.object(pid_data_api, "is_dot_notation_in_dictionary")
+    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(main_data_api, "get_by_id")
+    def test_pid_xpath_not_in_document_returns_none(
+        self, mock_get_by_id, mock_get_by_template, mock_is_dot_notation_in_dictionary
+    ):
+        mock_get_by_id.return_value = self.mock_global_data
+        mock_get_by_template.return_value = mocks.MockPidXpath()
+        mock_is_dot_notation_in_dictionary.return_value = False
+
+        self.assertIsNone(pid_data_api.get_pid_for_data(**self.mock_kwargs))
+
+    @patch.object(pid_data_api, "is_dot_notation_in_dictionary")
+    @patch.object(pid_data_api, "get_value_from_dot_notation")
+    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(main_data_api, "get_by_id")
+    def test_get_value_from_dot_notation_failure_raises_api_error(
+        self,
+        mock_get_by_id,
+        mock_get_by_template,
+        mock_get_value_from_dot_notation,
+        mock_is_dot_notation_in_dictionary,
+    ):
+        mock_get_by_id.return_value = self.mock_global_data
+        mock_get_by_template.return_value = mocks.MockPidXpath()
+        mock_get_value_from_dot_notation.return_value = True
+        mock_is_dot_notation_in_dictionary.side_effect = Exception(
             "mock_get_dict_value_from_key_list_exception"
         )
 
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_pid_for_data(**self.mock_kwargs)
 
-    @patch.object(pid_data_api, "get_dict_value_from_key_list")
+    @patch.object(pid_data_api, "is_valid_pid_value")
+    @patch.object(pid_data_api, "is_dot_notation_in_dictionary")
+    @patch.object(pid_data_api, "get_value_from_dot_notation")
     @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id")
-    def test_returns_get_dict_value_from_key_list_output(
-        self, mock_get_by_id, mock_get_by_template, mock_get_dict_value_from_key_list
+    def test_invalid_pid_raises_api_error(
+        self,
+        mock_get_by_id,
+        mock_get_by_template,
+        mock_get_value_from_dot_notation,
+        mock_is_dot_notation_in_dictionary,
+        mock_is_valid_pid_value,
+    ):
+        mock_get_by_id.return_value = self.mock_global_data
+        mock_get_by_template.return_value = mocks.MockPidXpath()
+        mock_is_dot_notation_in_dictionary.return_value = True
+        mock_get_value_from_dot_notation.return_value = "mock_pid"
+        mock_is_valid_pid_value.return_value = False
+
+        with self.assertRaises(exceptions.ApiError):
+            pid_data_api.get_pid_for_data(**self.mock_kwargs)
+
+    @patch.object(pid_data_api, "is_valid_pid_value")
+    @patch.object(pid_data_api, "is_dot_notation_in_dictionary")
+    @patch.object(pid_data_api, "get_value_from_dot_notation")
+    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(main_data_api, "get_by_id")
+    def test_returns_get_value_from_dot_notation_output(
+        self,
+        mock_get_by_id,
+        mock_get_by_template,
+        mock_get_value_from_dot_notation,
+        mock_is_dot_notation_in_dictionary,
+        mock_is_valid_pid_value,
     ):
         expected_result = "mock_pid"
         mock_get_by_id.return_value = self.mock_global_data
         mock_get_by_template.return_value = mocks.MockPidXpath()
-        mock_get_dict_value_from_key_list.return_value = expected_result
+        mock_is_dot_notation_in_dictionary.return_value = True
+        mock_get_value_from_dot_notation.return_value = expected_result
+        mock_is_valid_pid_value.return_value = True
 
         result = pid_data_api.get_pid_for_data(**self.mock_kwargs)
         self.assertEquals(result, expected_result)

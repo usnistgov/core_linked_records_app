@@ -29,31 +29,31 @@ class TestGetPidForData(TestCase):
         with self.assertRaises(ApiError):
             oai_record_api.get_pid_for_data("mock_id", mocks.MockRequest())
 
-    @patch.object(oai_record_api, "get_dict_value_from_key_list")
+    @patch.object(oai_record_api, "get_value_from_dot_notation")
     @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(oai_record_data, "get_by_id")
-    def test_get_dict_value_from_key_list_failure_raises_api_error(
-        self, mock_get_by_id, mock_get_by_template, mock_get_dict_value_from_key_list
+    def test_get_value_from_dot_notation_failure_raises_api_error(
+        self, mock_get_by_id, mock_get_by_template, mock_get_value_from_dot_notation
     ):
         mock_get_by_id.return_value = mocks.MockData()
         mock_get_by_template.return_value = mocks.MockPidXpath()
-        mock_get_dict_value_from_key_list.side_effect = Exception(
+        mock_get_value_from_dot_notation.side_effect = Exception(
             "mock_get_dict_value_from_key_list_exception"
         )
 
         with self.assertRaises(ApiError):
             oai_record_api.get_pid_for_data("mock_id", mocks.MockRequest())
 
-    @patch.object(oai_record_api, "get_dict_value_from_key_list")
+    @patch.object(oai_record_api, "get_value_from_dot_notation")
     @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(oai_record_data, "get_by_id")
-    def test_returns_get_dict_value_from_key_list(
-        self, mock_get_by_id, mock_get_by_template, mock_get_dict_value_from_key_list
+    def test_returns_get_value_from_dot_notation(
+        self, mock_get_by_id, mock_get_by_template, mock_get_value_from_dot_notation
     ):
         expected_result = "mock_get_pid_for_data"
         mock_get_by_id.return_value = mocks.MockData()
         mock_get_by_template.return_value = mocks.MockPidXpath()
-        mock_get_dict_value_from_key_list.return_value = expected_result
+        mock_get_value_from_dot_notation.return_value = expected_result
 
         self.assertEquals(
             oai_record_api.get_pid_for_data("mock_id", mocks.MockRequest()),

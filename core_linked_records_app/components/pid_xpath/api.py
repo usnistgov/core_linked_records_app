@@ -26,6 +26,7 @@ def get_by_template(template, request):
     try:
         pid_xpath_object = PidXpath.get_by_template(template)
 
+        # Returns default PID_XPATH settings if the template has no defined PidXpath
         if pid_xpath_object is None:
             return PidXpath(
                 template=template,
