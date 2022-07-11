@@ -52,19 +52,19 @@ class TestExecuteLocalPIDQueryViewExecuteRawQuery(TestCase):
 
         self.assertEquals(result, [])
 
-    @patch.object(query_views, "get_dict_value_from_key_list")
+    @patch.object(query_views, "get_value_from_dot_notation")
     @patch.object(pid_xpath_api, "get_by_template_id")
     @patch.object(data_api, "execute_query")
     def test_returns_data_with_pid(
         self,
         mock_execute_query,
         mock_get_by_template_id,
-        mock_get_dict_value_from_key_list,
+        mock_get_value_from_dot_notation,
     ):
         mock_data_pid = "mock_data_pid"
         mock_execute_query.return_value = [mocks.MockData() for _ in range(5)]
         mock_get_by_template_id.return_value = mocks.MockPidXpath()
-        mock_get_dict_value_from_key_list.return_value = mock_data_pid
+        mock_get_value_from_dot_notation.return_value = mock_data_pid
         expected_result = [{"pid": mock_data_pid} for _ in range(5)]
 
         test_view = query_views.ExecuteLocalPIDQueryView()

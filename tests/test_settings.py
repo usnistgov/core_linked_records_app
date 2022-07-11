@@ -70,5 +70,7 @@ CUSTOM_NAME = "mock_custom_name"
 
 ROOT_URLCONF = "core_linked_records_app.urls"
 
+SERVER_URI = "http://mock-cdcs.com"
+
 database = Database(MOCK_DATABASE_HOST, MOCK_DATABASE_NAME)
 database.connect()

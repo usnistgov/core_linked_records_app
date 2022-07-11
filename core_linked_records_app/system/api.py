@@ -5,7 +5,7 @@ from rest_framework import status
 
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath.models import PidXpath
-from core_linked_records_app.utils.dict import get_dict_value_from_key_list
+from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.providers import ProviderManager
 from core_main_app.commons.exceptions import DoesNotExist, ApiError
 from core_main_app.components.data.models import Data
@@ -90,7 +90,7 @@ def get_pid_for_data(data_id):
     pid_xpath_object = get_pid_xpath_by_template_id(data.template.pk)
     pid_xpath = pid_xpath_object.xpath
 
-    return get_dict_value_from_key_list(
+    return get_value_from_dot_notation(
         data["dict_content"],
         pid_xpath.split("."),
     )
@@ -123,7 +123,7 @@ def delete_pid_for_data(data):
     provider_manager = ProviderManager()
     previous_pid = get_pid_for_data(data.pk)
 
-    if previous_pid is None:  # If there is no previous PID assigned
+    if not previous_pid:  # If there is no previous PID assigned
         logger.info(f"No PID assigned to the data {str(data.pk)}")
         return
 
