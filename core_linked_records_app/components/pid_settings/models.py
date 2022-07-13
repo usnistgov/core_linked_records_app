@@ -3,7 +3,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
-from core_linked_records_app import settings
 from core_main_app.commons import exceptions
 
 

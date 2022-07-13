@@ -59,7 +59,7 @@ def get_all(request):
             [template.pk for template in template_api.get_all(request=request)]
         )
     except Exception as exc:
-        error_message = f"An unexpected error occurred while retrieving all PidXpath"
+        error_message = "An unexpected error occurred while retrieving all PidXpath"
 
         logger.error(f"{error_message}: {str(exc)}")
         raise ApiError(str(exc))

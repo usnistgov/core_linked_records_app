@@ -2,8 +2,6 @@
 """
 from logging import getLogger
 
-from django.db.models import Q
-
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_linked_records_app.utils.dict import get_dict_value_from_key_list
@@ -81,7 +79,7 @@ def get_pids_for_data_list(data_id_list, request):
         # Returns a list of PID available from the list.
         return [pid for pid in pid_list if pid is not None]
     except Exception as exc:
-        error_message = f"An error occurred while retrieving PIDs for data list"
+        error_message = "An error occurred while retrieving PIDs for data list"
 
         logger.error(f"{error_message}: {str(exc)}")
         raise ApiError(f"{error_message}.")
