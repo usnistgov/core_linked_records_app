@@ -29,7 +29,7 @@ def get_pid_for_data(oai_record_id, request):
         pid_xpath = pid_xpath_object.xpath
 
         # Return PID value from the document and the PID_XPATH
-        return get_value_from_dot_notation(data.dict_content, pid_xpath.split("."))
+        return get_value_from_dot_notation(data.dict_content, pid_xpath)
     except Exception as exc:
         error_message = "An unexpected error occurred while retrieving PID for OAI data"
 

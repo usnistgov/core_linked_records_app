@@ -92,7 +92,7 @@ def get_pid_for_data(data_id):
 
     return get_value_from_dot_notation(
         data["dict_content"],
-        pid_xpath.split("."),
+        pid_xpath,
     )
 
 

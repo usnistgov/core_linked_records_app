@@ -72,7 +72,7 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
 
             data_pid = get_value_from_dot_notation(
                 data.dict_content,
-                pid_xpath.split("."),
+                pid_xpath,
             )
 
             if not data_pid:
@@ -170,7 +170,7 @@ if (
 
                 data_pid = get_value_from_dot_notation(
                     data["dict_content"],
-                    pid_xpath.split("."),
+                    pid_xpath,
                 )
 
                 if not data_pid:
