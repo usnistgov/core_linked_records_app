@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
+from core_linked_records_app.utils.pid import is_valid_pid_value
 from core_main_app.components.data import api as data_api
 from core_main_app.rest.data.abstract_views import AbstractExecuteLocalQueryView
 
@@ -75,7 +76,9 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
                 pid_xpath,
             )
 
-            if not data_pid:
+            if not is_valid_pid_value(
+                data_pid, settings.ID_PROVIDER_SYSTEM_NAME, settings.PID_FORMAT
+            ):
                 continue
 
             pid_list.append({"pid": data_pid})
