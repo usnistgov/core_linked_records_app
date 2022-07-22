@@ -50,7 +50,9 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
                 )
 
             data_object = data_api.get_by_id(data["id"], request.user)
-            page_context = data_view_builder.build_page(data_object)
+            page_context = data_view_builder.build_page(
+                data_object, display_download_options=True
+            )
 
             return data_view_builder.render_page(
                 request, render, "core_main_app/user/data/detail.html", page_context
