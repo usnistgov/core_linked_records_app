@@ -3,15 +3,17 @@
 from rest_framework import status
 from rest_framework.response import Response
 
+from core_main_app.components.data import api as data_api
+from core_main_app.rest.data.abstract_views import AbstractExecuteLocalQueryView
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.pid import is_valid_pid_value
-from core_main_app.components.data import api as data_api
-from core_main_app.rest.data.abstract_views import AbstractExecuteLocalQueryView
 
 
 class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
+    """Execute Local PID Query View"""
+
     def build_query(
         self, query, workspaces=None, templates=None, options=None, title=None
     ):
@@ -110,6 +112,8 @@ if (
     from core_explore_oaipmh_app.rest.query.views import ExecuteQueryView
 
     class ExecuteOaiPmhPIDQueryView(ExecuteQueryView):
+        """ " Execute Oai Pmh PID Query View"""
+
         pid_xpath_list = None
 
         def build_query(self, query, templates, registries):

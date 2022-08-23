@@ -10,10 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 def init():
+    """init"""
+
     try:
         if not PidSettings.get():
             pid_settings = PidSettings(auto_set_pid=settings.AUTO_SET_PID)
             pid_settings_api.upsert(pid_settings)
     except Exception as exc:
-        error_message = "Impossible to initialize PidSettings"
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("Impossible to initialize PidSettings: %s", str(exc))

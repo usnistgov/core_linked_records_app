@@ -2,6 +2,8 @@
 """
 from logging import getLogger
 
+from core_main_app.commons.exceptions import ApiError, DoesNotExist
+from core_main_app.components.data import api as data_api
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_linked_records_app.utils.dict import (
@@ -9,8 +11,6 @@ from core_linked_records_app.utils.dict import (
     get_value_from_dot_notation,
 )
 from core_linked_records_app.utils.pid import is_valid_pid_value
-from core_main_app.commons.exceptions import ApiError, DoesNotExist
-from core_main_app.components.data import api as data_api
 
 logger = getLogger(__name__)
 
@@ -40,15 +40,15 @@ def get_data_by_pid(pid, request):
             f"An error occurred while looking up data assigned to PID '{pid}'"
         )
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise ApiError(f"{error_message}.")
 
     if query_result_length == 0:
         raise DoesNotExist("PID is not attached to any data.")
-    elif query_result_length != 1:
+    if query_result_length != 1:
         raise ApiError("PID must be unique.")
-    else:
-        return query_result[0]
+
+    return query_result[0]
 
 
 def get_pids_for_data_list(data_id_list, request):
@@ -65,7 +65,7 @@ def get_pids_for_data_list(data_id_list, request):
     except Exception as exc:
         error_message = "An error occurred while retrieving PIDs for data list"
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise ApiError(f"{error_message}.")
 
 
@@ -105,5 +105,5 @@ def get_pid_for_data(data_id, request):
             f"An error occurred while looking up PID assigned to data '{data_id}'"
         )
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise ApiError(f"{error_message}.")

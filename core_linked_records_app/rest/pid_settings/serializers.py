@@ -9,7 +9,11 @@ from core_linked_records_app.components.pid_settings.models import (
 
 
 class PidSettingsSerializer(serializers.ModelSerializer):
+    """Pid Settings Serializer"""
+
     class Meta:
+        """Meta"""
+
         model = PidSettings
         fields = "__all__"
 

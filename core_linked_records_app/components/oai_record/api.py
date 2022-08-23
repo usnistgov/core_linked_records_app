@@ -2,10 +2,10 @@
 """
 import logging
 
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
-from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_main_app.commons.exceptions import ApiError
 from core_oaipmh_harvester_app.components.oai_record import api as oai_record_data
+from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.utils.dict import get_value_from_dot_notation
 
 logger = logging.getLogger(__name__)
 
@@ -33,5 +33,5 @@ def get_pid_for_data(oai_record_id, request):
     except Exception as exc:
         error_message = "An unexpected error occurred while retrieving PID for OAI data"
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise ApiError(f"{error_message}.")

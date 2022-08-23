@@ -5,13 +5,13 @@ import logging
 from django.db.models import Q
 from rest_framework import status
 
+from core_main_app.commons.exceptions import DoesNotExist, ApiError
+from core_main_app.components.data.models import Data
+from core_main_app.utils.requests_utils.requests_utils import send_delete_request
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.providers import ProviderManager
-from core_main_app.commons.exceptions import DoesNotExist, ApiError
-from core_main_app.components.data.models import Data
-from core_main_app.utils.requests_utils.requests_utils import send_delete_request
 
 logger = logging.getLogger(__name__)
 
@@ -76,10 +76,10 @@ def get_data_by_pid(pid):
 
     if query_result_length == 0:
         raise DoesNotExist("PID is not attached to any data.")
-    elif query_result_length != 1:
+    if query_result_length != 1:
         raise ApiError("PID must be unique.")
-    else:
-        return query_result[0]
+
+    return query_result[0]
 
 
 def get_pid_for_data(data_id):
@@ -116,8 +116,8 @@ def get_pid_xpath_by_template(template):
 
     if pid_xpath_object is None:
         return PidXpath(template=template, xpath=settings.PID_XPATH)
-    else:
-        return pid_xpath_object
+
+    return pid_xpath_object
 
 
 def delete_pid_for_data(data):
@@ -131,7 +131,7 @@ def delete_pid_for_data(data):
     previous_pid = get_pid_for_data(data.pk)
 
     if not previous_pid:  # If there is no previous PID assigned
-        logger.info(f"No PID assigned to the data {str(data.pk)}")
+        logger.info("No PID assigned to the data %s", str(data.pk))
         return
 
     previous_provider_name = provider_manager.find_provider_from_pid(previous_pid)
@@ -141,12 +141,13 @@ def delete_pid_for_data(data):
     )
 
     previous_pid_delete_response = send_delete_request(
-        "%s?format=json" % previous_pid_url
+        f"{previous_pid_url}?format=json"
     )
 
     # Log any error that happen during PID deletion
     if previous_pid_delete_response.status_code != status.HTTP_200_OK:
         logger.warning(
-            "Deletion of PID %s returned %s"
-            % (previous_pid, previous_pid_delete_response.status_code)
+            "Deletion of PID %s returned %s",
+            previous_pid,
+            previous_pid_delete_response.status_code,
         )

@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class PidXpath(models.Model):
+    """Pid Xpath"""
+
     xpath = models.CharField(blank=False, max_length=255)
     template = models.OneToOneField(
         Template, blank=False, on_delete=models.CASCADE, null=False, unique=True

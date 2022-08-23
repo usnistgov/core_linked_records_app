@@ -2,13 +2,13 @@
 """
 import logging
 
-from core_linked_records_app import settings
-from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.commons.exceptions import ApiError
 from core_main_app.components.template import (
     api as template_api,
 )
+from core_linked_records_app import settings
+from core_linked_records_app.components.pid_xpath.models import PidXpath
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,8 @@ def get_by_template(template, request):
                 template=template,
                 xpath=settings.PID_XPATH,
             )
-        else:
-            return pid_xpath_object
+
+        return pid_xpath_object
     except AccessControlError as ace:
         raise AccessControlError(str(ace))
     except Exception as exc:
@@ -42,7 +42,7 @@ def get_by_template(template, request):
             f"assigned to template {template.pk}"
         )
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise ApiError(str(exc))
 
 
@@ -62,5 +62,5 @@ def get_all(request):
     except Exception as exc:
         error_message = "An unexpected error occurred while retrieving all PidXpath"
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise ApiError(str(exc))

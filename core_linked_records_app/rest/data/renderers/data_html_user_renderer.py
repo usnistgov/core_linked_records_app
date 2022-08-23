@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class DataHtmlUserRenderer(renderers.BaseRenderer):
+    """Data Html User Renderer"""
+
     media_type = "text/html"
     format = "html"
     charset = "utf-8"
@@ -64,8 +66,8 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
                 "core_main_app/common/commons/error.html",
                 context={"error": str(api_error)},
             )
-        except Exception as e:
-            logger.error("Error while building data page: %s" % str(e))
+        except Exception as exception:
+            logger.error("Error while building data page: %s", str(exception))
 
             if "kwargs" in renderer_context and "record" in renderer_context["kwargs"]:
                 error_msg = (

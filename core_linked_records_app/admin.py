@@ -1,3 +1,6 @@
+"""  Admin
+"""
+
 from django.contrib import admin
 
 from core_linked_records_app.components.local_id.admin_site import CustomLocalIdAdmin

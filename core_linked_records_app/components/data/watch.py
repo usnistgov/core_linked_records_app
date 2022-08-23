@@ -5,6 +5,8 @@ from os.path import join
 
 from django.db.models.signals import pre_save
 
+from core_main_app.commons import exceptions
+from core_main_app.components.data.models import Data
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_settings import api as pid_settings_api
 from core_linked_records_app.system import api as system_api
@@ -13,8 +15,6 @@ from core_linked_records_app.utils.xml import (
     get_xpath_from_dot_notation,
     get_xpath_with_target_namespace,
 )
-from core_main_app.commons import exceptions
-from core_main_app.components.data.models import Data
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,10 @@ def set_data_pid(sender, instance, **kwargs):
             pid_value = data_utils.get_pid_value_for_data(instance, pid_xpath)
         except Exception as exc:  # XPath is not valid for current instance
             logger.warning(
-                f"Cannot create PID at {pid_xpath} for data {instance.pk}: {str(exc)}"
+                "Cannot create PID at %s for data %s: %s",
+                pid_xpath,
+                instance.pk,
+                str(exc),
             )
             return
 
@@ -85,7 +88,7 @@ def set_data_pid(sender, instance, **kwargs):
         )
         data_utils.set_pid_value_for_data(instance, pid_xpath, pid_value)
     except exceptions.ModelError as model_error:
-        logger.error(f"An error occurred while assigning PID: {str(model_error)}")
+        logger.error("An error occurred while assigning PID: %s", str(model_error))
         raise exceptions.ModelError(str(model_error))
     except Exception as exc:
         if not instance.pk:
@@ -95,5 +98,5 @@ def set_data_pid(sender, instance, **kwargs):
 
         error_message = f"An error occurred while assigning PID to {data_definition}"
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise exceptions.CoreError(f"{error_message}.")

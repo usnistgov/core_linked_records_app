@@ -7,6 +7,8 @@ from core_main_app.commons import exceptions
 
 
 class PidSettings(models.Model):
+    """Pid Settings"""
+
     auto_set_pid = models.BooleanField(default=False)
 
     @staticmethod
