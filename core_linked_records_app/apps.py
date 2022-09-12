@@ -17,11 +17,18 @@ class LinkedRecordsAppConfig(AppConfig):
         Returns:
 
         """
+        from core_main_app.commons.exceptions import CoreError
+        from core_linked_records_app import settings
         from core_linked_records_app.components.blob import watch as blob_watch
         from core_linked_records_app.components.data import watch as data_watch
         from core_linked_records_app.components.pid_settings import (
             watch as pid_settings_watch,
         )
+
+        if "" in settings.ID_PROVIDER_PREFIXES:
+            raise CoreError(
+                "Empty string not allowed in settings.ID_PROVIDER_PREFIXES."
+            )
 
         if "migrate" not in sys.argv:
             pid_settings_watch.init()
