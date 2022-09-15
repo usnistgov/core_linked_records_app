@@ -3,12 +3,13 @@
 from importlib import import_module
 from logging import getLogger
 
+from core_main_app.commons import exceptions
+from core_main_app.components.blob.models import Blob
 from core_linked_records_app import settings
 from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.components.local_id.models import LocalId
 from core_linked_records_app.utils.path import get_api_path_from_object
-from core_main_app.commons import exceptions
-from core_main_app.components.blob.models import Blob
+
 
 logger = getLogger(__name__)
 
@@ -54,7 +55,7 @@ def get_blob_by_pid(pid, user):
             f"An error occurred while looking up blob assigned to PID '{pid}'"
         )
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise exceptions.ApiError(error_message)
 
 
@@ -79,7 +80,7 @@ def get_pid_for_blob(blob_id):
             f"An error occurred while looking up PID assigned to blob '{blob_id}'"
         )
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise exceptions.ApiError(error_message)
 
 
@@ -118,5 +119,5 @@ def set_pid_for_blob(blob_id, blob_pid):
             f"An error occurred while assigning PID '{blob_pid}' to blob '{blob_id}'"
         )
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise exceptions.ApiError(error_message)

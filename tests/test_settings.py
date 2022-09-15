@@ -1,6 +1,8 @@
-from core_main_app.utils.databases.mongoengine_database import Database
+""" Test settings
+"""
 
 SECRET_KEY = "fake-key"
+
 INSTALLED_APPS = [
     # Django apps
     "django.contrib.admin",
@@ -12,18 +14,31 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Extra apps
     "defender",
+    "django_celery_beat",
     "tz_detect",
     "menu",
     # Local apps
     "xml_utils",
     "core_main_app",
+    "core_explore_common_app",
     "core_federated_search_app",
     "core_oaipmh_common_app",
-    # "core_oaipmh_harvester_app",
-    # "core_explore_oaipmh_app",
+    "core_oaipmh_harvester_app",
     "core_linked_records_app",
     "tests",
 ]
+
+# IN-MEMORY TEST DATABASE
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",
+        "USER": "",
+        "PASSWORD": "",
+        "HOST": "",
+        "PORT": "",
+    },
+}
 
 MIDDLEWARE = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -50,27 +65,9 @@ TEMPLATES = [
     },
 ]
 
-# IN-MEMORY TEST DATABASE
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": ":memory:",
-        "USER": "",
-        "PASSWORD": "",
-        "HOST": "",
-        "PORT": "",
-    },
-}
-
-MOCK_DATABASE_NAME = "db_mock"
-MOCK_DATABASE_HOST = "mongomock://localhost"
-CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-
 CUSTOM_NAME = "mock_custom_name"
 
 ROOT_URLCONF = "core_linked_records_app.urls"
 
+CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 SERVER_URI = "http://mock-cdcs.com"
-
-database = Database(MOCK_DATABASE_HOST, MOCK_DATABASE_NAME)
-database.connect()

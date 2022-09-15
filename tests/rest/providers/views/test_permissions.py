@@ -1,21 +1,23 @@
 """ Permission tests for core_linked_records_app.rest.providers.views
 """
-from unittest import TestCase
-
 import json
-from rest_framework import status
+from unittest import TestCase
 from unittest.mock import patch
 
-from core_linked_records_app import settings
-from core_linked_records_app.rest.providers import views as providers_views
-from core_linked_records_app.utils.providers import ProviderManager
+from rest_framework import status
+
 from core_main_app.rest.data.serializers import DataSerializer
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_main_app.utils.tests_tools.RequestMock import RequestMock
+from core_linked_records_app import settings
+from core_linked_records_app.rest.providers import views as providers_views
+from core_linked_records_app.utils.providers import ProviderManager
 from tests import mocks
 
 
 class TestProviderRecordViewPost(TestCase):
+    """Test Provider Record View Post"""
+
     @staticmethod
     def _send_request(mock_provider_manager_get, mock_user):
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
@@ -32,6 +34,7 @@ class TestProviderRecordViewPost(TestCase):
 
     @patch.object(ProviderManager, "get")
     def test_anonymous_returns_201(self, mock_provider_manager_get):
+        """test_anonymous_returns_201"""
 
         response = self._send_request(mock_provider_manager_get, None)
 
@@ -39,6 +42,8 @@ class TestProviderRecordViewPost(TestCase):
 
     @patch.object(ProviderManager, "get")
     def test_authenticated_returns_201(self, mock_provider_manager_get):
+        """test_authenticated_returns_201"""
+
         mock_user = create_mock_user("1")
 
         response = self._send_request(mock_provider_manager_get, mock_user)
@@ -47,6 +52,8 @@ class TestProviderRecordViewPost(TestCase):
 
     @patch.object(ProviderManager, "get")
     def test_staff_returns_201(self, mock_provider_manager_get):
+        """test_staff_returns_201"""
+
         mock_user = create_mock_user("1", is_staff=True)
 
         response = self._send_request(mock_provider_manager_get, mock_user)
@@ -55,6 +62,8 @@ class TestProviderRecordViewPost(TestCase):
 
 
 class TestProviderRecordViewPut(TestCase):
+    """Test Provider Record View Put"""
+
     @staticmethod
     def _send_request(mock_provider_manager_get, mock_user):
 
@@ -72,12 +81,16 @@ class TestProviderRecordViewPut(TestCase):
 
     @patch.object(ProviderManager, "get")
     def test_anonymous_returns_200(self, mock_provider_manager_get):
+        """test_anonymous_returns_200"""
+
         response = self._send_request(mock_provider_manager_get, None)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch.object(ProviderManager, "get")
     def test_authenticated_returns_200(self, mock_provider_manager_get):
+        """test_authenticated_returns_200"""
+
         mock_user = create_mock_user("1")
 
         response = self._send_request(mock_provider_manager_get, mock_user)
@@ -86,6 +99,8 @@ class TestProviderRecordViewPut(TestCase):
 
     @patch.object(ProviderManager, "get")
     def test_staff_returns_200(self, mock_provider_manager_get):
+        """test_staff_returns_200"""
+
         mock_user = create_mock_user("1", is_staff=True)
 
         response = self._send_request(mock_provider_manager_get, mock_user)
@@ -94,6 +109,8 @@ class TestProviderRecordViewPut(TestCase):
 
 
 class TestProviderRecordViewGet(TestCase):
+    """Test Provider Record View Get"""
+
     @staticmethod
     def _send_request(
         mock_provider_manager_get, mock_get_data_by_pid, mock_data_serializer, mock_user
@@ -118,6 +135,8 @@ class TestProviderRecordViewGet(TestCase):
     def test_anonymous_returns_200(
         self, mock_provider_manager_get, mock_get_data_by_pid, mock_data_serializer
     ):
+        """test_anonymous_returns_200"""
+
         response = self._send_request(
             mock_provider_manager_get,
             mock_get_data_by_pid,
@@ -133,6 +152,8 @@ class TestProviderRecordViewGet(TestCase):
     def test_authenticated_returns_200(
         self, mock_provider_manager_get, mock_get_data_by_pid, mock_data_serializer
     ):
+        """test_authenticated_returns_200"""
+
         mock_user = create_mock_user("1")
 
         response = self._send_request(
@@ -150,6 +171,8 @@ class TestProviderRecordViewGet(TestCase):
     def test_staff_returns_200(
         self, mock_provider_manager_get, mock_get_data_by_pid, mock_data_serializer
     ):
+        """test_staff_returns_200"""
+
         mock_user = create_mock_user("1", is_staff=True)
 
         response = self._send_request(
@@ -163,6 +186,8 @@ class TestProviderRecordViewGet(TestCase):
 
 
 class TestProviderRecordViewDelete(TestCase):
+    """Test Provider Record View Delete"""
+
     @staticmethod
     def _send_request(mock_provider_manager_get, mock_user):
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
@@ -179,12 +204,16 @@ class TestProviderRecordViewDelete(TestCase):
 
     @patch.object(ProviderManager, "get")
     def test_anonymous_returns_204(self, mock_provider_manager_get):
+        """test_anonymous_returns_204"""
+
         response = self._send_request(mock_provider_manager_get, None)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     @patch.object(ProviderManager, "get")
     def test_authenticated_returns_204(self, mock_provider_manager_get):
+        """test_authenticated_returns_204"""
+
         mock_user = create_mock_user("1")
 
         response = self._send_request(mock_provider_manager_get, mock_user)
@@ -193,6 +222,8 @@ class TestProviderRecordViewDelete(TestCase):
 
     @patch.object(ProviderManager, "get")
     def test_staff_returns_204(self, mock_provider_manager_get):
+        """test_staff_returns_204"""
+
         mock_user = create_mock_user("1", is_staff=True)
 
         response = self._send_request(mock_provider_manager_get, mock_user)

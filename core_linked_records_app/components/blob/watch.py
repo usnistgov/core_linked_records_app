@@ -1,33 +1,42 @@
 """ Signals to trigger after Blob save
 """
+import json
 from logging import getLogger
 
-import json
+from django.db.models.signals import post_save
 from django.urls import reverse
 
-from core_linked_records_app import settings
-from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
 from core_main_app.commons.exceptions import CoreError, DoesNotExist
 from core_main_app.components.blob.models import Blob
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
-from signals_utils.signals.mongo import connector, signals
+from core_linked_records_app import settings
+from core_linked_records_app.components.blob import api as blob_api
+from core_linked_records_app.components.pid_settings import api as pid_settings_api
 
 logger = getLogger(__name__)
 
 
 def init():
     """Connect to Blob object events."""
-    connector.connect(set_blob_pid, signals.post_save, sender=Blob)
+    post_save.connect(set_blob_pid, sender=Blob)
 
 
-def set_blob_pid(sender, document, **kwargs):
+def set_blob_pid(sender, instance, **kwargs):
+    """set_blob_pid
+
+    Args:
+        sender:
+        instance:
+
+    Returns:
+
+    """
     try:
         if not pid_settings_api.get().auto_set_pid:
             return
 
         try:
-            blob_api.get_pid_for_blob(str(document.id))
+            blob_api.get_pid_for_blob(str(instance.pk))
         except DoesNotExist:
             # Register new PID for the saved Blob.
             sub_url = reverse(
@@ -42,11 +51,11 @@ def set_blob_pid(sender, document, **kwargs):
             )
             blob_pid = json.loads(pid_response.content)["url"]
 
-            blob_api.set_pid_for_blob(document.id, blob_pid)
+            blob_api.set_pid_for_blob(instance.pk, blob_pid)
     except Exception as exc:
         error_message = (
-            f"An error occurred while setting a PID for blob '{document.id}'"
+            f"An error occurred while setting a PID for blob '{instance.pk}'"
         )
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise CoreError(f"{error_message}.")

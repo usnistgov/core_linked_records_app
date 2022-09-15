@@ -1,20 +1,23 @@
 """ Handle system abstract class
 """
-from importlib import import_module
 
 import logging
 from abc import ABC, abstractmethod
+from importlib import import_module
+
 from django.urls import reverse
 from rest_framework import status
 
-from core_linked_records_app import settings
 from core_main_app.commons import exceptions
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
+from core_linked_records_app import settings
 
 logger = logging.getLogger(__name__)
 
 
 class AbstractIdProvider(ABC):
+    """Abstract Id Provider"""
+
     def __init__(
         self,
         provider_name,
@@ -23,13 +26,12 @@ class AbstractIdProvider(ABC):
         username,
         password,
     ):
-        self.local_url = "%s%s" % (
-            settings.SERVER_URI,
-            reverse(
-                "core_linked_records_provider_record",
-                kwargs={"provider": provider_name, "record": ""},
-            ),
+
+        self.local_url = (
+            f"{settings.SERVER_URI}"
+            f'{reverse("core_linked_records_provider_record",kwargs = {"provider": provider_name, "record": ""})}'
         )
+
         self.local_url = self.local_url[:-1]  # Removing the final /
         self.provider_lookup_url = (
             provider_lookup_url if provider_lookup_url else self.local_url
@@ -39,26 +41,48 @@ class AbstractIdProvider(ABC):
 
     @abstractmethod
     def encode_token(self, username, password):
+        """encode_token
+        Args:
+            username:
+            password:
+        """
         raise NotImplementedError()
 
     @abstractmethod
     def get(self, record):
+        """get
+        Args:
+            record:
+        """
         raise NotImplementedError()
 
     @abstractmethod
     def create(self, prefix, record=None):
+        """create
+        Args:
+            prefix:
+            record:
+        """
         raise NotImplementedError()
 
     @abstractmethod
     def update(self, record):
+        """update
+        Args:
+            record:
+        """
         raise NotImplementedError()
 
     @abstractmethod
     def delete(self, record):
+        """delete
+        Args:
+            record:
+        """
         raise NotImplementedError()
 
 
-class ProviderManager(object):
+class ProviderManager:
     """Manage provider instances from a given provider name"""
 
     def __init__(self):
@@ -68,6 +92,13 @@ class ProviderManager(object):
         self.provider_config = settings.ID_PROVIDER_SYSTEM_CONFIG
 
     def get(self, provider_name):
+        """get provider
+        Args:
+            provider_name:
+
+        Returns:
+
+        """
         if self._provider_instance is None:
             # Retrieve class name and module path
             id_provider_classpath = self.provider_config["class"].split(".")
@@ -86,6 +117,13 @@ class ProviderManager(object):
         return self._provider_instance
 
     def find_provider_from_pid(self, pid):
+        """find_provider_from_pid
+        Args:
+            pid:
+
+        Returns:
+
+        """
         provider = self.get(settings.ID_PROVIDER_SYSTEM_NAME)
 
         return (
@@ -138,7 +176,7 @@ def register_pid_for_data_id(provider_name, pid_value, data_id):
         provider.provider_lookup_url, provider.local_url
     )
 
-    document_pid_response = send_post_request("%s?format=json" % registration_url)
+    document_pid_response = send_post_request(f"{registration_url}?format=json")
 
     # If an error happened during PID registration, try to relay the message from the
     # provider, otherwise relay a default error message.
@@ -149,7 +187,7 @@ def register_pid_for_data_id(provider_name, pid_value, data_id):
                 document_pid_response.json().get("message", default_error_message)
             )
         except Exception as exc:  # If the response is not JSON parsable
-            logger.error(f"{default_error_message}: {str(exc)}")
+            logger.error("%s: %s", default_error_message, str(exc))
             raise exceptions.ModelError(default_error_message)
 
     if (

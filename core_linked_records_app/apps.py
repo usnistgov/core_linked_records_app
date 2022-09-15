@@ -9,6 +9,7 @@ class LinkedRecordsAppConfig(AppConfig):
     """Core application settings"""
 
     name = "core_linked_records_app"
+    verbose_name = "Core Linked Records App"
 
     def ready(self):
         """Run when the app is ready.

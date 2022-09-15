@@ -1,20 +1,22 @@
 """ System API for core_linked_records
 """
 import logging
+
+from django.db.models import Q
 from rest_framework import status
 
+from core_main_app.commons.exceptions import DoesNotExist, ApiError
+from core_main_app.components.data.models import Data
+from core_main_app.utils.requests_utils.requests_utils import send_delete_request
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.providers import ProviderManager
-from core_main_app.commons.exceptions import DoesNotExist, ApiError
-from core_main_app.components.data.models import Data
-from core_main_app.utils.requests_utils.requests_utils import send_delete_request
 
 logger = logging.getLogger(__name__)
 
 
-def is_pid_defined_for_document(pid, document_id):
+def is_pid_defined_for_data(pid, document_id):
     """Determine if a given PID match the document ID provided.
 
     Params:
@@ -25,11 +27,12 @@ def is_pid_defined_for_document(pid, document_id):
     """
     data = Data.get_by_id(document_id)
 
-    pid_xpath_object = get_pid_xpath_by_template_id(data.template.pk)
+    pid_xpath_object = get_pid_xpath_by_template(data.template)
     pid_xpath = pid_xpath_object.xpath
 
-    json_pid_path = f"dict_content.{pid_xpath}"
-    query_result = Data.execute_query({json_pid_path: pid}, order_by_field=[])
+    query_result = Data.execute_query(
+        Q(**{f"dict_content__{pid_xpath.replace('.', '__')}": pid}), order_by_field=[]
+    )
 
     return len(query_result) == 1 and query_result[0].pk == document_id
 
@@ -57,22 +60,26 @@ def get_data_by_pid(pid):
 
     Returns: data object
     """
-    pid_xpath_list = [
-        pid_xpath_object.xpath for pid_xpath_object in PidXpath.get_all()
-    ] + [settings.PID_XPATH]
-    json_pid_xpaths = [f"dict_content.{pid_xpath}" for pid_xpath in pid_xpath_list]
-    query_result = Data.execute_query(
-        {"$or": [{json_pid_xpath: pid} for json_pid_xpath in json_pid_xpaths]},
-        order_by_field=[],
+    pid_xpath_query = Q(
+        **{f"dict_content__{settings.PID_XPATH.replace('.', '__')}": pid}
     )
-    query_result_length = len(query_result)
+
+    # Create the or query with all the different PID Xpath available.
+    for pid_xpath_object in PidXpath.get_all():
+        pid_xpath_query |= Q(
+            **{f"dict_content__{pid_xpath_object.xpath.replace('.', '__')}": pid}
+        )
+
+    # Execute built query and retrieve number of items returned.
+    query_result = Data.execute_query(pid_xpath_query, order_by_field=[])
+    query_result_length = query_result.count()
 
     if query_result_length == 0:
         raise DoesNotExist("PID is not attached to any data.")
-    elif query_result_length != 1:
+    if query_result_length != 1:
         raise ApiError("PID must be unique.")
-    else:
-        return query_result[0]
+
+    return query_result[0]
 
 
 def get_pid_for_data(data_id):
@@ -87,30 +94,30 @@ def get_pid_for_data(data_id):
     data = Data.get_by_id(data_id)
 
     # Return PID value from the document and the PID_XPATH
-    pid_xpath_object = get_pid_xpath_by_template_id(data.template.pk)
+    pid_xpath_object = get_pid_xpath_by_template(data.template)
     pid_xpath = pid_xpath_object.xpath
 
     return get_value_from_dot_notation(
-        data["dict_content"],
+        data.get_dict_content(),
         pid_xpath,
     )
 
 
-def get_pid_xpath_by_template_id(template_id):
+def get_pid_xpath_by_template(template):
     """Retrieve XPath associated with a specific template ID
 
     Args:
-        template_id: ObjectId
+        template: Template object
 
     Returns:
         PidXpath - PidXpath object, linking template ID and XPath
     """
-    pid_xpath_object = PidXpath.get_by_template_id(template_id)
+    pid_xpath_object = PidXpath.get_by_template(template)
 
     if pid_xpath_object is None:
-        return PidXpath(template=template_id, xpath=settings.PID_XPATH)
-    else:
-        return pid_xpath_object
+        return PidXpath(template=template, xpath=settings.PID_XPATH)
+
+    return pid_xpath_object
 
 
 def delete_pid_for_data(data):
@@ -124,7 +131,7 @@ def delete_pid_for_data(data):
     previous_pid = get_pid_for_data(data.pk)
 
     if not previous_pid:  # If there is no previous PID assigned
-        logger.info(f"No PID assigned to the data {str(data.pk)}")
+        logger.info("No PID assigned to the data %s", str(data.pk))
         return
 
     previous_provider_name = provider_manager.find_provider_from_pid(previous_pid)
@@ -134,12 +141,13 @@ def delete_pid_for_data(data):
     )
 
     previous_pid_delete_response = send_delete_request(
-        "%s?format=json" % previous_pid_url
+        f"{previous_pid_url}?format=json"
     )
 
     # Log any error that happen during PID deletion
     if previous_pid_delete_response.status_code != status.HTTP_200_OK:
         logger.warning(
-            "Deletion of PID %s returned %s"
-            % (previous_pid, previous_pid_delete_response.status_code)
+            "Deletion of PID %s returned %s",
+            previous_pid,
+            previous_pid_delete_response.status_code,
         )

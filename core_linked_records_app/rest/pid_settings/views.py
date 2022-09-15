@@ -30,6 +30,7 @@ class PidSettingsView(APIView):
             pid_settings_data = PidSettingsSerializer(pid_settings).data
 
             response_data = {
+                "xpath": settings.PID_XPATH,
                 "format": settings.PID_FORMAT,
                 "system": settings.ID_PROVIDER_SYSTEM_NAME,
                 "prefixes": settings.ID_PROVIDER_PREFIXES,

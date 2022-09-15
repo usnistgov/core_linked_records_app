@@ -4,13 +4,14 @@ import json
 import logging
 from base64 import b64encode
 
-from core_linked_records_app import settings
-from core_linked_records_app.utils.providers import AbstractIdProvider
 from core_main_app.utils.requests_utils.requests_utils import (
     send_put_request,
     send_delete_request,
     send_get_request,
 )
+
+from core_linked_records_app import settings
+from core_linked_records_app.utils.providers import AbstractIdProvider
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +36,8 @@ class HandleNetSystem(AbstractIdProvider):
     def _get_message_for_response_code(self, return_code):
         if return_code in self.response_code_messages.keys():
             return self.response_code_messages[return_code]
-        else:
-            return "Handle code not recognized"
+
+        return "Handle code not recognized"
 
     def _update_response_content(self, response):
         json_response_content = json.loads(response.content)
@@ -45,10 +46,9 @@ class HandleNetSystem(AbstractIdProvider):
             json_response_content["responseCode"]
         )
 
-        json_response_content["url"] = "%s/%s" % (
-            self.provider_lookup_url,
-            json_response_content["handle"],
-        )
+        json_response_content[
+            "url"
+        ] = f'{self.provider_lookup_url}/{ json_response_content["handle"]}'
 
         return json.dumps(json_response_content)
 
@@ -73,7 +73,7 @@ class HandleNetSystem(AbstractIdProvider):
         return json.dumps(record_data)
 
     def encode_token(self, username, password):
-        user_pass = "%s:%s" % (username, password)
+        user_pass = f"{username}:{password}"
         return b64encode(user_pass.encode("utf-8")).decode("utf-8")
 
     def get(self, record):
@@ -85,7 +85,7 @@ class HandleNetSystem(AbstractIdProvider):
         Returns:
         """
         response = send_get_request(
-            "%s/%s/%s" % (self.provider_lookup_url, self.registration_api, record),
+            f"{self.provider_lookup_url}/{self.registration_api}/{record}",
             headers={
                 "Content-Type": "application/json",
             },
@@ -105,33 +105,25 @@ class HandleNetSystem(AbstractIdProvider):
         """
         # Create request url depending on handle value
         if record is not None:
-            request_url = "%s/%s/%s/%s?overwrite=false" % (
-                self.provider_registration_url,
-                self.registration_api,
-                prefix,
-                record,
-            )
+            request_url = f"{self.provider_registration_url}/{self.registration_api}/{prefix}/{record}?overwrite=false"
+
         else:
-            request_url = "%s/%s/%s/?overwrite=false&mintNewSuffix=true" % (
-                self.provider_registration_url,
-                self.registration_api,
-                prefix,
-            )
+            request_url = f"{self.provider_registration_url}/{self.registration_api}/{prefix}/?overwrite=false&mintNewSuffix=true"
 
         response = send_put_request(
             request_url,
             self._generate_record_data(f"{prefix}/{record}"),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Basic %s" % str(self.auth_token),
+                "Authorization": f"Basic {str(self.auth_token)}",
             },
         )
 
         if record is None:
             return self.update(response.json()["handle"])
-        else:
-            response._content = self._update_response_content(response)
-            return response
+
+        response._content = self._update_response_content(response)
+        return response
 
     def update(self, record):
         """Update a handle for a handle.net system.
@@ -142,12 +134,11 @@ class HandleNetSystem(AbstractIdProvider):
         Returns:
         """
         response = send_put_request(
-            f"{self.provider_registration_url}/{self.registration_api}/"
-            f"{record}?overwrite=true",
+            f"{self.provider_url}/{self.registration_api}/{record}?overwrite=true",
             self._generate_record_data(record, include_handle=True),
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Basic %s" % str(self.auth_token),
+                "Authorization": f"Basic {str(self.auth_token)}",
             },
         )
 
@@ -156,9 +147,8 @@ class HandleNetSystem(AbstractIdProvider):
 
     def delete(self, record):
         response = send_delete_request(
-            "%s/%s/%s"
-            % (self.provider_registration_url, self.registration_api, record),
-            headers={"Authorization": "Basic %s" % str(self.auth_token)},
+            f"{self.provider_registration_url}/{self.registration_api}/{record}",
+            headers={"Authorization": f"Basic {str(self.auth_token)}"},
         )
 
         response._content = self._update_response_content(response)

@@ -6,6 +6,8 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_E
 
 
 class DataXmlRenderer(renderers.BaseRenderer):
+    """Data Xml Renderer"""
+
     media_type = "application/xml"
     format = "xml"
     charset = "utf-8"
@@ -25,7 +27,7 @@ class DataXmlRenderer(renderers.BaseRenderer):
         if "status" in data and data["status"] == "error":
             if data["code"] == HTTP_404_NOT_FOUND:
                 return HttpResponse(status=HTTP_404_NOT_FOUND)
-            else:
-                return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return data["xml_content"]
+
+            return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return data["xml_content"]

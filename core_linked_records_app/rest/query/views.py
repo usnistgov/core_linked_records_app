@@ -3,15 +3,17 @@
 from rest_framework import status
 from rest_framework.response import Response
 
+from core_main_app.components.data import api as data_api
+from core_main_app.rest.data.abstract_views import AbstractExecuteLocalQueryView
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.pid import is_valid_pid_value
-from core_main_app.components.data import api as data_api
-from core_main_app.rest.data.abstract_views import AbstractExecuteLocalQueryView
 
 
 class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
+    """Execute Local PID Query View"""
+
     def build_query(
         self, query, workspaces=None, templates=None, options=None, title=None
     ):
@@ -63,16 +65,16 @@ class ExecuteLocalPIDQueryView(AbstractExecuteLocalQueryView):
             Results of the query
         """
         pid_list = list()
-        data_list = data_api.execute_query(raw_query, self.request.user)
+        data_list = data_api.execute_json_query(raw_query, self.request.user)
 
         for data in data_list:
-            pid_xpath_object = pid_xpath_api.get_by_template_id(
-                data.template.pk, self.request
+            pid_xpath_object = pid_xpath_api.get_by_template(
+                data.template, self.request
             )
             pid_xpath = pid_xpath_object.xpath
 
             data_pid = get_value_from_dot_notation(
-                data.dict_content,
+                data.get_dict_content(),
                 pid_xpath,
             )
 
@@ -107,10 +109,11 @@ if (
     "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
     and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
 ):
-    from core_oaipmh_harvester_app.components.oai_record import api as oai_record_api
     from core_explore_oaipmh_app.rest.query.views import ExecuteQueryView
 
     class ExecuteOaiPmhPIDQueryView(ExecuteQueryView):
+        """ " Execute Oai Pmh PID Query View"""
+
         pid_xpath_list = None
 
         def build_query(self, query, templates, registries):
@@ -147,41 +150,6 @@ if (
                 pid_query["$and"].append(query)
 
             return pid_query
-
-        def execute_raw_query(self, raw_query, order_by_field):
-            """Execute the raw query in database
-
-            Args:
-
-                raw_query: Query to execute
-                order_by_field:
-
-            Returns:
-                Results of the query
-            """
-            if self.pid_xpath_list is None:
-                raise Exception("Undefined PID xpath from remote server.")
-
-            pid_list = list()
-            data_list = oai_record_api.execute_query(raw_query, self.request.user)
-
-            for data in data_list:
-                pid_xpath_object = pid_xpath_api.get_by_template_id(
-                    data.harvester_metadata_format.template.pk, self.request
-                )
-                pid_xpath = pid_xpath_object.xpath
-
-                data_pid = get_value_from_dot_notation(
-                    data["dict_content"],
-                    pid_xpath,
-                )
-
-                if not data_pid:
-                    continue
-
-                pid_list.append({"pid": data_pid})
-
-            return pid_list
 
         def build_response(self, data_list):
             """Build the list of PIDs

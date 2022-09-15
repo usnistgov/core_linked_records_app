@@ -1,9 +1,12 @@
 """ Signals to trigger before Data save
 """
+import logging
 from os.path import join
 
-import logging
+from django.db.models.signals import pre_save
 
+from core_main_app.commons import exceptions
+from core_main_app.components.data.models import Data
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_settings import api as pid_settings_api
 from core_linked_records_app.system import api as system_api
@@ -12,25 +15,22 @@ from core_linked_records_app.utils.xml import (
     get_xpath_from_dot_notation,
     get_xpath_with_target_namespace,
 )
-from core_main_app.commons import exceptions
-from core_main_app.components.data.models import Data
-from signals_utils.signals.mongo import signals, connector
 
 logger = logging.getLogger(__name__)
 
 
 def init():
     """Connect to Data object events."""
-    connector.connect(set_data_pid, signals.pre_save, sender=Data)
+    pre_save.connect(set_data_pid, sender=Data)
 
 
-def set_data_pid(sender, document, **kwargs):
+def set_data_pid(sender, instance, **kwargs):
     """Set the PID in the XML field specified in the settings. If the PID
     already exists and is valid, it is not reset.
 
     Params:
         sender:
-        document:
+        instance:
         kwargs:
 
     Returns:
@@ -43,30 +43,31 @@ def set_data_pid(sender, document, **kwargs):
 
         # Retrieve PID XPath from `PidSettings.xpath_list`. Skip PID assignment
         # if the PID XPath is not defined for the template.
-        template_pid_xpath = system_api.get_pid_xpath_by_template_id(
-            document.template.pk
-        )
+        template_pid_xpath = system_api.get_pid_xpath_by_template(instance.template)
         pid_xpath = get_xpath_with_target_namespace(
             get_xpath_from_dot_notation(template_pid_xpath.xpath),
-            document.template.content,
+            instance.template.content,
         )
 
         try:  # Retrieve the PID located at predefined XPath
-            pid_value = data_utils.get_pid_value_for_data(document, pid_xpath)
-        except Exception as exc:  # XPath is not valid for current document
+            pid_value = data_utils.get_pid_value_for_data(instance, pid_xpath)
+        except Exception as exc:  # XPath is not valid for current instance
             logger.warning(
-                f"Cannot create PID at {pid_xpath} for data {document.pk}: {str(exc)}"
+                "Cannot create PID at %s for data %s: %s",
+                pid_xpath,
+                instance.pk,
+                str(exc),
             )
             return
 
-        # Remove previous document PID from DB.
-        if document.pk is not None:
-            system_api.delete_pid_for_data(document)
+        # Remove previous instance PID from DB.
+        if instance.pk is not None:
+            system_api.delete_pid_for_data(instance)
 
         provider_name = providers_utils.retrieve_provider_name(pid_value)
 
         # Assign default value for undefined PID and check that the PID is not
-        # defined for a document other than the current document.
+        # defined for a instance other than the current instance.
         if pid_value is None or pid_value == "":
             pid_value = join(
                 providers_utils.ProviderManager()
@@ -76,26 +77,26 @@ def set_data_pid(sender, document, **kwargs):
             )
 
         if system_api.is_pid_defined(pid_value) and (
-            document.pk is None
-            or not system_api.is_pid_defined_for_document(pid_value, document.pk)
+            instance.pk is None
+            or not system_api.is_pid_defined_for_data(pid_value, instance.pk)
         ):
-            raise exceptions.ModelError("PID already defined for another document")
+            raise exceptions.ModelError("PID already defined for another instance")
 
-        # Register PID and write resulting URL in document
+        # Register PID and write resulting URL in instance
         pid_value = providers_utils.register_pid_for_data_id(
-            provider_name, pid_value, document.pk
+            provider_name, pid_value, instance.pk
         )
-        data_utils.set_pid_value_for_data(document, pid_xpath, pid_value)
+        data_utils.set_pid_value_for_data(instance, pid_xpath, pid_value)
     except exceptions.ModelError as model_error:
-        logger.error(f"An error occurred while assigning PID: {str(model_error)}")
+        logger.error("An error occurred while assigning PID: %s", str(model_error))
         raise exceptions.ModelError(str(model_error))
     except Exception as exc:
-        if not document.id:
+        if not instance.pk:
             data_definition = "new data"
         else:
-            data_definition = f"data '{document.id}'"
+            data_definition = f"data '{instance.pk}'"
 
         error_message = f"An error occurred while assigning PID to {data_definition}"
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise exceptions.CoreError(f"{error_message}.")

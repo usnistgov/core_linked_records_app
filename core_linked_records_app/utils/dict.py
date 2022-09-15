@@ -1,4 +1,4 @@
-"""
+""" Dict
 """
 
 
@@ -19,8 +19,7 @@ def get_value_from_dot_notation(dictionary, dot_notation):
 
         if key in dictionary.keys():
             return get_value_from_dot_notation(dictionary[key], ".".join(key_list))
-        else:
-            return None
+        return None
 
     return dictionary
 
@@ -42,7 +41,6 @@ def is_dot_notation_in_dictionary(dictionary, dot_notation):
 
         if key in dictionary.keys():
             return is_dot_notation_in_dictionary(dictionary[key], ".".join(key_list))
-        else:
-            return False
+        return False
 
     return True

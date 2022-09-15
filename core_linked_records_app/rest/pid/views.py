@@ -1,36 +1,44 @@
 """ Ajax views accessible by users.
 """
 import json
+from urllib.parse import urljoin
+
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
-from urllib.parse import urljoin
 
 from core_explore_common_app.components.query import api as query_api
 from core_explore_common_app.utils.protocols.oauth2 import (
     send_post_request as oauth2_post_request,
     send_get_request as oauth2_get_request,
 )
-from core_linked_records_app import settings
-from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.data import api as data_api
 from core_main_app.utils.requests_utils.requests_utils import (
     send_get_request,
 )
+from core_linked_records_app import settings
+from core_linked_records_app.components.blob import api as blob_api
+from core_linked_records_app.components.data import api as data_api
 
 
 class RetrieveDataPIDView(APIView):
     """Retrieve PIDs for a given data IDs."""
 
     def get(self, request):
+        """get
+
+        Args:
+            request:
+
+        Returns:
+        """
         try:
             if "data_id" in request.GET:
                 return JsonResponse(
                     {"pid": data_api.get_pid_for_data(request.GET["data_id"], request)}
                 )
-            elif (
+            if (
                 "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
                 and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
                 and "oai_data_id" in request.GET
@@ -46,7 +54,7 @@ class RetrieveDataPIDView(APIView):
                         )
                     }
                 )
-            elif (
+            if (
                 "core_federated_search_app" in settings.INSTALLED_APPS
                 and "fede_data_id" in request.GET
                 and "fede_origin" in request.GET
@@ -59,24 +67,21 @@ class RetrieveDataPIDView(APIView):
                 instance_name = fede_origin_keys[1].split("=")[1]
                 instance = instance_api.get_by_name(instance_name)
 
-                url_get_data = "%s?data_id=%s" % (
-                    reverse(
-                        "core_linked_records_retrieve_data_pid",
-                    ),
-                    request.GET["fede_data_id"],
-                )
+                reverse_url = reverse("core_linked_records_retrieve_data_pid")
+                url_get_data = f'{reverse_url}?data_id={request.GET["fede_data_id"]}'
+
                 data_response = oauth2_get_request(
                     urljoin(instance.endpoint, url_get_data), instance.access_token
                 )
                 return JsonResponse(json.loads(data_response.text))
-            else:
-                return JsonResponse(
-                    {
-                        "message": "Impossible to retrieve PID for data with the given "
-                        "parameters"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
+            return JsonResponse(
+                {
+                    "message": "Impossible to retrieve PID for data with the given "
+                    "parameters"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except Exception as exc:
             return JsonResponse(
                 {
@@ -91,6 +96,13 @@ class RetrieveBlobPIDView(APIView):
     """Retrieve PIDs for a given blob ID."""
 
     def get(self, request):
+        """get PIDs
+        Args:
+            request:
+
+        Returns:
+
+        """
         if "blob_id" in request.GET:
             try:
                 blob_pid = blob_api.get_pid_for_blob(request.GET["blob_id"])
@@ -124,6 +136,13 @@ class RetrieveListPIDView(APIView):
     """Retrieve PIDs for a given list of data IDs."""
 
     def post(self, request):
+        """get PIDs
+        Args:
+            request:
+
+        Returns:
+
+        """
         try:
             # FIXME duplicated code with core_explore_common.utils.query.send
             query = query_api.get_by_id(
@@ -139,36 +158,36 @@ class RetrieveListPIDView(APIView):
                 "query": query.content,
                 "templates": json.dumps(
                     [
-                        {"id": str(template.id), "hash": template.hash}
-                        for template in query.templates
+                        {"id": template.id, "hash": template.hash}
+                        for template in query.templates.all()
                     ]
                 ),
-                "options": json.dumps(data_source.query_options),
-                "order_by_field": data_source.order_by_field,
+                "options": json.dumps(data_source["query_options"]),
+                "order_by_field": data_source["order_by_field"],
             }
 
             if (
-                getattr(data_source, "capabilities", False) is not False
-                and "url_pid" not in data_source.capabilities.keys()
+                "capabilities" in data_source.keys()
+                and "url_pid" not in data_source["capabilities"].keys()
             ):
                 return JsonResponse(
                     {"error": "The remote does not have PID capabilities."},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
-            if data_source.authentication.type == "session":
+            if data_source["authentication"]["auth_type"] == "session":
                 response = send_get_request(
-                    data_source.capabilities["url_pid"],
+                    data_source["capabilities"]["url_pid"],
                     json=json_query,
                     cookies={
                         "sessionid": request.session.session_key,
                     },
                 )
-            elif data_source.authentication.type == "oauth2":
+            elif data_source["authentication"]["auth_type"] == "oauth2":
                 response = oauth2_post_request(
-                    data_source.capabilities["url_pid"],
+                    data_source["capabilities"]["url_pid"],
                     json_query,
-                    data_source.authentication.params["access_token"],
+                    data_source["authentication"]["params"]["access_token"],
                     session_time_zone=timezone.get_current_timezone(),
                 )
             else:
@@ -179,14 +198,13 @@ class RetrieveListPIDView(APIView):
                     {"pids": [pid for pid in response.json() if pid is not None]},
                     status=response.status_code,
                 )
-            else:
-                return JsonResponse(
-                    {
-                        "error": "Remote service answered with status code %d."
-                        % response.status_code
-                    },
-                    status=response.status_code,
-                )
+
+            return JsonResponse(
+                {
+                    "error": f"Remote service answered with status code {response.status_code}."
+                },
+                status=response.status_code,
+            )
         except Exception as exception:
             return JsonResponse(
                 {"error": str(exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR

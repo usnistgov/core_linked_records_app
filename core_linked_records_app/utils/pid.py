@@ -1,7 +1,6 @@
 """ Utilities related to PID
 """
 import re
-
 from django.urls import reverse
 
 from core_linked_records_app import settings

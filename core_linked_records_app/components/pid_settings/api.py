@@ -2,8 +2,8 @@
 """
 import logging
 
-from core_linked_records_app.components.pid_settings.models import PidSettings
 from core_main_app.commons.exceptions import ApiError
+from core_linked_records_app.components.pid_settings.models import PidSettings
 
 logger = logging.getLogger(__name__)
 
@@ -18,11 +18,12 @@ def upsert(pid_settings_object):
         Saved PidSettings object
     """
     try:
-        return pid_settings_object.save()
+        pid_settings_object.save()
+        return pid_settings_object
     except Exception as exc:
         error_message = "An unexpected error occurred while saving PidSettings"
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise ApiError(f"{error_message}.")
 
 
@@ -37,5 +38,5 @@ def get():
     except Exception as exc:
         error_message = "An unexpected error occurred while retrieving PidSettings"
 
-        logger.error(f"{error_message}: {str(exc)}")
+        logger.error("%s: %s", error_message, str(exc))
         raise ApiError(f"{error_message}.")

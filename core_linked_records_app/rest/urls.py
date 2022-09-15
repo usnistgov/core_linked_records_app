@@ -42,7 +42,7 @@ urlpatterns += [
         name="core_linked_records_app_settings",
     ),
     url(
-        r"^settings/xpath/(?P<id>[^/]+)/$",
+        r"^settings/xpath/(?P<pk>[0-9]+)/$",
         xpath_views.PidXpathDetailView.as_view(),
         name="core_linked_records_app_settings",
     ),
