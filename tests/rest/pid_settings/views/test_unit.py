@@ -4,8 +4,12 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
-from core_linked_records_app.rest.pid_settings import views as pid_settings_views
+from core_linked_records_app.components.pid_settings import (
+    api as pid_settings_api,
+)
+from core_linked_records_app.rest.pid_settings import (
+    views as pid_settings_views,
+)
 from core_linked_records_app.rest.pid_settings.serializers import (
     PidSettingsSerializer,
 )
@@ -21,10 +25,14 @@ class TestPidSettingsViewGet(TestCase):
         self.mock_request = mocks.MockRequest()
 
     @patch.object(pid_settings_api, "get")
-    def test_pid_settings_api_get_fails_returns_500(self, mock_pid_settings_get):
+    def test_pid_settings_api_get_fails_returns_500(
+        self, mock_pid_settings_get
+    ):
         """test_pid_settings_api_get_fails_returns_500"""
 
-        mock_pid_settings_get.side_effect = Exception("mock_pid_settings_get_exception")
+        mock_pid_settings_get.side_effect = Exception(
+            "mock_pid_settings_get_exception"
+        )
 
         test_view = pid_settings_views.PidSettingsView()
         response = test_view.get(self.mock_request)
@@ -74,7 +82,9 @@ class TestPidSettingsViewPatch(TestCase):
         self.mock_request.user = create_mock_user("1", is_superuser=True)
 
     @patch.object(PidSettingsSerializer, "__new__")
-    def test_pid_serializer_init_fails_returns_500(self, mock_pid_settings_serializer):
+    def test_pid_serializer_init_fails_returns_500(
+        self, mock_pid_settings_serializer
+    ):
         """test_pid_serializer_init_fails_returns_500"""
 
         mock_pid_settings_serializer.side_effect = Exception(
@@ -102,7 +112,9 @@ class TestPidSettingsViewPatch(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch.object(PidSettingsSerializer, "__new__")
-    def test_pid_serializer_not_valid_returns_400(self, mock_pid_settings_serializer):
+    def test_pid_serializer_not_valid_returns_400(
+        self, mock_pid_settings_serializer
+    ):
         """test_pid_serializer_not_valid_returns_400"""
 
         mock_pid_settings_serializer.return_value = mocks.MockSerializer(
@@ -122,7 +134,9 @@ class TestPidSettingsViewPatch(TestCase):
 
         mock_pid_settings_serializer.return_value = mocks.MockSerializer(
             is_valid_result=True,
-            update_exc=Exception("mock_pid_settings_serializer_update_exception"),
+            update_exc=Exception(
+                "mock_pid_settings_serializer_update_exception"
+            ),
         )
 
         test_view = pid_settings_views.PidSettingsView()
@@ -132,7 +146,9 @@ class TestPidSettingsViewPatch(TestCase):
 
     @patch.object(pid_settings_views.PidSettingsView, "get")
     @patch.object(PidSettingsSerializer, "__new__")
-    def test_get_fails_returns_500(self, mock_pid_settings_serializer, mock_view_get):
+    def test_get_fails_returns_500(
+        self, mock_pid_settings_serializer, mock_view_get
+    ):
         """test_get_fails_returns_500"""
 
         mock_pid_settings_serializer.return_value = mocks.MockSerializer(
@@ -147,7 +163,9 @@ class TestPidSettingsViewPatch(TestCase):
 
     @patch.object(pid_settings_views.PidSettingsView, "get")
     @patch.object(PidSettingsSerializer, "__new__")
-    def test_success_returns_200(self, mock_pid_settings_serializer, mock_view_get):
+    def test_success_returns_200(
+        self, mock_pid_settings_serializer, mock_view_get
+    ):
         """test_success_returns_200"""
 
         mock_pid_settings_serializer.return_value = mocks.MockSerializer(

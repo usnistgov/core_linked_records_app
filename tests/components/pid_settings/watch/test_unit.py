@@ -3,8 +3,12 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
-from core_linked_records_app.components.pid_settings import watch as pid_settings_watch
+from core_linked_records_app.components.pid_settings import (
+    api as pid_settings_api,
+)
+from core_linked_records_app.components.pid_settings import (
+    watch as pid_settings_watch,
+)
 from core_linked_records_app.components.pid_settings.models import PidSettings
 
 
@@ -12,10 +16,14 @@ class TestInit(TestCase):
     """Test Init"""
 
     @patch.object(PidSettings, "get")
-    def test_pid_settings_get_failure_returns_none(self, mock_pid_settings_get):
+    def test_pid_settings_get_failure_returns_none(
+        self, mock_pid_settings_get
+    ):
         """test_pid_settings_get_failure_returns_none"""
 
-        mock_pid_settings_get.side_effect = Exception("mock_pid_settings_get_exception")
+        mock_pid_settings_get.side_effect = Exception(
+            "mock_pid_settings_get_exception"
+        )
 
         self.assertIsNone(pid_settings_watch.init())
 
@@ -45,7 +53,10 @@ class TestInit(TestCase):
     @patch.object(PidSettings, "__init__")
     @patch.object(PidSettings, "get")
     def test_pid_settings_upsert_failure_returns_none(
-        self, mock_pid_settings_get, mock_pid_settings_init, mock_pid_settings_upsert
+        self,
+        mock_pid_settings_get,
+        mock_pid_settings_init,
+        mock_pid_settings_upsert,
     ):
         """test_pid_settings_upsert_failure_returns_none"""
 
@@ -61,7 +72,10 @@ class TestInit(TestCase):
     @patch.object(PidSettings, "__init__")
     @patch.object(PidSettings, "get")
     def test_pid_settings_get_false_returns_none(
-        self, mock_pid_settings_get, mock_pid_settings_init, mock_pid_settings_upsert
+        self,
+        mock_pid_settings_get,
+        mock_pid_settings_init,
+        mock_pid_settings_upsert,
     ):
         """test_pid_settings_get_false_returns_none"""
 

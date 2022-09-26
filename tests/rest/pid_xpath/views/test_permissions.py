@@ -115,7 +115,9 @@ class TestPidXpathDetailViewGet(TestCase):
 
         mock_view_get.return_value = Response(status=status.HTTP_200_OK)
         response = RequestMock.do_request_get(
-            pid_xpath_views.PidXpathDetailView.as_view(), mock_user, param={"id": 0}
+            pid_xpath_views.PidXpathDetailView.as_view(),
+            mock_user,
+            param={"id": 0},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -128,7 +130,9 @@ class TestPidXpathDetailViewGet(TestCase):
 
         mock_view_get.return_value = Response(status=status.HTTP_200_OK)
         response = RequestMock.do_request_get(
-            pid_xpath_views.PidXpathDetailView.as_view(), mock_user, param={"id": 0}
+            pid_xpath_views.PidXpathDetailView.as_view(),
+            mock_user,
+            param={"id": 0},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -198,7 +202,9 @@ class TestPidXpathDetailViewDelete(TestCase):
 
         mock_user = create_mock_user("1")
 
-        mock_view_delete.return_value = Response(status=status.HTTP_204_NO_CONTENT)
+        mock_view_delete.return_value = Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
         response = RequestMock.do_request_delete(
             pid_xpath_views.PidXpathDetailView.as_view(),
             mock_user,
@@ -212,7 +218,9 @@ class TestPidXpathDetailViewDelete(TestCase):
 
         mock_user = create_mock_user("1", is_staff=True)
 
-        mock_view_delete.return_value = Response(status=status.HTTP_204_NO_CONTENT)
+        mock_view_delete.return_value = Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
         response = RequestMock.do_request_delete(
             pid_xpath_views.PidXpathDetailView.as_view(),
             mock_user,

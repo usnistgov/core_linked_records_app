@@ -8,8 +8,12 @@ from rest_framework import status
 
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_main_app.utils.tests_tools.RequestMock import RequestMock
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
-from core_linked_records_app.rest.pid_settings import views as pid_settings_views
+from core_linked_records_app.components.pid_settings import (
+    api as pid_settings_api,
+)
+from core_linked_records_app.rest.pid_settings import (
+    views as pid_settings_views,
+)
 from core_linked_records_app.rest.pid_settings.serializers import (
     PidSettingsSerializer,
 )
@@ -108,7 +112,9 @@ class TestPidSettingsViewPatch(TestCase):
 
     @patch.object(pid_settings_api, "get")
     @patch.object(PidSettingsSerializer, "__new__")
-    def test_staff_returns_200(self, mock_pid_serializer, mock_pid_settings_get):
+    def test_staff_returns_200(
+        self, mock_pid_serializer, mock_pid_settings_get
+    ):
         """test_staff_returns_200"""
 
         mock_user = create_mock_user("1", is_superuser=True)

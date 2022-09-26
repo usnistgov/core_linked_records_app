@@ -93,7 +93,9 @@ class ProviderRecordView(APIView):
             provider_response = id_provider.create(prefix, record)
 
             provider_content = json.loads(provider_response.content)
-            return Response(provider_content, status=provider_response.status_code)
+            return Response(
+                provider_content, status=provider_response.status_code
+            )
         except Exception as exc:
             return Response(
                 {
@@ -120,7 +122,9 @@ class ProviderRecordView(APIView):
 
             provider_content = json.loads(provider_response.content)
 
-            return Response(provider_content, status=provider_response.status_code)
+            return Response(
+                provider_content, status=provider_response.status_code
+            )
         except Exception as exc:
             return Response(
                 {
@@ -149,13 +153,15 @@ class ProviderRecordView(APIView):
                     json.loads(provider_response.content)["url"], request
                 )
                 return Response(
-                    DataSerializer(query_result).data, status=status.HTTP_200_OK
+                    DataSerializer(query_result).data,
+                    status=status.HTTP_200_OK,
                 )
             except DoesNotExist:
                 # Try to find PID in blobs
                 try:
                     query_result = get_blob_by_pid(
-                        json.loads(provider_response.content)["url"], request.user
+                        json.loads(provider_response.content)["url"],
+                        request.user,
                     )
 
                     return get_file_http_response(
@@ -177,7 +183,9 @@ class ProviderRecordView(APIView):
                 "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "message": str(exc),
             }
-            return Response(content, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                content, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def delete(self, request, provider, record):
         """Delete a handle record
@@ -195,7 +203,9 @@ class ProviderRecordView(APIView):
 
             provider_content = json.loads(provider_response.content)
 
-            return Response(provider_content, status=provider_response.status_code)
+            return Response(
+                provider_content, status=provider_response.status_code
+            )
         except Exception as exc:
             return Response(
                 {

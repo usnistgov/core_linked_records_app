@@ -15,7 +15,9 @@ class TestPidXpathGetAll(TestCase):
     def test_pid_xpath_all_failure_raises_model_error(self, mock_pid_xpath):
         """test_pid_xpath_all_failure_raises_model_error"""
 
-        mock_pid_xpath.all.side_effect = Exception("mock_pid_xpath_all_exception")
+        mock_pid_xpath.all.side_effect = Exception(
+            "mock_pid_xpath_all_exception"
+        )
 
         with self.assertRaises(ModelError):
             PidXpath.get_all()
@@ -37,7 +39,9 @@ class TestPidXpathGetByTemplateList(TestCase):
     def test_pid_xpath_filter_failure_raises_model_error(self, mock_pid_xpath):
         """test_pid_xpath_filter_failure_raises_model_error"""
 
-        mock_pid_xpath.filter.side_effect = Exception("mock_pid_xpath_filter_exception")
+        mock_pid_xpath.filter.side_effect = Exception(
+            "mock_pid_xpath_filter_exception"
+        )
 
         with self.assertRaises(ModelError):
             PidXpath.get_all_by_template_list("mock_template_list")
@@ -50,7 +54,8 @@ class TestPidXpathGetByTemplateList(TestCase):
         mock_pid_xpath.filter.return_value = expected_result
 
         self.assertEqual(
-            PidXpath.get_all_by_template_list("mock_template_list"), expected_result
+            PidXpath.get_all_by_template_list("mock_template_list"),
+            expected_result,
         )
 
 
@@ -69,7 +74,9 @@ class TestPidXpathGetByTemplateId(TestCase):
     def test_pid_xpath_get_raises_model_error(self, mock_pid_xpath):
         """test_pid_xpath_get_raises_model_error"""
 
-        mock_pid_xpath.get.side_effect = Exception("mock_pid_xpath_get_exception")
+        mock_pid_xpath.get.side_effect = Exception(
+            "mock_pid_xpath_get_exception"
+        )
 
         with self.assertRaises(ModelError):
             PidXpath.get_by_template("mock_template")
@@ -81,4 +88,6 @@ class TestPidXpathGetByTemplateId(TestCase):
         expected_result = "mock_pid_xpath_get"
         mock_pid_xpath.get.return_value = expected_result
 
-        self.assertEqual(PidXpath.get_by_template("mock_template"), expected_result)
+        self.assertEqual(
+            PidXpath.get_by_template("mock_template"), expected_result
+        )

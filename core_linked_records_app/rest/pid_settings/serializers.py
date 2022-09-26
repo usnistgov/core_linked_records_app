@@ -2,7 +2,9 @@
 """
 from rest_framework import serializers
 
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
+from core_linked_records_app.components.pid_settings import (
+    api as pid_settings_api,
+)
 from core_linked_records_app.components.pid_settings.models import (
     PidSettings,
 )

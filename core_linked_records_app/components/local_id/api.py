@@ -21,7 +21,9 @@ def get_by_name(record_name):
     except exceptions.DoesNotExist as dne:
         raise exceptions.DoesNotExist(str(dne))
     except Exception as exc:
-        error_message = "An unexpected error occurred while retrieving LocalId by name"
+        error_message = (
+            "An unexpected error occurred while retrieving LocalId by name"
+        )
 
         logger.error("%s: %s", error_message, str(exc))
         raise exceptions.ApiError(f"{error_message}.")
@@ -37,13 +39,13 @@ def get_by_class_and_id(record_object_class, record_object_id):
     Returns:
     """
     try:
-        return LocalId.get_by_class_and_id(record_object_class, record_object_id)
+        return LocalId.get_by_class_and_id(
+            record_object_class, record_object_id
+        )
     except exceptions.DoesNotExist as dne:
         raise exceptions.DoesNotExist(str(dne))
     except Exception as exc:
-        error_message = (
-            "An unexpected error occurred while retrieving LocalId by class and id"
-        )
+        error_message = "An unexpected error occurred while retrieving LocalId by class and id"
 
         logger.error("%s: %s", error_message, str(exc))
         raise exceptions.ApiError(f"{error_message}.")

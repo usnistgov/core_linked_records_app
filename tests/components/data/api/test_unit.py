@@ -28,7 +28,9 @@ class TestGetDataByPid(TestCase):
     def test_execute_query_failure_raises_api_error(self, mock_execute_query):
         """test_execute_query_failure_raises_api_error"""
 
-        mock_execute_query.side_effect = Exception("mock_execute_query_exception")
+        mock_execute_query.side_effect = Exception(
+            "mock_execute_query_exception"
+        )
 
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_data_by_pid(**self.mock_kwargs)
@@ -71,13 +73,20 @@ class TestGetPidsForDataList(TestCase):
         mock_request = Mock(spec=HttpRequest)
         mock_request.user = mock_user
 
-        self.mock_kwargs = {"data_id_list": mock_data_id_list, "request": mock_request}
+        self.mock_kwargs = {
+            "data_id_list": mock_data_id_list,
+            "request": mock_request,
+        }
 
     @patch.object(pid_data_api, "get_pid_for_data")
-    def test_get_pid_for_data_failure_raises_api_error(self, mock_get_pid_for_data):
+    def test_get_pid_for_data_failure_raises_api_error(
+        self, mock_get_pid_for_data
+    ):
         """test_get_pid_for_data_failure_raises_api_error"""
 
-        mock_get_pid_for_data.side_effect = Exception("mock_get_by_id_list_exception")
+        mock_get_pid_for_data.side_effect = Exception(
+            "mock_get_by_id_list_exception"
+        )
 
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_pids_for_data_list(**self.mock_kwargs)
@@ -86,7 +95,9 @@ class TestGetPidsForDataList(TestCase):
     def test_get_pid_for_data_returns_list(self, mock_get_pid_for_data):
         """test_get_pid_for_data_returns_list"""
 
-        mock_get_pid_for_data.side_effect = lambda data_id, req: f"{data_id}_pid"
+        mock_get_pid_for_data.side_effect = (
+            lambda data_id, req: f"{data_id}_pid"
+        )
 
         self.assertListEqual(
             pid_data_api.get_pids_for_data_list(**self.mock_kwargs),
@@ -124,7 +135,9 @@ class TestGetPidForData(TestCase):
         """test_get_by_template_failure_raises_api_error"""
 
         mock_get_by_id.return_value = self.mock_global_data
-        mock_get_by_template.side_effect = Exception("mock_get_by_template_exception")
+        mock_get_by_template.side_effect = Exception(
+            "mock_get_by_template_exception"
+        )
 
         with self.assertRaises(exceptions.ApiError):
             pid_data_api.get_pid_for_data(**self.mock_kwargs)
@@ -133,7 +146,10 @@ class TestGetPidForData(TestCase):
     @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id")
     def test_is_key_list_in_dictionary_failure_raises_api_error(
-        self, mock_get_by_id, mock_get_by_template, mock_is_dot_notation_in_dictionary
+        self,
+        mock_get_by_id,
+        mock_get_by_template,
+        mock_is_dot_notation_in_dictionary,
     ):
         """test_is_key_list_in_dictionary_failure_raises_api_error"""
 
@@ -170,7 +186,10 @@ class TestGetPidForData(TestCase):
     @patch.object(pid_xpath_api, "get_by_template")
     @patch.object(main_data_api, "get_by_id")
     def test_pid_xpath_not_in_document_returns_none(
-        self, mock_get_by_id, mock_get_by_template, mock_is_dot_notation_in_dictionary
+        self,
+        mock_get_by_id,
+        mock_get_by_template,
+        mock_is_dot_notation_in_dictionary,
     ):
         """test_pid_xpath_not_in_document_returns_none"""
 

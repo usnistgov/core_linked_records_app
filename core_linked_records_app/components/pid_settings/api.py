@@ -36,7 +36,9 @@ def get():
     try:
         return PidSettings.get()
     except Exception as exc:
-        error_message = "An unexpected error occurred while retrieving PidSettings"
+        error_message = (
+            "An unexpected error occurred while retrieving PidSettings"
+        )
 
         logger.error("%s: %s", error_message, str(exc))
         raise ApiError(f"{error_message}.")

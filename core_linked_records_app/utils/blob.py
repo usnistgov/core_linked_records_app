@@ -44,7 +44,9 @@ def get_blob_download_regex(xml_string):
             blob_api.get_pid_for_blob(record_object.record_object_id)
             blob_urls.append(document_pid)
         except Exception as exc:
-            logger.warning("Retrieving blob URL raised an exception: %s", str(exc))
+            logger.warning(
+                "Retrieving blob URL raised an exception: %s", str(exc)
+            )
             continue
 
     return blob_urls

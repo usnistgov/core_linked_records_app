@@ -31,12 +31,17 @@ def get_blob_by_pid(pid, user):
         local_id_object = local_id_api.get_by_name(pid_internal_name)
 
         # Ensure the LocalID object refers to a Blob
-        assert local_id_object.record_object_class and local_id_object.record_object_id
+        assert (
+            local_id_object.record_object_class
+            and local_id_object.record_object_id
+        )
 
         # From the local ID object, retrieve record module, separating import path
         # and module name.
         record_object_classpath = local_id_object.record_object_class
-        record_object_module_path = ".".join(record_object_classpath.split(".")[:-1])
+        record_object_module_path = ".".join(
+            record_object_classpath.split(".")[:-1]
+        )
         api_module_name = record_object_classpath.split(".")[-1]
 
         # Import record module and call 'get_by_id' function with record ID as
@@ -76,9 +81,7 @@ def get_pid_for_blob(blob_id):
     except exceptions.DoesNotExist as dne:
         raise exceptions.DoesNotExist(str(dne))
     except Exception as exc:
-        error_message = (
-            f"An error occurred while looking up PID assigned to blob '{blob_id}'"
-        )
+        error_message = f"An error occurred while looking up PID assigned to blob '{blob_id}'"
 
         logger.error("%s: %s", error_message, str(exc))
         raise exceptions.ApiError(error_message)
@@ -92,7 +95,9 @@ def set_pid_for_blob(blob_id, blob_pid):
         blob_pid:
     """
     try:
-        record_name = f"{settings.ID_PROVIDER_PREFIX_BLOB}/{blob_pid.split('/')[-1]}"
+        record_name = (
+            f"{settings.ID_PROVIDER_PREFIX_BLOB}/{blob_pid.split('/')[-1]}"
+        )
 
         try:
             local_id_object = get_pid_for_blob(blob_id)
@@ -104,7 +109,9 @@ def set_pid_for_blob(blob_id, blob_pid):
 
         if local_id_object:
             local_id_object.record_name = record_name
-            local_id_object.record_object_class = get_api_path_from_object(Blob())
+            local_id_object.record_object_class = get_api_path_from_object(
+                Blob()
+            )
             local_id_object.record_object_id = str(blob_id)
         else:
             local_id_object = LocalId(
@@ -115,9 +122,7 @@ def set_pid_for_blob(blob_id, blob_pid):
 
         return local_id_api.insert(local_id_object)
     except Exception as exc:
-        error_message = (
-            f"An error occurred while assigning PID '{blob_pid}' to blob '{blob_id}'"
-        )
+        error_message = f"An error occurred while assigning PID '{blob_pid}' to blob '{blob_id}'"
 
         logger.error("%s: %s", error_message, str(exc))
         raise exceptions.ApiError(error_message)

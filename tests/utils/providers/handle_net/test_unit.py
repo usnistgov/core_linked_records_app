@@ -89,7 +89,9 @@ class TestHandleNetSystemUpdate(TestCase):
             "mock_password",
         )
 
-    @patch("core_linked_records_app.utils.providers.handle_net.send_put_request")
+    @patch(
+        "core_linked_records_app.utils.providers.handle_net.send_put_request"
+    )
     def test_send_put_request_on_record_url(self, mock_send_put_request):
         """test_send_put_request_on_record_url"""
         mock_record = "mock_record"

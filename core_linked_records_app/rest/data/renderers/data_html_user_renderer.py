@@ -30,7 +30,11 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
         Returns: html page
         """
         # Build the request object or set it up to None if undefined
-        request = renderer_context["request"] if "request" in renderer_context else None
+        request = (
+            renderer_context["request"]
+            if "request" in renderer_context
+            else None
+        )
 
         # If the data retrieved contains an error
         if "status" in data and data["status"] == "error":
@@ -58,7 +62,10 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
             )
 
             return data_view_builder.render_page(
-                request, render, "core_main_app/user/data/detail.html", page_context
+                request,
+                render,
+                "core_main_app/user/data/detail.html",
+                page_context,
             )
         except APIException as api_error:
             return render(
@@ -69,9 +76,13 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
         except Exception as exception:
             logger.error("Error while building data page: %s", str(exception))
 
-            if "kwargs" in renderer_context and "record" in renderer_context["kwargs"]:
+            if (
+                "kwargs" in renderer_context
+                and "record" in renderer_context["kwargs"]
+            ):
                 error_msg = (
-                    "Document %s does not exist." % renderer_context["kwargs"]["record"]
+                    "Document %s does not exist."
+                    % renderer_context["kwargs"]["record"]
                 )
             else:
                 error_msg = "Invalid request provided."

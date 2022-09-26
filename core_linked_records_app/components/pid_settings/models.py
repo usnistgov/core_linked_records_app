@@ -31,4 +31,6 @@ class PidSettings(models.Model):
         Returns:
             str - String representation of PidSettings object.
         """
-        return f"PidSettings {{ id:{self.pk}; auto_set_pid:{self.auto_set_pid} }}"
+        return (
+            f"PidSettings {{ id:{self.pk}; auto_set_pid:{self.auto_set_pid} }}"
+        )

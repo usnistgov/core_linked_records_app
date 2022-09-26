@@ -19,7 +19,9 @@ def set_pid_value_for_data(data, pid_xpath, pid_value):
         pid_xpath:
         pid_value:
     """
-    target_namespace = get_target_namespace_for_xsd_string(data.template.content)
+    target_namespace = get_target_namespace_for_xsd_string(
+        data.template.content
+    )
     xml_tree = XSDTree.build_tree(data.xml_content)
 
     xml_tree = create_tree_from_xpath(pid_xpath, xml_tree, target_namespace)
@@ -41,7 +43,9 @@ def get_pid_value_for_data(data, pid_xpath):
     Returns:
         str - Persitstent identifier
     """
-    target_namespace = get_target_namespace_for_xsd_string(data.template.content)
+    target_namespace = get_target_namespace_for_xsd_string(
+        data.template.content
+    )
     xml_tree = XSDTree.build_tree(data.xml_content)
 
     try:  # Get the PID from the `pid_xpath` value
@@ -52,7 +56,10 @@ def get_pid_value_for_data(data, pid_xpath):
             pid_value = pid_value[:-1]
     except AssertionError:  # PID XPath not found in document
         assert can_create_value_at_xpath(
-            data.xml_content, data.template.content, pid_xpath, "http://sample_pid.org"
+            data.xml_content,
+            data.template.content,
+            pid_xpath,
+            "http://sample_pid.org",
         )
         pid_value = None
 

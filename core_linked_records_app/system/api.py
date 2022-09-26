@@ -7,7 +7,9 @@ from rest_framework import status
 
 from core_main_app.commons.exceptions import DoesNotExist, ApiError
 from core_main_app.components.data.models import Data
-from core_main_app.utils.requests_utils.requests_utils import send_delete_request
+from core_main_app.utils.requests_utils.requests_utils import (
+    send_delete_request,
+)
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
@@ -31,7 +33,8 @@ def is_pid_defined_for_data(pid, document_id):
     pid_xpath = pid_xpath_object.xpath
 
     query_result = Data.execute_query(
-        Q(**{f"dict_content__{pid_xpath.replace('.', '__')}": pid}), order_by_field=[]
+        Q(**{f"dict_content__{pid_xpath.replace('.', '__')}": pid}),
+        order_by_field=[],
     )
 
     return len(query_result) == 1 and query_result[0].pk == document_id
@@ -67,7 +70,9 @@ def get_data_by_pid(pid):
     # Create the or query with all the different PID Xpath available.
     for pid_xpath_object in PidXpath.get_all():
         pid_xpath_query |= Q(
-            **{f"dict_content__{pid_xpath_object.xpath.replace('.', '__')}": pid}
+            **{
+                f"dict_content__{pid_xpath_object.xpath.replace('.', '__')}": pid
+            }
         )
 
     # Execute built query and retrieve number of items returned.

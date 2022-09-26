@@ -5,7 +5,9 @@ from unittest.mock import patch
 
 from core_main_app.commons import exceptions
 from core_linked_records_app.components.data import watch as data_watch
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
+from core_linked_records_app.components.pid_settings import (
+    api as pid_settings_api,
+)
 from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils import data as data_utils
 from core_linked_records_app.utils import providers as providers_utils
@@ -24,10 +26,14 @@ class TestSetDataPid(TestCase):
         self.mock_kwargs = {"sender": mock_sender, "instance": mock_document}
 
     @patch.object(pid_settings_api, "get")
-    def test_pid_settings_get_failure_raises_core_error(self, mock_pid_settings_get):
+    def test_pid_settings_get_failure_raises_core_error(
+        self, mock_pid_settings_get
+    ):
         """test_pid_settings_get_failure_raises_core_error"""
 
-        mock_pid_settings_get.side_effect = Exception("mock_pid_settings_get_exception")
+        mock_pid_settings_get.side_effect = Exception(
+            "mock_pid_settings_get_exception"
+        )
 
         with self.assertRaises(exceptions.CoreError):
             data_watch.set_data_pid(**self.mock_kwargs)

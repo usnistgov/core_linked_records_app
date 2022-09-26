@@ -36,7 +36,10 @@ class LocalIdProvider(AbstractIdProvider):
 
         Returns:
         """
-        return json.loads(self.get(record).content)["message"] == "Successful operation"
+        return (
+            json.loads(self.get(record).content)["message"]
+            == "Successful operation"
+        )
 
     def get(self, record):
         """get
@@ -64,7 +67,11 @@ class LocalIdProvider(AbstractIdProvider):
         except exceptions.DoesNotExist:
             response.status_code = status.HTTP_404_NOT_FOUND
             response._content = json.dumps(
-                {"message": "record not found", "record": record, "url": record_url}
+                {
+                    "message": "record not found",
+                    "record": record,
+                    "url": record_url,
+                }
             )
 
         return response

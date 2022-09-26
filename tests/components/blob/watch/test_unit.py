@@ -7,7 +7,9 @@ from unittest.mock import patch
 from core_main_app.commons import exceptions
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.blob import watch as blob_watch
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
+from core_linked_records_app.components.pid_settings import (
+    api as pid_settings_api,
+)
 
 from tests import mocks
 
@@ -57,7 +59,11 @@ class TestSetBlobPid(TestCase):
     @patch.object(blob_watch, "reverse")
     @patch.object(pid_settings_api, "get")
     def test_send_post_request_failure_raises_core_error(
-        self, mock_get, mock_reverse, mock_send_post_request, mock_get_pid_for_blob
+        self,
+        mock_get,
+        mock_reverse,
+        mock_send_post_request,
+        mock_get_pid_for_blob,
     ):
         """test_send_post_request_failure_raises_core_error"""
 
@@ -78,7 +84,11 @@ class TestSetBlobPid(TestCase):
     @patch.object(blob_watch, "reverse")
     @patch.object(pid_settings_api, "get")
     def test_json_loads_failure_raises_core_error(
-        self, mock_get, mock_reverse, mock_send_post_request, mock_get_pid_for_blob
+        self,
+        mock_get,
+        mock_reverse,
+        mock_send_post_request,
+        mock_get_pid_for_blob,
     ):
         """test_json_loads_failure_raises_core_error"""
 
@@ -114,9 +124,13 @@ class TestSetBlobPid(TestCase):
         mock_reverse.return_value = "mock/reverse/url"
 
         mock_pid_response = mocks.MockResponse()
-        mock_pid_response.content = json.dumps({"url": "mock_pid_response_url"})
+        mock_pid_response.content = json.dumps(
+            {"url": "mock_pid_response_url"}
+        )
         mock_send_post_request.return_value = mock_pid_response
-        mock_set_pid_for_blob.side_effect = Exception("mock_set_pid_for_blob_exception")
+        mock_set_pid_for_blob.side_effect = Exception(
+            "mock_set_pid_for_blob_exception"
+        )
 
         with self.assertRaises(exceptions.CoreError):
             blob_watch.set_blob_pid(None, self.mock_document)
@@ -161,7 +175,9 @@ class TestSetBlobPid(TestCase):
         mock_reverse.return_value = "mock/reverse/url"
 
         mock_pid_response = mocks.MockResponse()
-        mock_pid_response.content = json.dumps({"url": "mock_pid_response_url"})
+        mock_pid_response.content = json.dumps(
+            {"url": "mock_pid_response_url"}
+        )
         mock_send_post_request.return_value = mock_pid_response
         mock_set_pid_for_blob.return_value = None
 
@@ -170,7 +186,9 @@ class TestSetBlobPid(TestCase):
 
     @patch.object(blob_api, "get_pid_for_blob")
     @patch.object(pid_settings_api, "get")
-    def test_auto_set_pid_false_returns_none(self, mock_get, mock_get_pid_for_blob):
+    def test_auto_set_pid_false_returns_none(
+        self, mock_get, mock_get_pid_for_blob
+    ):
         """test_auto_set_pid_false_returns_none"""
 
         mock_get_pid_for_blob.side_effect = exceptions.DoesNotExist(
@@ -205,7 +223,9 @@ class TestSetBlobPid(TestCase):
         mock_reverse.return_value = "mock/reverse/url"
 
         mock_pid_response = mocks.MockResponse()
-        mock_pid_response.content = json.dumps({"url": "mock_pid_response_url"})
+        mock_pid_response.content = json.dumps(
+            {"url": "mock_pid_response_url"}
+        )
         mock_send_post_request.return_value = mock_pid_response
         mock_set_pid_for_blob.return_value = None
 

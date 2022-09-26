@@ -42,7 +42,9 @@ class TestProviderRecordViewPost(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch.object(ProviderManager, "get")
-    def test_provider_manager_get_fails_returns_500(self, mock_provider_manager_get):
+    def test_provider_manager_get_fails_returns_500(
+        self, mock_provider_manager_get
+    ):
         """test_provider_manager_get_fails_returns_500"""
 
         mock_provider_manager_get.side_effect = Exception(
@@ -58,7 +60,9 @@ class TestProviderRecordViewPost(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch.object(ProviderManager, "get")
-    def test_provider_manager_create_fails_returns_500(self, mock_provider_manager_get):
+    def test_provider_manager_create_fails_returns_500(
+        self, mock_provider_manager_get
+    ):
         """test_provider_manager_create_fails_returns_500"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
@@ -97,7 +101,9 @@ class TestProviderRecordViewPut(TestCase):
         self.mock_request = mocks.MockRequest()
 
     @patch.object(ProviderManager, "get")
-    def test_provider_manager_get_fails_returns_500(self, mock_provider_manager_get):
+    def test_provider_manager_get_fails_returns_500(
+        self, mock_provider_manager_get
+    ):
         """test_provider_manager_get_fails_returns_500"""
 
         mock_provider_manager_get.side_effect = Exception(
@@ -113,7 +119,9 @@ class TestProviderRecordViewPut(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch.object(ProviderManager, "get")
-    def test_provider_manager_update_fails_returns_500(self, mock_provider_manager_get):
+    def test_provider_manager_update_fails_returns_500(
+        self, mock_provider_manager_get
+    ):
         """test_provider_manager_update_fails_returns_500"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
@@ -154,7 +162,9 @@ class TestProviderRecordViewGet(TestCase):
         self.mock_request = mocks.MockRequest()
 
     @patch.object(ProviderManager, "get")
-    def test_provider_manager_get_fails_returns_500(self, mock_provider_manager_get):
+    def test_provider_manager_get_fails_returns_500(
+        self, mock_provider_manager_get
+    ):
         """test_provider_manager_get_fails_returns_500"""
 
         mock_provider_manager_get.side_effect = Exception(
@@ -195,9 +205,13 @@ class TestProviderRecordViewGet(TestCase):
         """test_get_data_by_pid_fails_returns_500"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
-            get_result=mocks.MockResponse(content=json.dumps({"url": "mock_url"}))
+            get_result=mocks.MockResponse(
+                content=json.dumps({"url": "mock_url"})
+            )
         )
-        mock_get_data_by_pid.side_effect = Exception("mock_get_data_by_pid_exception")
+        mock_get_data_by_pid.side_effect = Exception(
+            "mock_get_data_by_pid_exception"
+        )
 
         test_view = providers_views.ProviderRecordView()
         response = test_view.get(
@@ -212,15 +226,22 @@ class TestProviderRecordViewGet(TestCase):
     @patch.object(providers_views, "get_data_by_pid")
     @patch.object(ProviderManager, "get")
     def test_data_serializer_fails_returns_500(
-        self, mock_provider_manager_get, mock_get_data_by_pid, mock_data_serializer
+        self,
+        mock_provider_manager_get,
+        mock_get_data_by_pid,
+        mock_data_serializer,
     ):
         """test_data_serializer_fails_returns_500"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
-            get_result=mocks.MockResponse(content=json.dumps({"url": "mock_url"}))
+            get_result=mocks.MockResponse(
+                content=json.dumps({"url": "mock_url"})
+            )
         )
         mock_get_data_by_pid.return_value = mocks.MockData()
-        mock_data_serializer.side_effect = Exception("mock_data_serializer_exception")
+        mock_data_serializer.side_effect = Exception(
+            "mock_data_serializer_exception"
+        )
 
         test_view = providers_views.ProviderRecordView()
         response = test_view.get(
@@ -235,12 +256,17 @@ class TestProviderRecordViewGet(TestCase):
     @patch.object(providers_views, "get_data_by_pid")
     @patch.object(ProviderManager, "get")
     def test_get_data_success_returns_200(
-        self, mock_provider_manager_get, mock_get_data_by_pid, mock_data_serializer
+        self,
+        mock_provider_manager_get,
+        mock_get_data_by_pid,
+        mock_data_serializer,
     ):
         """test_get_data_success_returns_200"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
-            get_result=mocks.MockResponse(content=json.dumps({"url": "mock_url"}))
+            get_result=mocks.MockResponse(
+                content=json.dumps({"url": "mock_url"})
+            )
         )
         mock_get_data_by_pid.side_effect = mocks.MockData()
         mock_data_serializer.return_value = mocks.MockSerializer()
@@ -258,17 +284,24 @@ class TestProviderRecordViewGet(TestCase):
     @patch.object(providers_views, "get_data_by_pid")
     @patch.object(ProviderManager, "get")
     def test_get_blob_by_pid_fails_returns_500(
-        self, mock_provider_manager_get, mock_get_data_by_pid, mock_get_blob_by_pid
+        self,
+        mock_provider_manager_get,
+        mock_get_data_by_pid,
+        mock_get_blob_by_pid,
     ):
         """test_get_blob_by_pid_fails_returns_500"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
-            get_result=mocks.MockResponse(content=json.dumps({"url": "mock_url"}))
+            get_result=mocks.MockResponse(
+                content=json.dumps({"url": "mock_url"})
+            )
         )
         mock_get_data_by_pid.side_effect = DoesNotExist(
             "mock_get_data_by_pid_does_not_exist"
         )
-        mock_get_blob_by_pid.side_effect = Exception("mock_get_blob_by_pid_exception")
+        mock_get_blob_by_pid.side_effect = Exception(
+            "mock_get_blob_by_pid_exception"
+        )
 
         test_view = providers_views.ProviderRecordView()
         response = test_view.get(
@@ -283,12 +316,17 @@ class TestProviderRecordViewGet(TestCase):
     @patch.object(providers_views, "get_data_by_pid")
     @patch.object(ProviderManager, "get")
     def test_get_blob_by_pid_access_control_error_returns_403(
-        self, mock_provider_manager_get, mock_get_data_by_pid, mock_get_blob_by_pid
+        self,
+        mock_provider_manager_get,
+        mock_get_data_by_pid,
+        mock_get_blob_by_pid,
     ):
         """test_get_blob_by_pid_access_control_error_returns_403"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
-            get_result=mocks.MockResponse(content=json.dumps({"url": "mock_url"}))
+            get_result=mocks.MockResponse(
+                content=json.dumps({"url": "mock_url"})
+            )
         )
         mock_get_data_by_pid.side_effect = DoesNotExist(
             "mock_get_data_by_pid_does_not_exist"
@@ -310,12 +348,17 @@ class TestProviderRecordViewGet(TestCase):
     @patch.object(providers_views, "get_data_by_pid")
     @patch.object(ProviderManager, "get")
     def test_get_blob_by_pid_deos_not_exist_returns_404(
-        self, mock_provider_manager_get, mock_get_data_by_pid, mock_get_blob_by_pid
+        self,
+        mock_provider_manager_get,
+        mock_get_data_by_pid,
+        mock_get_blob_by_pid,
     ):
         """test_get_blob_by_pid_deos_not_exist_returns_404"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
-            get_result=mocks.MockResponse(content=json.dumps({"url": "mock_url"}))
+            get_result=mocks.MockResponse(
+                content=json.dumps({"url": "mock_url"})
+            )
         )
         mock_get_data_by_pid.side_effect = DoesNotExist(
             "mock_get_data_by_pid_does_not_exist"
@@ -347,7 +390,9 @@ class TestProviderRecordViewGet(TestCase):
         """test_get_file_http_response_fails_returns_500"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
-            get_result=mocks.MockResponse(content=json.dumps({"url": "mock_url"}))
+            get_result=mocks.MockResponse(
+                content=json.dumps({"url": "mock_url"})
+            )
         )
         mock_get_data_by_pid.side_effect = DoesNotExist(
             "mock_get_data_by_pid_does_not_exist"
@@ -380,7 +425,9 @@ class TestProviderRecordViewGet(TestCase):
         """test_get_file_http_response_success_returns_200"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(
-            get_result=mocks.MockResponse(content=json.dumps({"url": "mock_url"}))
+            get_result=mocks.MockResponse(
+                content=json.dumps({"url": "mock_url"})
+            )
         )
         mock_get_data_by_pid.side_effect = DoesNotExist(
             "mock_get_data_by_pid_does_not_exist"
@@ -405,7 +452,9 @@ class TestProviderRecordViewDelete(TestCase):
         self.mock_request = mocks.MockRequest()
 
     @patch.object(ProviderManager, "get")
-    def test_provider_manager_get_fails_returns_500(self, mock_provider_manager_get):
+    def test_provider_manager_get_fails_returns_500(
+        self, mock_provider_manager_get
+    ):
         """test_provider_manager_get_fails_returns_500"""
 
         mock_provider_manager_get.side_effect = Exception(
@@ -421,7 +470,9 @@ class TestProviderRecordViewDelete(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch.object(ProviderManager, "get")
-    def test_provider_manager_update_fails_returns_500(self, mock_provider_manager_get):
+    def test_provider_manager_update_fails_returns_500(
+        self, mock_provider_manager_get
+    ):
         """test_provider_manager_update_fails_returns_500"""
 
         mock_provider_manager_get.return_value = mocks.MockProviderManager(

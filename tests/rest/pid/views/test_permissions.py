@@ -121,18 +121,23 @@ class TestRetrieveListPidPost(TestCase):
             query_options=dict(),
             order_by_field="",
             authentication=dict(
-                auth_type="oauth2", params={"access_token": "mock_access_token"}
+                auth_type="oauth2",
+                params={"access_token": "mock_access_token"},
             ),
             capabilities={"url_pid": True},
         )
 
-    def send_post_request(self, mock_query_get_by_id, mock_send_get_request, user):
+    def send_post_request(
+        self, mock_query_get_by_id, mock_send_get_request, user
+    ):
         """send_post_request"""
 
         mock_query_get_by_id.return_value = mocks.MockQuery(
             data_sources=[self.mock_data_source]
         )
-        mock_send_get_request.return_value = mocks.MockResponse(json_data=[None])
+        mock_send_get_request.return_value = mocks.MockResponse(
+            json_data=[None]
+        )
 
         return RequestMock.do_request_post(
             pid_views.RetrieveListPIDView.as_view(),
@@ -143,7 +148,9 @@ class TestRetrieveListPidPost(TestCase):
 
     @patch.object(pid_views, "oauth2_post_request")
     @patch.object(query_api, "get_by_id")
-    def test_anonymous_returns_200(self, mock_query_get_by_id, mock_send_get_request):
+    def test_anonymous_returns_200(
+        self, mock_query_get_by_id, mock_send_get_request
+    ):
         """test_anonymous_returns_200"""
 
         response = self.send_post_request(
@@ -167,7 +174,9 @@ class TestRetrieveListPidPost(TestCase):
 
     @patch.object(pid_views, "oauth2_post_request")
     @patch.object(query_api, "get_by_id")
-    def test_staff_returns_200(self, mock_query_get_by_id, mock_send_get_request):
+    def test_staff_returns_200(
+        self, mock_query_get_by_id, mock_send_get_request
+    ):
         """test_staff_returns_200"""
 
         mock_user = create_mock_user("1", is_staff=True)

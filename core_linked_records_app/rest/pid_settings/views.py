@@ -6,7 +6,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core_linked_records_app import settings
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
+from core_linked_records_app.components.pid_settings import (
+    api as pid_settings_api,
+)
 from core_linked_records_app.rest.pid_settings.serializers import (
     PidSettingsSerializer,
 )

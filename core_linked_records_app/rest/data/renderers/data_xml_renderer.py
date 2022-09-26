@@ -2,7 +2,10 @@
 """
 from django.http import HttpResponse
 from rest_framework import renderers
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+from rest_framework.status import (
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 
 
 class DataXmlRenderer(renderers.BaseRenderer):

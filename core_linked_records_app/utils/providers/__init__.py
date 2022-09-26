@@ -106,10 +106,14 @@ class ProviderManager:
 
             # Import module and class
             id_provider_module = import_module(id_provider_modpath)
-            id_provider_class = getattr(id_provider_module, id_provider_classname)
+            id_provider_class = getattr(
+                id_provider_module, id_provider_classname
+            )
 
             # Initialize handle system instance
-            if provider_name is None:  # Default provider name to the default system
+            if (
+                provider_name is None
+            ):  # Default provider name to the default system
                 provider_name = settings.ID_PROVIDER_SYSTEM_NAME
 
             self._provider_instance = id_provider_class(
@@ -154,7 +158,9 @@ def retrieve_provider_name(pid_value):
     # Detect provider specified by PID. Raise an error if no matching providers are
     # found.
     if provider_name is None:
-        raise exceptions.ModelError("Invalid PID provided (provider not found)")
+        raise exceptions.ModelError(
+            "Invalid PID provided (provider not found)"
+        )
 
     return provider_name
 
@@ -178,15 +184,22 @@ def register_pid_for_data_id(provider_name, pid_value, data_id):
         provider.provider_lookup_url, provider.local_url
     )
 
-    document_pid_response = send_post_request(f"{registration_url}?format=json")
+    document_pid_response = send_post_request(
+        f"{registration_url}?format=json"
+    )
 
     # If an error happened during PID registration, try to relay the message from the
     # provider, otherwise relay a default error message.
-    if document_pid_response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR:
+    if (
+        document_pid_response.status_code
+        == status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         default_error_message = "An error occurred while creating the PID"
         try:
             raise exceptions.ModelError(
-                document_pid_response.json().get("message", default_error_message)
+                document_pid_response.json().get(
+                    "message", default_error_message
+                )
             )
         except Exception as exc:  # If the response is not JSON parsable
             logger.error("%s: %s", default_error_message, str(exc))

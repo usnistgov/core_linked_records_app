@@ -43,7 +43,9 @@ class TestBlobUploadWithPIDViewPost(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch.object(local_id_api, "get_by_name")
-    def test_local_pid_get_by_name_succeeds_returns_500(self, mock_get_by_name):
+    def test_local_pid_get_by_name_succeeds_returns_500(
+        self, mock_get_by_name
+    ):
         """test_local_pid_get_by_name_succeeds_returns_500"""
 
         self.mock_request.POST["pid"] = "mock_pid"
@@ -56,12 +58,18 @@ class TestBlobUploadWithPIDViewPost(TestCase):
 
     @patch.object(BlobList, "post")
     @patch.object(local_id_api, "get_by_name")
-    def test_super_post_fails_returns_500(self, mock_get_by_name, mock_blob_list_post):
+    def test_super_post_fails_returns_500(
+        self, mock_get_by_name, mock_blob_list_post
+    ):
         """test_super_post_fails_returns_500"""
 
         self.mock_request.POST["pid"] = "mock_pid"
-        mock_get_by_name.side_effect = DoesNotExist("mock_get_by_name_does_not_exist")
-        mock_blob_list_post.side_effect = Exception("mock_blob_list_post_exception")
+        mock_get_by_name.side_effect = DoesNotExist(
+            "mock_get_by_name_does_not_exist"
+        )
+        mock_blob_list_post.side_effect = Exception(
+            "mock_blob_list_post_exception"
+        )
 
         test_view = blob_views.BlobUploadWithPIDView()
         response = test_view.post(self.mock_request)
@@ -76,7 +84,9 @@ class TestBlobUploadWithPIDViewPost(TestCase):
         """test_super_post_returns_400_returns_400"""
 
         self.mock_request.POST["pid"] = "mock_pid"
-        mock_get_by_name.side_effect = DoesNotExist("mock_get_by_name_does_not_exist")
+        mock_get_by_name.side_effect = DoesNotExist(
+            "mock_get_by_name_does_not_exist"
+        )
         mock_blob_list_post.return_value = mocks.MockResponse(
             status_code=status.HTTP_400_BAD_REQUEST
         )
@@ -95,11 +105,15 @@ class TestBlobUploadWithPIDViewPost(TestCase):
         """test_set_pid_for_blob_fails_returns_500"""
 
         self.mock_request.POST["pid"] = "mock_pid"
-        mock_get_by_name.side_effect = DoesNotExist("mock_get_by_name_does_not_exist")
+        mock_get_by_name.side_effect = DoesNotExist(
+            "mock_get_by_name_does_not_exist"
+        )
         mock_blob_list_post.return_value = mocks.MockResponse(
             status_code=status.HTTP_201_CREATED, data={"id": "mock_blob_id"}
         )
-        mock_set_pid_for_blob.side_effect = Exception("mock_set_pid_for_blob_exception")
+        mock_set_pid_for_blob.side_effect = Exception(
+            "mock_set_pid_for_blob_exception"
+        )
 
         test_view = blob_views.BlobUploadWithPIDView()
         response = test_view.post(self.mock_request)
@@ -115,7 +129,9 @@ class TestBlobUploadWithPIDViewPost(TestCase):
         """test_success_returns_201"""
 
         self.mock_request.POST["pid"] = "mock_pid"
-        mock_get_by_name.side_effect = DoesNotExist("mock_get_by_name_does_not_exist")
+        mock_get_by_name.side_effect = DoesNotExist(
+            "mock_get_by_name_does_not_exist"
+        )
         mock_blob_list_post.return_value = mocks.MockResponse(
             status_code=status.HTTP_201_CREATED, data={"id": "mock_blob_id"}
         )

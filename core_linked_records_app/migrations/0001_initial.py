@@ -44,8 +44,14 @@ class Migration(migrations.Migration):
                         ],
                     ),
                 ),
-                ("record_object_class", models.CharField(blank=True, max_length=255)),
-                ("record_object_id", models.CharField(blank=True, max_length=255)),
+                (
+                    "record_object_class",
+                    models.CharField(blank=True, max_length=255),
+                ),
+                (
+                    "record_object_id",
+                    models.CharField(blank=True, max_length=255),
+                ),
             ],
         ),
         migrations.CreateModel(

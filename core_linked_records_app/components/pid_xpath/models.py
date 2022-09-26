@@ -17,7 +17,11 @@ class PidXpath(models.Model):
 
     xpath = models.CharField(blank=False, max_length=255)
     template = models.OneToOneField(
-        Template, blank=False, on_delete=models.CASCADE, null=False, unique=True
+        Template,
+        blank=False,
+        on_delete=models.CASCADE,
+        null=False,
+        unique=True,
     )
 
     @staticmethod

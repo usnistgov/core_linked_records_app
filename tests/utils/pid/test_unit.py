@@ -4,7 +4,10 @@ from unittest import TestCase
 from unittest.mock import patch, Mock
 
 from core_linked_records_app.utils import pid as pid_utils
-from core_linked_records_app.utils.providers import AbstractIdProvider, ProviderManager
+from core_linked_records_app.utils.providers import (
+    AbstractIdProvider,
+    ProviderManager,
+)
 from tests import test_settings
 
 
@@ -39,7 +42,9 @@ class TestIsValidPidValue(TestCase):
         )
 
     @patch("core_linked_records_app.utils.providers.ProviderManager.get")
-    def test_pid_value_not_match_returns_false(self, mock_provider_manager_get):
+    def test_pid_value_not_match_returns_false(
+        self, mock_provider_manager_get
+    ):
         """Test pid_value not matching returns False"""
         mock_provider_manager_get.return_value = self.mock_provider
 
@@ -54,9 +59,7 @@ class TestIsValidPidValue(TestCase):
         """Test pid_value matching returns True"""
         mock_provider_manager_get.return_value = self.mock_provider
 
-        mock_pid = (
-            f"{self.mock_provider_url}/{test_settings.ID_PROVIDER_PREFIXES[0]}/mockpid"
-        )
+        mock_pid = f"{self.mock_provider_url}/{test_settings.ID_PROVIDER_PREFIXES[0]}/mockpid"
 
         self.assertTrue(
             pid_utils.is_valid_pid_value(

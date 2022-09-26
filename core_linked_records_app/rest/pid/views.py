@@ -36,7 +36,11 @@ class RetrieveDataPIDView(APIView):
         try:
             if "data_id" in request.GET:
                 return JsonResponse(
-                    {"pid": data_api.get_pid_for_data(request.GET["data_id"], request)}
+                    {
+                        "pid": data_api.get_pid_for_data(
+                            request.GET["data_id"], request
+                        )
+                    }
                 )
             if (
                 "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
@@ -68,10 +72,13 @@ class RetrieveDataPIDView(APIView):
                 instance = instance_api.get_by_name(instance_name)
 
                 reverse_url = reverse("core_linked_records_retrieve_data_pid")
-                url_get_data = f'{reverse_url}?data_id={request.GET["fede_data_id"]}'
+                url_get_data = (
+                    f'{reverse_url}?data_id={request.GET["fede_data_id"]}'
+                )
 
                 data_response = oauth2_get_request(
-                    urljoin(instance.endpoint, url_get_data), instance.access_token
+                    urljoin(instance.endpoint, url_get_data),
+                    instance.access_token,
                 )
                 return JsonResponse(json.loads(data_response.text))
 
@@ -115,7 +122,9 @@ class RetrieveBlobPIDView(APIView):
                 )
 
                 return JsonResponse(
-                    {"pid": f"{settings.SERVER_URI}{sub_url}{blob_pid.record_name}"}
+                    {
+                        "pid": f"{settings.SERVER_URI}{sub_url}{blob_pid.record_name}"
+                    }
                 )
             except Exception as exc:
                 return JsonResponse(
@@ -195,7 +204,11 @@ class RetrieveListPIDView(APIView):
 
             if response.status_code == 200:
                 return JsonResponse(
-                    {"pids": [pid for pid in response.json() if pid is not None]},
+                    {
+                        "pids": [
+                            pid for pid in response.json() if pid is not None
+                        ]
+                    },
                     status=response.status_code,
                 )
 
@@ -207,5 +220,6 @@ class RetrieveListPIDView(APIView):
             )
         except Exception as exception:
             return JsonResponse(
-                {"error": str(exception)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": str(exception)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

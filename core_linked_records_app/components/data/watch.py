@@ -8,7 +8,9 @@ from django.db.models.signals import pre_save
 from core_main_app.commons import exceptions
 from core_main_app.components.data.models import Data
 from core_linked_records_app import settings
-from core_linked_records_app.components.pid_settings import api as pid_settings_api
+from core_linked_records_app.components.pid_settings import (
+    api as pid_settings_api,
+)
 from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils import data as data_utils
 from core_linked_records_app.utils.xml import (
@@ -43,7 +45,9 @@ def set_data_pid(sender, instance, **kwargs):
 
         # Retrieve PID XPath from `PidSettings.xpath_list`. Skip PID assignment
         # if the PID XPath is not defined for the template.
-        template_pid_xpath = system_api.get_pid_xpath_by_template(instance.template)
+        template_pid_xpath = system_api.get_pid_xpath_by_template(
+            instance.template
+        )
         pid_xpath = get_xpath_with_target_namespace(
             get_xpath_from_dot_notation(template_pid_xpath.xpath),
             instance.template.content,
@@ -80,7 +84,9 @@ def set_data_pid(sender, instance, **kwargs):
             instance.pk is None
             or not system_api.is_pid_defined_for_data(pid_value, instance.pk)
         ):
-            raise exceptions.ModelError("PID already defined for another instance")
+            raise exceptions.ModelError(
+                "PID already defined for another instance"
+            )
 
         # Register PID and write resulting URL in instance
         pid_value = providers_utils.register_pid_for_data_id(
@@ -88,7 +94,9 @@ def set_data_pid(sender, instance, **kwargs):
         )
         data_utils.set_pid_value_for_data(instance, pid_xpath, pid_value)
     except exceptions.ModelError as model_error:
-        logger.error("An error occurred while assigning PID: %s", str(model_error))
+        logger.error(
+            "An error occurred while assigning PID: %s", str(model_error)
+        )
         raise exceptions.ModelError(str(model_error))
     except Exception as exc:
         if not instance.pk:
@@ -96,7 +104,9 @@ def set_data_pid(sender, instance, **kwargs):
         else:
             data_definition = f"data '{instance.pk}'"
 
-        error_message = f"An error occurred while assigning PID to {data_definition}"
+        error_message = (
+            f"An error occurred while assigning PID to {data_definition}"
+        )
 
         logger.error("%s: %s", error_message, str(exc))
         raise exceptions.CoreError(f"{error_message}.")

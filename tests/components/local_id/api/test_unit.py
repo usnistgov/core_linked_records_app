@@ -27,7 +27,9 @@ class TestGetByName(TestCase):
         expected_result = "mock_get_by_name"
         mock_get_by_name.return_value = expected_result
 
-        self.assertEqual(local_id_api.get_by_name("mock_name"), expected_result)
+        self.assertEqual(
+            local_id_api.get_by_name("mock_name"), expected_result
+        )
 
 
 class TestGetByClassAndId(TestCase):
@@ -47,7 +49,9 @@ class TestGetByClassAndId(TestCase):
             local_id_api.get_by_class_and_id("class", "id")
 
     @patch.object(LocalId, "get_by_class_and_id")
-    def test_returns_get_by_class_and_id_output(self, mock_get_by_class_and_id):
+    def test_returns_get_by_class_and_id_output(
+        self, mock_get_by_class_and_id
+    ):
         """test_returns_get_by_class_and_id_output"""
 
         expected_result = "mock_get_by_class_and_id"
@@ -79,7 +83,9 @@ class TestInsert(TestCase):
 
         mock_save.return_value = None
 
-        self.assertEqual(local_id_api.insert(self.mock_local_id), self.mock_local_id)
+        self.assertEqual(
+            local_id_api.insert(self.mock_local_id), self.mock_local_id
+        )
 
 
 class TestDelete(TestCase):
@@ -104,4 +110,6 @@ class TestDelete(TestCase):
         expected_result = "mock_delete"
         mock_delete.return_value = expected_result
 
-        self.assertEqual(local_id_api.delete(self.mock_local_id), expected_result)
+        self.assertEqual(
+            local_id_api.delete(self.mock_local_id), expected_result
+        )

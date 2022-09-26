@@ -25,8 +25,6 @@ def is_valid_pid_value(pid_value, pid_provider_name, pid_format):
 
     # Build regexp and test if it matches the pid_value
     pid_prefixes_regexp = "|".join(settings.ID_PROVIDER_PREFIXES)
-    pid_regexp_match = (
-        f"{provider.provider_lookup_url}/(?:{pid_prefixes_regexp})/{pid_format}"
-    )
+    pid_regexp_match = f"{provider.provider_lookup_url}/(?:{pid_prefixes_regexp})/{pid_format}"
 
     return re.match(pid_regexp_match, pid_value) is not None

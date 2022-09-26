@@ -67,7 +67,9 @@ def get_xpath_with_target_namespace(xpath, xsd_string):
     target_namespace = get_target_namespace_for_xsd_string(xsd_string)
 
     xpath = xpath.format(
-        list(target_namespace.keys())[0] if target_namespace is not None else ""
+        list(target_namespace.keys())[0]
+        if target_namespace is not None
+        else ""
     )
 
     if target_namespace is None:
@@ -95,7 +97,9 @@ def set_value_at_xpath(xml_tree, xpath, value, namespaces):
         attribute = xpath_list[-1].replace("@", "")
         xpath = "/%s" % "/".join(xpath_list[:-1])
 
-        xml_tree.xpath(xpath, namespaces=namespaces)[0].attrib[attribute] = value
+        xml_tree.xpath(xpath, namespaces=namespaces)[0].attrib[
+            attribute
+        ] = value
 
 
 def get_value_at_xpath(xml_tree, xpath, namespaces):
@@ -140,7 +144,9 @@ def can_create_value_at_xpath(xml_string, xsd_string, xpath, value):
         target_namespace = get_target_namespace_for_xsd_string(xsd_string)
         xml_tree = XSDTree.build_tree(xml_string)
 
-        modified_xml_tree = create_tree_from_xpath(xpath, xml_tree, target_namespace)
+        modified_xml_tree = create_tree_from_xpath(
+            xpath, xml_tree, target_namespace
+        )
         set_value_at_xpath(modified_xml_tree, xpath, value, target_namespace)
         xsd_tree = XSDTree.build_tree(xsd_string)
         assert validate_xml_data(xsd_tree, modified_xml_tree) is None

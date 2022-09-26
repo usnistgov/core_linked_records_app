@@ -7,7 +7,9 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAuthenticated
 
 from core_linked_records_app.components.pid_xpath.models import PidXpath
-from core_linked_records_app.rest.pid_xpath.serializers import PidXpathSerializer
+from core_linked_records_app.rest.pid_xpath.serializers import (
+    PidXpathSerializer,
+)
 
 
 class PidXpathListView(ListCreateAPIView):

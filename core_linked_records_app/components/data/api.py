@@ -29,9 +29,15 @@ def get_data_by_pid(pid, request):
             pid_xpath_object.xpath
             for pid_xpath_object in pid_xpath_api.get_all(request)
         ] + [settings.PID_XPATH]
-        json_pid_xpaths = [f"dict_content.{pid_xpath}" for pid_xpath in pid_xpath_list]
+        json_pid_xpaths = [
+            f"dict_content.{pid_xpath}" for pid_xpath in pid_xpath_list
+        ]
         query_result = data_api.execute_json_query(
-            {"$or": [{json_pid_xpath: pid} for json_pid_xpath in json_pid_xpaths]},
+            {
+                "$or": [
+                    {json_pid_xpath: pid} for json_pid_xpath in json_pid_xpaths
+                ]
+            },
             request.user,
         )
         query_result_length = len(query_result)
@@ -84,14 +90,20 @@ def get_pid_for_data(data_id, request):
 
         # Return PID value from the document and the pid_xpath retrieved from
         # `PidSettings`
-        pid_xpath_object = pid_xpath_api.get_by_template(data.template, request)
+        pid_xpath_object = pid_xpath_api.get_by_template(
+            data.template, request
+        )
         pid_xpath = pid_xpath_object.xpath
 
         # If the pid_xpath does not exist in the document, exit early and return None
-        if not is_dot_notation_in_dictionary(data.get_dict_content(), pid_xpath):
+        if not is_dot_notation_in_dictionary(
+            data.get_dict_content(), pid_xpath
+        ):
             return None
 
-        pid_value = get_value_from_dot_notation(data.get_dict_content(), pid_xpath)
+        pid_value = get_value_from_dot_notation(
+            data.get_dict_content(), pid_xpath
+        )
 
         # If the field has an invalid PID, raise an exception.
         if not is_valid_pid_value(
@@ -101,9 +113,7 @@ def get_pid_for_data(data_id, request):
 
         return pid_value
     except Exception as exc:
-        error_message = (
-            f"An error occurred while looking up PID assigned to data '{data_id}'"
-        )
+        error_message = f"An error occurred while looking up PID assigned to data '{data_id}'"
 
         logger.error("%s: %s", error_message, str(exc))
         raise ApiError(f"{error_message}.")

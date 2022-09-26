@@ -6,7 +6,9 @@ from unittest.mock import patch
 from rest_framework import status
 from rest_framework.response import Response
 
-from core_main_app.rest.data.abstract_views import AbstractExecuteLocalQueryView
+from core_main_app.rest.data.abstract_views import (
+    AbstractExecuteLocalQueryView,
+)
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_main_app.utils.tests_tools.RequestMock import RequestMock
 from core_linked_records_app.rest.query import views as query_views

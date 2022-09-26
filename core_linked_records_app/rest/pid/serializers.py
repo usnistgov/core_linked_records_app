@@ -13,4 +13,8 @@ class LocalIdSerializer(ModelSerializer):
 
         model = LocalId
         fields = "__all__"
-        read_only_fields = ["record_name", "record_object_class", "record_object_id"]
+        read_only_fields = [
+            "record_name",
+            "record_object_class",
+            "record_object_id",
+        ]

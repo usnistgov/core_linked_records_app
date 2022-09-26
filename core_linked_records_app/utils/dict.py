@@ -18,7 +18,9 @@ def get_value_from_dot_notation(dictionary, dot_notation):
         key = key_list.pop(0)
 
         if key in dictionary.keys():
-            return get_value_from_dot_notation(dictionary[key], ".".join(key_list))
+            return get_value_from_dot_notation(
+                dictionary[key], ".".join(key_list)
+            )
         return None
 
     return dictionary
@@ -40,7 +42,9 @@ def is_dot_notation_in_dictionary(dictionary, dot_notation):
         key = key_list.pop(0)
 
         if key in dictionary.keys():
-            return is_dot_notation_in_dictionary(dictionary[key], ".".join(key_list))
+            return is_dot_notation_in_dictionary(
+                dictionary[key], ".".join(key_list)
+            )
         return False
 
     return True

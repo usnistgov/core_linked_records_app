@@ -23,10 +23,14 @@ class TestGetByTemplateId(TestCase):
         }
 
     @patch.object(PidXpath, "get_by_template")
-    def test_get_by_template_failure_raises_api_error(self, mock_get_by_template):
+    def test_get_by_template_failure_raises_api_error(
+        self, mock_get_by_template
+    ):
         """test_get_by_template_failure_raises_api_error"""
 
-        mock_get_by_template.side_effect = Exception("mock_get_by_template_exception")
+        mock_get_by_template.side_effect = Exception(
+            "mock_get_by_template_exception"
+        )
 
         with self.assertRaises(ApiError):
             pid_xpath_api.get_by_template(**self.kwargs)
@@ -54,7 +58,9 @@ class TestGetByTemplateId(TestCase):
         expected_result = "mock_pid_xpath_object"
         mock_get_by_template.return_value = expected_result
 
-        self.assertEqual(pid_xpath_api.get_by_template(**self.kwargs), expected_result)
+        self.assertEqual(
+            pid_xpath_api.get_by_template(**self.kwargs), expected_result
+        )
 
     @patch.object(PidXpath, "__new__")
     @patch.object(template_api, "get_by_id")
@@ -69,7 +75,9 @@ class TestGetByTemplateId(TestCase):
         mock_get_by_id.return_value = self.mock_template
         mock_pid_xpath.return_value = expected_result
 
-        self.assertEqual(pid_xpath_api.get_by_template(**self.kwargs), expected_result)
+        self.assertEqual(
+            pid_xpath_api.get_by_template(**self.kwargs), expected_result
+        )
 
 
 class TestGetAll(TestCase):
@@ -92,7 +100,9 @@ class TestGetAll(TestCase):
         """test_get_all_by_template_list_failure_raises_api_error"""
 
         mock_get_all.return_value = []
-        mock_get_all_by_template_list.side_effect = Exception("mock_get_all_exception")
+        mock_get_all_by_template_list.side_effect = Exception(
+            "mock_get_all_exception"
+        )
 
         with self.assertRaises(ApiError):
             pid_xpath_api.get_all(mocks.MockRequest())
@@ -108,4 +118,6 @@ class TestGetAll(TestCase):
         mock_get_all.return_value = []
         mock_get_all_by_template_list.return_value = expected_result
 
-        self.assertEqual(pid_xpath_api.get_all(mocks.MockRequest()), expected_result)
+        self.assertEqual(
+            pid_xpath_api.get_all(mocks.MockRequest()), expected_result
+        )

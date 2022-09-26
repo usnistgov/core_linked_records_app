@@ -22,11 +22,15 @@ class TestRetrieveDataPidGet(TestCase):
         self.mock_request.GET = dict()
 
     @patch.object(data_api, "get_pid_for_data")
-    def test_data_api_get_pid_for_data_fails_returns_500(self, mock_get_pid_for_data):
+    def test_data_api_get_pid_for_data_fails_returns_500(
+        self, mock_get_pid_for_data
+    ):
         """test_data_api_get_pid_for_data_fails_returns_500"""
 
         self.mock_request.GET["data_id"] = "mock_data_id"
-        mock_get_pid_for_data.side_effect = Exception("mock_get_pid_for_data_exception")
+        mock_get_pid_for_data.side_effect = Exception(
+            "mock_get_pid_for_data_exception"
+        )
 
         test_view = pid_views.RetrieveDataPIDView()
         response = test_view.get(self.mock_request)
@@ -53,7 +57,9 @@ class TestRetrieveDataPidGet(TestCase):
     #     pass
 
     @patch.object(instance_api, "get_by_name")
-    def test_instance_api_get_by_name_fails_returns_500(self, mock_get_by_name):
+    def test_instance_api_get_by_name_fails_returns_500(
+        self, mock_get_by_name
+    ):
         """test_instance_api_get_by_name_fails_returns_500"""
 
         self.mock_request.GET["fede_data_id"] = "mock_data_id"
@@ -86,7 +92,9 @@ class TestRetrieveDataPidGet(TestCase):
 
     @patch.object(pid_views, "oauth2_get_request")
     @patch.object(instance_api, "get_by_name")
-    def test_fede_success_returns_200(self, mock_get_by_name, mock_oauth2_get_request):
+    def test_fede_success_returns_200(
+        self, mock_get_by_name, mock_oauth2_get_request
+    ):
         """test_fede_success_returns_200"""
 
         self.mock_request.GET["fede_data_id"] = "mock_data_id"
@@ -122,7 +130,9 @@ class TestRetrieveBlobPidGet(TestCase):
         """test_get_pid_for_blob_fails_returns_500"""
 
         self.mock_request.GET["blob_id"] = "mock_blob_id"
-        mock_get_pid_for_blob.side_effect = Exception("mock_get_pid_for_blob_exception")
+        mock_get_pid_for_blob.side_effect = Exception(
+            "mock_get_pid_for_blob_exception"
+        )
 
         test_view = pid_views.RetrieveBlobPIDView()
         response = test_view.get(self.mock_request)
@@ -154,7 +164,9 @@ class TestRetrieveListPidPost(TestCase):
     """Test Retrieve List Pid Post"""
 
     def setUp(self) -> None:
-        self.mock_request = mocks.MockRequest(POST={"query_id": "mock_query_id"})
+        self.mock_request = mocks.MockRequest(
+            POST={"query_id": "mock_query_id"}
+        )
 
     @patch.object(query_api, "get_by_id")
     def test_get_by_id_fails_returns_500(self, mock_get_by_id):
@@ -168,7 +180,9 @@ class TestRetrieveListPidPost(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch.object(query_api, "get_by_id")
-    def test_data_source_no_pid_url_capabilities_returns_500(self, mock_get_by_id):
+    def test_data_source_no_pid_url_capabilities_returns_500(
+        self, mock_get_by_id
+    ):
         """test_data_source_no_pid_url_capabilities_returns_500"""
 
         mock_get_by_id.return_value = mocks.MockQuery(
@@ -195,7 +209,9 @@ class TestRetrieveListPidPost(TestCase):
                 )
             ]
         )
-        mock_send_get_request.side_effect = Exception("mock_send_get_request_exception")
+        mock_send_get_request.side_effect = Exception(
+            "mock_send_get_request_exception"
+        )
 
         test_view = pid_views.RetrieveListPIDView()
         response = test_view.post(self.mock_request)
@@ -248,7 +264,9 @@ class TestRetrieveListPidPost(TestCase):
 
     @patch.object(pid_views, "oauth2_post_request")
     @patch.object(query_api, "get_by_id")
-    def test_status_200_returns_200(self, mock_get_by_id, mock_oauth2_post_request):
+    def test_status_200_returns_200(
+        self, mock_get_by_id, mock_oauth2_post_request
+    ):
         """test_status_200_returns_200"""
 
         mock_get_by_id.return_value = mocks.MockQuery(
@@ -264,7 +282,9 @@ class TestRetrieveListPidPost(TestCase):
                 )
             ]
         )
-        mock_oauth2_post_request.return_value = mocks.MockResponse(json_data=list())
+        mock_oauth2_post_request.return_value = mocks.MockResponse(
+            json_data=list()
+        )
 
         test_view = pid_views.RetrieveListPIDView()
         response = test_view.post(self.mock_request)
@@ -273,7 +293,9 @@ class TestRetrieveListPidPost(TestCase):
 
     @patch.object(pid_views, "oauth2_post_request")
     @patch.object(query_api, "get_by_id")
-    def test_status_400_returns_400(self, mock_get_by_id, mock_oauth2_post_request):
+    def test_status_400_returns_400(
+        self, mock_get_by_id, mock_oauth2_post_request
+    ):
         """test_status_400_returns_400"""
 
         mock_get_by_id.return_value = mocks.MockQuery(
@@ -289,7 +311,9 @@ class TestRetrieveListPidPost(TestCase):
                 )
             ],
         )
-        mock_oauth2_post_request.return_value = mocks.MockResponse(status_code=400)
+        mock_oauth2_post_request.return_value = mocks.MockResponse(
+            status_code=400
+        )
 
         test_view = pid_views.RetrieveListPIDView()
         response = test_view.post(self.mock_request)

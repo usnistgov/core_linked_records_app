@@ -59,7 +59,9 @@ class TestBlobUploadWithPIDViewPost(TestCase):
 
         mock_user = create_mock_user("1", is_staff=True, is_superuser=True)
 
-        mock_get_by_name.side_effect = DoesNotExist("mock_get_by_name_exception")
+        mock_get_by_name.side_effect = DoesNotExist(
+            "mock_get_by_name_exception"
+        )
         mock_blob_list_post.return_value = mocks.MockResponse(
             data={"id": "mock_id"}, status_code=status.HTTP_201_CREATED
         )

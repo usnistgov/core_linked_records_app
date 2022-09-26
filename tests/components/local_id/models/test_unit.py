@@ -42,7 +42,9 @@ class TestGetByName(TestCase):
         expected_result = "mock_get_by_name"
         mock_objects.get.return_value = expected_result
 
-        self.assertEqual(LocalId.get_by_name("mock_record_name"), expected_result)
+        self.assertEqual(
+            LocalId.get_by_name("mock_record_name"), expected_result
+        )
 
 
 class TestGetByClassAndId(TestCase):
@@ -92,7 +94,9 @@ class TestUpdate(TestCase):
         self.mock_local_id = LocalId()
 
     @patch.object(LocalId, "save")
-    def test_local_id_save_not_unique_error_raises_not_unique_error(self, mock_save):
+    def test_local_id_save_not_unique_error_raises_not_unique_error(
+        self, mock_save
+    ):
         """test_local_id_save_not_unique_error_raises_not_unique_error"""
 
         mock_save.side_effect = IntegrityError("mock_save_not_unique_error")

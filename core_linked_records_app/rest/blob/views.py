@@ -63,10 +63,14 @@ class BlobUploadWithPIDView(BlobList):
             serialized_data["pid"] = pid
 
             # Assign PID to blob
-            blob_api.set_pid_for_blob(serialized_data["id"], serialized_data["pid"])
+            blob_api.set_pid_for_blob(
+                serialized_data["id"], serialized_data["pid"]
+            )
 
             # Return the serialized data
             return Response(serialized_data, status=status.HTTP_201_CREATED)
         except Exception as api_exception:
             content = {"message": str(api_exception)}
-            return Response(content, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                content, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
