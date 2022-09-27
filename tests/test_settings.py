@@ -71,3 +71,7 @@ ROOT_URLCONF = "core_linked_records_app.urls"
 
 CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 SERVER_URI = "http://mock-cdcs.com"
+
+PID_XPATH = "mock.pid"
+
+ID_PROVIDER_PREFIXES = ["mock_cdcs"]

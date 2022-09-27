@@ -35,7 +35,10 @@ let configurePIDDataSharingModal = function() {
             );
         },
         error:function(){
-            showErrorModal("Error while retrieving persistent query.");
+            $("#pid-sharing-link").val(
+                "PID not available"
+            );
+            $("#pid-sharing-submit").attr("disabled", true)
             hasError = true;
         }
     });

@@ -26,7 +26,6 @@ class AbstractIdProvider(ABC):
         username,
         password,
     ):
-
         self.local_url = (
             f"{settings.SERVER_URI}"
             f'{reverse("core_linked_records_provider_record",kwargs = {"provider": provider_name, "record": ""})}'
@@ -91,7 +90,7 @@ class ProviderManager:
         self.provider_name = settings.ID_PROVIDER_SYSTEM_NAME
         self.provider_config = settings.ID_PROVIDER_SYSTEM_CONFIG
 
-    def get(self, provider_name):
+    def get(self, provider_name=None) -> AbstractIdProvider:
         """get provider
         Args:
             provider_name:
@@ -109,7 +108,10 @@ class ProviderManager:
             id_provider_module = import_module(id_provider_modpath)
             id_provider_class = getattr(id_provider_module, id_provider_classname)
 
-            # Initialize handel system instance
+            # Initialize handle system instance
+            if provider_name is None:  # Default provider name to the default system
+                provider_name = settings.ID_PROVIDER_SYSTEM_NAME
+
             self._provider_instance = id_provider_class(
                 provider_name, *settings.ID_PROVIDER_SYSTEM_CONFIG["args"]
             )

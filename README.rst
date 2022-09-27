@@ -87,7 +87,7 @@ additional optional settings keys are available.
 
 .. code:: python
 
-    ID_PROVIDER_SYSTEM_NAME = "handle.net",
+    ID_PROVIDER_SYSTEM_NAME = "handle.net"
     """ str: internal name of the provider system.
     """
 

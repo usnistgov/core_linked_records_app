@@ -127,24 +127,21 @@ def delete_pid_for_data(data):
     Args:
         data:
     """
-    provider_manager = ProviderManager()
     previous_pid = get_pid_for_data(data.pk)
 
-    if not previous_pid:  # If there is no previous PID assigned
+    if not previous_pid:  # If there is no previous PID assigned.
         logger.info("No PID assigned to the data %s", str(data.pk))
         return
 
-    previous_provider_name = provider_manager.find_provider_from_pid(previous_pid)
-    previous_provider = provider_manager.get(previous_provider_name)
-    previous_pid_url = previous_pid.replace(
-        previous_provider.provider_lookup_url, previous_provider.local_url
-    )
+    provider = ProviderManager().get()  # Returns the default provider.
 
-    previous_pid_delete_response = send_delete_request(
-        f"{previous_pid_url}?format=json"
-    )
+    # From the PID url (e.g. https://pid-system.org/prefix/record), retrieve
+    # only the prefix and record (e.g. prefix/record) stored in DB.
+    pid_internal_name = "/".join(previous_pid.split("/")[-2:])
 
-    # Log any error that happen during PID deletion
+    previous_pid_delete_response = provider.delete(pid_internal_name)
+
+    # Log any error that happen during PID deletion.
     if previous_pid_delete_response.status_code != status.HTTP_200_OK:
         logger.warning(
             "Deletion of PID %s returned %s",

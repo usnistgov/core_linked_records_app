@@ -1,9 +1,9 @@
 """ Utilities related to PID
 """
 import re
-from django.urls import reverse
 
 from core_linked_records_app import settings
+from core_linked_records_app.utils.providers import ProviderManager
 
 
 def is_valid_pid_value(pid_value, pid_provider_name, pid_format):
@@ -20,16 +20,13 @@ def is_valid_pid_value(pid_value, pid_provider_name, pid_format):
     if not pid_value:  # Don't test if pid_value is None or ''
         return False
 
-    # Build regexp and test if it matches the pid_value
-    pid_regexp_match = reverse(
-        "core_linked_records_provider_record",
-        kwargs={
-            "provider": pid_provider_name,
-            "record": "@format@",
-        },
-    ).replace("@format@", pid_format)
+    # Retrieve the active provider
+    provider = ProviderManager().get(pid_provider_name)
 
-    return (
-        re.match(pid_regexp_match, pid_value.replace(settings.SERVER_URI, ""))
-        is not None
+    # Build regexp and test if it matches the pid_value
+    pid_prefixes_regexp = "|".join(settings.ID_PROVIDER_PREFIXES)
+    pid_regexp_match = (
+        f"{provider.provider_lookup_url}/(?:{pid_prefixes_regexp})/{pid_format}"
     )
+
+    return re.match(pid_regexp_match, pid_value) is not None
