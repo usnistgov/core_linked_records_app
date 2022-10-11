@@ -1,2 +1,2 @@
-core-federated-search-app==2.0.*
-core-explore-oaipmh-app==2.0.*
+core-federated-search-app==2.1.*
+core-explore-oaipmh-app==2.1.*
