@@ -2,6 +2,8 @@
 """
 
 from django.contrib import admin
+from django.contrib.admin.views.decorators import staff_member_required
+from django.urls import re_path
 
 from core_linked_records_app.components.local_id.admin_site import (
     CustomLocalIdAdmin,
@@ -15,7 +17,20 @@ from core_linked_records_app.components.pid_xpath.admin_site import (
     CustomPidXpathAdmin,
 )
 from core_linked_records_app.components.pid_xpath.models import PidXpath
+from core_linked_records_app.views.admin import views as admin_views
+from core_main_app.admin import core_admin_site
+
+admin_urls = [
+    re_path(
+        r"^settings/$",
+        staff_member_required(admin_views.PidSettingsView.as_view()),
+        name="core_linked_records_app_admin_settings",
+    ),
+]
 
 admin.site.register(LocalId, CustomLocalIdAdmin)
 admin.site.register(PidSettings, CustomPidSettingsAdmin)
 admin.site.register(PidXpath, CustomPidXpathAdmin)
+
+urls = core_admin_site.get_urls()
+core_admin_site.get_urls = lambda: admin_urls + urls

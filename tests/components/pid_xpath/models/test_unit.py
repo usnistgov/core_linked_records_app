@@ -4,8 +4,9 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from django.core.exceptions import ObjectDoesNotExist
-from core_main_app.commons.exceptions import ModelError
+
 from core_linked_records_app.components.pid_xpath.models import PidXpath
+from core_main_app.commons.exceptions import ModelError
 
 
 class TestPidXpathGetAll(TestCase):

@@ -4,12 +4,13 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from rest_framework import status
-from core_main_app.utils.tests_tools.MockUser import create_mock_user
-from core_main_app.utils.tests_tools.RequestMock import RequestMock
+
 from core_explore_common_app.components.query import api as query_api
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.data import api as data_api
 from core_linked_records_app.rest.pid import views as pid_views
+from core_main_app.utils.tests_tools.MockUser import create_mock_user
+from core_main_app.utils.tests_tools.RequestMock import RequestMock
 from tests import mocks
 
 
@@ -118,7 +119,7 @@ class TestRetrieveListPidPost(TestCase):
 
     def setUp(self) -> None:
         self.mock_data_source = dict(
-            query_options=dict(),
+            query_options={},
             order_by_field="",
             authentication=dict(
                 auth_type="oauth2",

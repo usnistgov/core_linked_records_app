@@ -3,12 +3,12 @@
 from unittest import TestCase
 from unittest.mock import patch
 
+from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.rest.query import views as query_views
 from core_main_app.components.data import api as data_api
 from core_main_app.rest.data.abstract_views import (
     AbstractExecuteLocalQueryView,
 )
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
-from core_linked_records_app.rest.query import views as query_views
 from tests import mocks
 
 

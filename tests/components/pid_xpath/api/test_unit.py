@@ -3,12 +3,12 @@
 from unittest import TestCase
 from unittest.mock import patch
 
+from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_main_app.commons.exceptions import ApiError
 from core_main_app.components.template import (
     api as template_api,
 )
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
-from core_linked_records_app.components.pid_xpath.models import PidXpath
 from tests import mocks
 
 

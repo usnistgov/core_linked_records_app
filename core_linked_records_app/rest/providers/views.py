@@ -10,11 +10,6 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core_main_app.access_control.exceptions import AccessControlError
-from core_main_app.commons.exceptions import DoesNotExist
-from core_main_app.rest.data.serializers import DataSerializer
-from core_main_app.utils.file import get_file_http_response
-
 from core_linked_records_app import settings
 from core_linked_records_app.components.blob.api import get_blob_by_pid
 from core_linked_records_app.components.data.api import get_data_by_pid
@@ -25,6 +20,10 @@ from core_linked_records_app.rest.data.renderers.data_xml_renderer import (
     DataXmlRenderer,
 )
 from core_linked_records_app.utils.providers import ProviderManager
+from core_main_app.access_control.exceptions import AccessControlError
+from core_main_app.commons.exceptions import DoesNotExist
+from core_main_app.rest.data.serializers import DataSerializer
+from core_main_app.utils.file import get_file_http_response
 
 logger = logging.getLogger(__name__)
 

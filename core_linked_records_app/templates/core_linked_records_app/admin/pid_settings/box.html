@@ -1,0 +1,70 @@
+{% extends "core_main_app/_render/admin/theme/tools/box.html" %}
+
+{% block box_title %}PID configuration settings{% endblock %}
+
+{% block box_tools %}
+{% endblock %}
+
+{% block box_body %}
+<p>Sample PID: {{ data.pid_settings.sample_url }}</p>
+<table class="table table-bordered table-striped">
+    <tr>
+        <th>Configuration key</th>
+        <th>Configuration value</th>
+    </tr>
+    <tr>
+        <td>Set PID automatically</td>
+        <td>
+            <div id="auto-set-pid-error" class="alert alert-error"></div>
+            <div id="auto-set-pid-control" class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="auto-set-pid-switch">
+              <label class="custom-control-label" id="auto-set-pid-label" for="auto-set-pid-switch">
+                {{ data.pid_settings.auto_set_pid }}
+              </label>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>PID XPath</td>
+        <td>
+            <ul>
+                {% for key, value in data.pid_settings.xpath.items %}
+                    <li>
+                        {{ key }}: <code>{{ value.xpath }}</code>
+                        {% if key != "default" %}
+                        <a class="ml-2" href="{{ value.edit_url }}">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            <a class="btn btn-sm btn-success"
+               href="{{ data.pid_settings.add_xpath_url }}">
+                <i class="fa fa-plus-circle"></i> Add another xpath
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td>PID System</td>
+        <td>
+            {{ data.pid_settings.system_name }}
+            (<code>{{ data.pid_settings.system_type }}</code>)
+        </td>
+    </tr>
+    <tr>
+        <td>Prefixes</td>
+        <td>
+            <ul>
+                {% for prefix in data.pid_settings.prefixes %}
+                <li>{{ prefix }}</li>
+                {%endfor %}
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>Record name format</td>
+        <td>{{ data.pid_settings.format }}</td>
+    </tr>
+</table>
+{% endblock %}

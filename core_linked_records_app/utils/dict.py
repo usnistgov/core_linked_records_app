@@ -1,4 +1,4 @@
-""" Dict
+""" Utilities to manipulate dictionaries
 """
 
 

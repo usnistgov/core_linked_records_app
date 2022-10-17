@@ -19,7 +19,7 @@ class TestRetrieveDataPidGet(TestCase):
 
     def setUp(self) -> None:
         self.mock_request = mocks.MockRequest()
-        self.mock_request.GET = dict()
+        self.mock_request.GET = {}
 
     @patch.object(data_api, "get_pid_for_data")
     def test_data_api_get_pid_for_data_fails_returns_500(
@@ -123,7 +123,7 @@ class TestRetrieveBlobPidGet(TestCase):
 
     def setUp(self) -> None:
         self.mock_request = mocks.MockRequest()
-        self.mock_request.GET = dict()
+        self.mock_request.GET = {}
 
     @patch.object(blob_api, "get_pid_for_blob")
     def test_get_pid_for_blob_fails_returns_500(self, mock_get_pid_for_blob):
@@ -272,7 +272,7 @@ class TestRetrieveListPidPost(TestCase):
         mock_get_by_id.return_value = mocks.MockQuery(
             data_sources=[
                 dict(
-                    query_options=dict(),
+                    query_options={},
                     order_by_field="",
                     capabilities={"url_pid": "mock_url_pid"},
                     authentication=dict(
@@ -283,7 +283,7 @@ class TestRetrieveListPidPost(TestCase):
             ]
         )
         mock_oauth2_post_request.return_value = mocks.MockResponse(
-            json_data=list()
+            json_data=[]
         )
 
         test_view = pid_views.RetrieveListPIDView()
@@ -301,7 +301,7 @@ class TestRetrieveListPidPost(TestCase):
         mock_get_by_id.return_value = mocks.MockQuery(
             data_sources=[
                 dict(
-                    query_options=dict(),
+                    query_options={},
                     order_by_field="",
                     capabilities={"url_pid": "mock_url_pid"},
                     authentication=dict(

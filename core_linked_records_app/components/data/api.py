@@ -2,8 +2,6 @@
 """
 from logging import getLogger
 
-from core_main_app.commons.exceptions import ApiError, DoesNotExist
-from core_main_app.components.data import api as data_api
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_linked_records_app.utils.dict import (
@@ -11,6 +9,8 @@ from core_linked_records_app.utils.dict import (
     get_value_from_dot_notation,
 )
 from core_linked_records_app.utils.pid import is_valid_pid_value
+from core_main_app.commons.exceptions import ApiError, DoesNotExist
+from core_main_app.components.data import api as data_api
 
 logger = getLogger(__name__)
 

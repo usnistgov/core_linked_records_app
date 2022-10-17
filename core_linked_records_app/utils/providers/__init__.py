@@ -8,9 +8,9 @@ from importlib import import_module
 from django.urls import reverse
 from rest_framework import status
 
+from core_linked_records_app import settings
 from core_main_app.commons import exceptions
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
-from core_linked_records_app import settings
 
 logger = logging.getLogger(__name__)
 

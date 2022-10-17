@@ -2,13 +2,13 @@
 """
 import logging
 
+from core_linked_records_app import settings
+from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.commons.exceptions import ApiError
 from core_main_app.components.template import (
     api as template_api,
 )
-from core_linked_records_app import settings
-from core_linked_records_app.components.pid_xpath.models import PidXpath
 
 logger = logging.getLogger(__name__)
 

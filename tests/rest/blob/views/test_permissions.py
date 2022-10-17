@@ -5,13 +5,13 @@ from unittest.mock import patch
 
 from rest_framework import status
 
+from core_linked_records_app.components.blob import api as blob_api
+from core_linked_records_app.components.local_id import api as local_id_api
+from core_linked_records_app.rest.blob import views as blob_views
 from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.rest.blob.views import BlobList
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_main_app.utils.tests_tools.RequestMock import RequestMock
-from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.local_id import api as local_id_api
-from core_linked_records_app.rest.blob import views as blob_views
 from tests import mocks
 
 

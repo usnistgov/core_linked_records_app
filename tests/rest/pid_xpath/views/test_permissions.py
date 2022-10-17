@@ -10,9 +10,9 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
+from core_linked_records_app.rest.pid_xpath import views as pid_xpath_views
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_main_app.utils.tests_tools.RequestMock import RequestMock
-from core_linked_records_app.rest.pid_xpath import views as pid_xpath_views
 
 
 class TestPidXpathListViewGet(TestCase):

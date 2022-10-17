@@ -67,7 +67,9 @@ TEMPLATES = [
 
 CUSTOM_NAME = "mock_custom_name"
 
-ROOT_URLCONF = "core_linked_records_app.urls"
+ROOT_URLCONF = "tests.test_urls"
+
+STATIC_URL = "/static/"
 
 CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 SERVER_URI = "http://mock-cdcs.com"

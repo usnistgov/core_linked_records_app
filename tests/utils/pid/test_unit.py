@@ -6,7 +6,6 @@ from unittest.mock import patch, Mock
 from core_linked_records_app.utils import pid as pid_utils
 from core_linked_records_app.utils.providers import (
     AbstractIdProvider,
-    ProviderManager,
 )
 from tests import test_settings
 

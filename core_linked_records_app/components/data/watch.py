@@ -5,8 +5,6 @@ from os.path import join
 
 from django.db.models.signals import pre_save
 
-from core_main_app.commons import exceptions
-from core_main_app.components.data.models import Data
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
@@ -17,6 +15,8 @@ from core_linked_records_app.utils.xml import (
     get_xpath_from_dot_notation,
     get_xpath_with_target_namespace,
 )
+from core_main_app.commons import exceptions
+from core_main_app.components.data.models import Data
 
 logger = logging.getLogger(__name__)
 

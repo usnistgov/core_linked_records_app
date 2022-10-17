@@ -2,12 +2,12 @@
 """
 import logging
 
+from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_main_app.commons.exceptions import ApiError
 from core_oaipmh_harvester_app.components.oai_record import (
     api as oai_record_data,
 )
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
-from core_linked_records_app.utils.dict import get_value_from_dot_notation
 
 logger = logging.getLogger(__name__)
 

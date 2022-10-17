@@ -3,7 +3,6 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from core_main_app.commons import exceptions
 from core_linked_records_app.components.data import watch as data_watch
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
@@ -11,6 +10,7 @@ from core_linked_records_app.components.pid_settings import (
 from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils import data as data_utils
 from core_linked_records_app.utils import providers as providers_utils
+from core_main_app.commons import exceptions
 from tests import mocks
 
 

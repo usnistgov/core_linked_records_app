@@ -1,14 +1,14 @@
 """ PID utilities related to data objects.
 """
 
-from xml_utils.xpath import create_tree_from_xpath
-from xml_utils.xsd_tree.xsd_tree import XSDTree
 from core_linked_records_app.utils.xml import (
     get_target_namespace_for_xsd_string,
     set_value_at_xpath,
     get_value_at_xpath,
     can_create_value_at_xpath,
 )
+from xml_utils.xpath import create_tree_from_xpath
+from xml_utils.xsd_tree.xsd_tree import XSDTree
 
 
 def set_pid_value_for_data(data, pid_xpath, pid_value):

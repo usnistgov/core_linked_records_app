@@ -5,11 +5,11 @@ from unittest.mock import patch, Mock
 
 from django.http import HttpRequest
 
+from core_linked_records_app.components.data import api as pid_data_api
+from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_main_app.commons import exceptions
 from core_main_app.components.data import api as main_data_api
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
-from core_linked_records_app.components.data import api as pid_data_api
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from tests import mocks
 
 
@@ -61,7 +61,7 @@ class TestGetDataByPid(TestCase):
         mock_execute_query.return_value = [expected_result]
 
         result = pid_data_api.get_data_by_pid(**self.mock_kwargs)
-        self.assertEquals(result, expected_result)
+        self.assertEqual(result, expected_result)
 
 
 class TestGetPidsForDataList(TestCase):
@@ -269,4 +269,4 @@ class TestGetPidForData(TestCase):
         mock_is_valid_pid_value.return_value = True
 
         result = pid_data_api.get_pid_for_data(**self.mock_kwargs)
-        self.assertEquals(result, expected_result)
+        self.assertEqual(result, expected_result)

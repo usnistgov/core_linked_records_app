@@ -3,7 +3,6 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
 )
@@ -13,6 +12,7 @@ from core_linked_records_app.rest.pid_settings import (
 from core_linked_records_app.rest.pid_settings.serializers import (
     PidSettingsSerializer,
 )
+from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from tests import mocks
 
 

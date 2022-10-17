@@ -4,12 +4,12 @@ import json
 from unittest import TestCase
 from unittest.mock import patch
 
-from core_main_app.access_control.exceptions import AccessControlError
-from core_main_app.commons.exceptions import DoesNotExist
-from core_main_app.rest.data.serializers import DataSerializer
 from core_linked_records_app import settings
 from core_linked_records_app.rest.providers import views as providers_views
 from core_linked_records_app.utils.providers import ProviderManager
+from core_main_app.access_control.exceptions import AccessControlError
+from core_main_app.commons.exceptions import DoesNotExist
+from core_main_app.rest.data.serializers import DataSerializer
 from tests import mocks
 
 

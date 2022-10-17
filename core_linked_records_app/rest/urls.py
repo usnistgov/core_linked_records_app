@@ -39,12 +39,12 @@ urlpatterns += [
     url(
         r"^settings/xpath/$",
         xpath_views.PidXpathListView.as_view(),
-        name="core_linked_records_app_settings",
+        name="core_linked_records_app_settings_xpath_list",
     ),
     url(
         r"^settings/xpath/(?P<pk>[0-9]+)/$",
         xpath_views.PidXpathDetailView.as_view(),
-        name="core_linked_records_app_settings",
+        name="core_linked_records_app_settings_xpath_detail",
     ),
     url(
         r"^retrieve-list-pid",

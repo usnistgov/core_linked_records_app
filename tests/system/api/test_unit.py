@@ -10,9 +10,7 @@ from core_linked_records_app.system.api import (
 )
 from core_linked_records_app.utils.providers import AbstractIdProvider
 from core_main_app.components.data.models import Data
-from tests import test_settings
 from tests.mocks import MockResponse
-from core_main_app.components.template.models import Template
 
 
 class TestIsPidDefinedForDocument(TestCase):
@@ -97,6 +95,8 @@ class TestGetPidForData(TestCase):
 
 
 class TestGetPidXpathByTemplate(TestCase):
+    """Test get_pid_xpath_by_template method"""
+
     @patch("core_linked_records_app.system.api.PidXpath.get_by_template")
     def test_get_by_template_is_called(self, mock_get_by_template):
         """Test get_by_template is called"""
@@ -129,10 +129,14 @@ class TestGetPidXpathByTemplate(TestCase):
 
 
 class TestDeletePidForData(TestCase):
+    """Test delete_pid_for_data"""
+
     @classmethod
     def setUpClass(cls) -> None:
-        cls.mock_data = Mock(spec=Data)
-        cls.mock_data.pk = "mock_pk"
+        mock_data = Mock(spec=Data)
+        mock_data.pk = "mock_pk"
+
+        cls.mock_data = mock_data
 
         cls.mock_provider = Mock(spec=AbstractIdProvider)
 
@@ -141,6 +145,7 @@ class TestDeletePidForData(TestCase):
     def test_empty_pid_is_not_deleted(
         self, mock_get_pid_for_data, mock_provider_manager_get
     ):
+        """test_empty_pid_is_not_deleted"""
         mock_get_pid_for_data.return_value = None
         mock_provider_manager_get.return_value = self.mock_provider
 
@@ -152,6 +157,7 @@ class TestDeletePidForData(TestCase):
     def test_provider_delete_called(
         self, mock_get_pid_for_data, mock_provider_manager_get
     ):
+        """test_provider_delete_called"""
         mock_pid = "mock_pid"
         mock_get_pid_for_data.return_value = mock_pid
         mock_provider_manager_get.return_value = self.mock_provider
@@ -164,6 +170,7 @@ class TestDeletePidForData(TestCase):
     def test_pid_delete_failure_exits(
         self, mock_get_pid_for_data, mock_provider_manager_get
     ):
+        """test_pid_delete_failure_exits"""
         mock_pid = "mock_pid"
         mock_get_pid_for_data.return_value = mock_pid
         mock_provider_manager_get.return_value = self.mock_provider
@@ -177,6 +184,7 @@ class TestDeletePidForData(TestCase):
     def test_pid_delete_success_works(
         self, mock_get_pid_for_data, mock_provider_manager_get
     ):
+        """test_pid_delete_success_works"""
         mock_pid = "mock_pid"
         mock_get_pid_for_data.return_value = mock_pid
         mock_provider_manager_get.return_value = self.mock_provider

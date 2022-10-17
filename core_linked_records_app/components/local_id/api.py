@@ -2,8 +2,8 @@
 """
 import logging
 
-from core_main_app.commons import exceptions
 from core_linked_records_app.components.local_id.models import LocalId
+from core_main_app.commons import exceptions
 
 logger = logging.getLogger(__name__)
 

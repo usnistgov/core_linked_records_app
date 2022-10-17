@@ -37,6 +37,12 @@ class MockData(MockDocument):
     dict_content = "mock_dict_content"
 
 
+class MockTemplate(Mock):
+    """Mock Template"""
+
+    display_name = None
+
+
 class MockPidSettings(Mock):
     """Mock Pid Settings"""
 
@@ -54,7 +60,7 @@ class MockResponse(Mock):
     """Mock Response"""
 
     status_code = status.HTTP_200_OK
-    data = dict()
+    data = {}
     content = "{}"
     json_data = None
 
@@ -63,10 +69,17 @@ class MockResponse(Mock):
         return self.json_data
 
 
+class MockSession(Mock):
+    """MockSession"""
+
+    session_key = "mock_session"
+
+
 class MockRequest(Mock):
     """Mock Request"""
 
     user = None
+    session = MockSession()
 
 
 class MockProviderManager(Mock):
@@ -117,13 +130,13 @@ class MockQuery(Mock):
     class MockTemplates(Mock):
         """Mock Templates"""
 
-        templates = list()
+        templates = []
 
         def all(self):
             """all"""
             return self.templates
 
-    data_sources = list()
+    data_sources = []
     content = ""
     templates = MockTemplates()
 
@@ -131,9 +144,9 @@ class MockQuery(Mock):
 class MockDataSource(Mock):
     """Mock Data Source"""
 
-    query_options = dict()
+    query_options = {}
     order_by_field = ""
-    capabilities = dict()
+    capabilities = {}
 
 
 class MockAuthentication(Mock):
@@ -145,7 +158,7 @@ class MockAuthentication(Mock):
 class MockSerializer(Mock):
     """Mock Serializer"""
 
-    data = dict()
+    data = {}
     is_valid_exc = None
     is_valid_result = True
     update_exc = None

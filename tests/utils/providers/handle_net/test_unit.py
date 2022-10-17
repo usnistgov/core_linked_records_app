@@ -5,7 +5,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from core_linked_records_app.utils.providers.handle_net import HandleNetSystem
-from tests.mocks import MockRequest, MockResponse
+from tests.mocks import MockResponse
 
 
 class TestHandleNetSystemUpdateResponseContent(TestCase):

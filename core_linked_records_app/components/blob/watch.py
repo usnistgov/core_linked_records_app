@@ -6,14 +6,14 @@ from logging import getLogger
 from django.db.models.signals import post_save
 from django.urls import reverse
 
-from core_main_app.commons.exceptions import CoreError, DoesNotExist
-from core_main_app.components.blob.models import Blob
-from core_main_app.utils.requests_utils.requests_utils import send_post_request
 from core_linked_records_app import settings
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
 )
+from core_main_app.commons.exceptions import CoreError, DoesNotExist
+from core_main_app.components.blob.models import Blob
+from core_main_app.utils.requests_utils.requests_utils import send_post_request
 
 logger = getLogger(__name__)
 

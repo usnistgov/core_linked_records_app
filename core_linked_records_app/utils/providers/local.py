@@ -7,14 +7,20 @@ import string
 from requests import Response
 from rest_framework import status
 
-from core_main_app.commons import exceptions
 from core_linked_records_app.components.local_id import api as record_api
 from core_linked_records_app.components.local_id.models import LocalId
 from core_linked_records_app.utils.providers import AbstractIdProvider
+from core_main_app.commons import exceptions
 
 
 class LocalIdProvider(AbstractIdProvider):
     """Local Id Provider"""
+
+    messages = {
+        "success": "Successful operation",
+        "not_found": "Record not found",
+        "already_exist": "Record already exists",
+    }
 
     def __init__(self, provider_name):
         super().__init__(provider_name, None, None, None, None)
@@ -38,7 +44,7 @@ class LocalIdProvider(AbstractIdProvider):
         """
         return (
             json.loads(self.get(record).content)["message"]
-            == "Successful operation"
+            == self.messages["success"]
         )
 
     def get(self, record):
@@ -52,14 +58,14 @@ class LocalIdProvider(AbstractIdProvider):
 
         response = Response()
 
-        record_url = "%s/%s" % (self.provider_lookup_url, record)
+        record_url = f"{self.provider_lookup_url}/{record}"
 
         try:
             record_api.get_by_name(record)
             response.status_code = status.HTTP_200_OK
             response._content = json.dumps(
                 {
-                    "message": "Successful operation",
+                    "message": self.messages["success"],
                     "record": record,
                     "url": record_url,
                 }
@@ -68,7 +74,7 @@ class LocalIdProvider(AbstractIdProvider):
             response.status_code = status.HTTP_404_NOT_FOUND
             response._content = json.dumps(
                 {
-                    "message": "record not found",
+                    "message": self.messages["not_found"],
                     "record": record,
                     "url": record_url,
                 }
@@ -110,10 +116,10 @@ class LocalIdProvider(AbstractIdProvider):
             record_api.insert(record_object)
 
             response.status_code = status.HTTP_201_CREATED
-            response_content["message"] = "Successful operation"
+            response_content["message"] = self.messages["success"]
         except exceptions.NotUniqueError:
             response.status_code = status.HTTP_409_CONFLICT
-            response_content["message"] = "record already exists"
+            response_content["message"] = self.messages["already_exist"]
 
         response._content = json.dumps(response_content)
         return response
@@ -134,7 +140,7 @@ class LocalIdProvider(AbstractIdProvider):
         response._content = json.dumps(
             {
                 "record": record,
-                "message": "Successful operation",
+                "message": self.messages["success"],
                 "url": record_url,
             }
         )
@@ -157,10 +163,11 @@ class LocalIdProvider(AbstractIdProvider):
             record_object = record_api.get_by_name(record)
             record_object.delete()
 
+            response.status_code = status.HTTP_200_OK
             response._content = json.dumps(
                 {
                     "record": record,
-                    "message": "Successful operation",
+                    "message": self.messages["success"],
                     "url": record_url,
                 }
             )
@@ -169,7 +176,7 @@ class LocalIdProvider(AbstractIdProvider):
             response._content = json.dumps(
                 {
                     "record": record,
-                    "message": "record not found",
+                    "message": self.messages["not_found"],
                     "url": record_url,
                 }
             )

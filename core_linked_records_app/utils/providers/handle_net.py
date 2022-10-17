@@ -4,14 +4,13 @@ import json
 import logging
 from base64 import b64encode
 
+from core_linked_records_app import settings
+from core_linked_records_app.utils.providers import AbstractIdProvider
 from core_main_app.utils.requests_utils.requests_utils import (
     send_put_request,
     send_delete_request,
     send_get_request,
 )
-
-from core_linked_records_app import settings
-from core_linked_records_app.utils.providers import AbstractIdProvider
 
 logger = logging.getLogger(__name__)
 

@@ -2,8 +2,8 @@
 """
 import logging
 
-from core_main_app.commons.exceptions import ApiError
 from core_linked_records_app.components.pid_settings.models import PidSettings
+from core_main_app.commons.exceptions import ApiError
 
 logger = logging.getLogger(__name__)
 

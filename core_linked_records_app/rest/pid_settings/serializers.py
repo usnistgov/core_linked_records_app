@@ -17,7 +17,7 @@ class PidSettingsSerializer(serializers.ModelSerializer):
         """Meta"""
 
         model = PidSettings
-        fields = "__all__"
+        exclude = ["id"]
 
     def update(self, instance: PidSettings, validated_data):
         """Update a PidSetting instance

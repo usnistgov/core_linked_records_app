@@ -3,9 +3,9 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from core_main_app.commons import exceptions
 from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.components.local_id.models import LocalId
+from core_main_app.commons import exceptions
 
 
 class TestGetByName(TestCase):

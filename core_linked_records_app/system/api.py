@@ -5,15 +5,12 @@ import logging
 from django.db.models import Q
 from rest_framework import status
 
-from core_main_app.commons.exceptions import DoesNotExist, ApiError
-from core_main_app.components.data.models import Data
-from core_main_app.utils.requests_utils.requests_utils import (
-    send_delete_request,
-)
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.providers import ProviderManager
+from core_main_app.commons.exceptions import DoesNotExist, ApiError
+from core_main_app.components.data.models import Data
 
 logger = logging.getLogger(__name__)
 

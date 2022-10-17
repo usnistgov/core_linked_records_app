@@ -34,7 +34,8 @@ class PidSettingsView(APIView):
             response_data = {
                 "xpath": settings.PID_XPATH,
                 "format": settings.PID_FORMAT,
-                "system": settings.ID_PROVIDER_SYSTEM_NAME,
+                "system_name": settings.ID_PROVIDER_SYSTEM_NAME,
+                "system_type": settings.ID_PROVIDER_SYSTEM_CONFIG["class"],
                 "prefixes": settings.ID_PROVIDER_PREFIXES,
             }
 

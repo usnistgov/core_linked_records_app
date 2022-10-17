@@ -4,8 +4,9 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from django.core.exceptions import ObjectDoesNotExist
-from core_main_app.commons import exceptions
+
 from core_linked_records_app.components.pid_settings.models import PidSettings
+from core_main_app.commons import exceptions
 
 
 class TestPidSettingsGet(TestCase):

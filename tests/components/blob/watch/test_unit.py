@@ -4,13 +4,12 @@ import json
 from unittest import TestCase
 from unittest.mock import patch
 
-from core_main_app.commons import exceptions
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.blob import watch as blob_watch
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
 )
-
+from core_main_app.commons import exceptions
 from tests import mocks
 
 

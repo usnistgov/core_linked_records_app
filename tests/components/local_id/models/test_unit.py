@@ -6,8 +6,8 @@ from unittest.mock import patch
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 
-from core_main_app.commons import exceptions
 from core_linked_records_app.components.local_id.models import LocalId
+from core_main_app.commons import exceptions
 
 
 class TestGetByName(TestCase):

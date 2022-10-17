@@ -14,12 +14,12 @@ from core_explore_common_app.utils.protocols.oauth2 import (
     send_post_request as oauth2_post_request,
     send_get_request as oauth2_get_request,
 )
-from core_main_app.utils.requests_utils.requests_utils import (
-    send_get_request,
-)
 from core_linked_records_app import settings
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.data import api as data_api
+from core_main_app.utils.requests_utils.requests_utils import (
+    send_get_request,
+)
 
 
 class RetrieveDataPIDView(APIView):

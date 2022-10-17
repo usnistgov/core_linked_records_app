@@ -3,12 +3,12 @@
 from unittest import TestCase
 from unittest.mock import patch
 
+from core_linked_records_app.components.oai_record import api as oai_record_api
+from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_main_app.commons.exceptions import ApiError
 from core_oaipmh_harvester_app.components.oai_record import (
     api as oai_record_data,
 )
-from core_linked_records_app.components.oai_record import api as oai_record_api
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from tests import mocks
 
 
