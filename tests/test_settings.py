@@ -77,3 +77,6 @@ SERVER_URI = "http://mock-cdcs.com"
 PID_XPATH = "mock.pid"
 
 ID_PROVIDER_PREFIXES = ["mock_cdcs"]
+
+MONGODB_INDEXING = False
+MONGODB_ASYNC_SAVE = False
