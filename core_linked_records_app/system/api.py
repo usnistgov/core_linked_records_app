@@ -2,7 +2,7 @@
 """
 import logging
 
-from django.db.models import Q
+from django.conf import settings as conf_settings
 from rest_framework import status
 
 from core_linked_records_app import settings
@@ -11,6 +11,7 @@ from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.providers import ProviderManager
 from core_main_app.commons.exceptions import DoesNotExist, ApiError
 from core_main_app.components.data.models import Data
+from core_main_app.utils.query.mongo.prepare import sanitize_value
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +29,27 @@ def is_pid_defined_for_data(pid, document_id):
 
     pid_xpath_object = get_pid_xpath_by_template(data.template)
     pid_xpath = pid_xpath_object.xpath
+    query = {
+        f"dict_content__{pid_xpath.replace('.', '__')}__exact": sanitize_value(
+            pid
+        )
+    }
 
-    query_result = Data.execute_query(
-        Q(**{f"dict_content__{pid_xpath.replace('.', '__')}": pid}),
-        order_by_field=[],
-    )
+    if conf_settings.MONGODB_INDEXING:
+        from mongoengine.queryset.visitor import Q
+        from core_main_app.components.mongo.models import MongoData
+
+        query_result = MongoData.execute_query(
+            Q(**query),
+            order_by_field=[],
+        )
+    else:
+        from django.db.models import Q
+
+        query_result = Data.execute_query(
+            Q(**query),
+            order_by_field=[],
+        )
 
     return len(query_result) == 1 and query_result[0].pk == document_id
 
@@ -60,20 +77,42 @@ def get_data_by_pid(pid):
 
     Returns: data object
     """
+    if conf_settings.MONGODB_INDEXING:
+        from mongoengine.queryset.visitor import Q
+    else:
+        from django.db.models import Q
+
     pid_xpath_query = Q(
-        **{f"dict_content__{settings.PID_XPATH.replace('.', '__')}": pid}
+        **{
+            f"dict_content__{settings.PID_XPATH.replace('.', '__')}__exact": sanitize_value(
+                pid
+            )
+        }
     )
 
     # Create the or query with all the different PID Xpath available.
     for pid_xpath_object in PidXpath.get_all():
         pid_xpath_query |= Q(
             **{
-                f"dict_content__{pid_xpath_object.xpath.replace('.', '__')}": pid
+                f"dict_content__{pid_xpath_object.xpath.replace('.', '__')}__exact": sanitize_value(
+                    pid
+                )
             }
         )
-
     # Execute built query and retrieve number of items returned.
-    query_result = Data.execute_query(pid_xpath_query, order_by_field=[])
+    if conf_settings.MONGODB_INDEXING:
+        from core_main_app.components.mongo.models import MongoData
+
+        query_result = MongoData.execute_query(
+            pid_xpath_query,
+            order_by_field=[],
+        )
+    else:
+        query_result = Data.execute_query(
+            pid_xpath_query,
+            order_by_field=[],
+        )
+
     query_result_length = query_result.count()
 
     if query_result_length == 0:

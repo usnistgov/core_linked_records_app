@@ -1,45 +1,200 @@
 """ Unit tests for core_linked_records_app.system.api
 """
 from unittest import TestCase
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, MagicMock
+from django.test import tag, override_settings
 
 from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_linked_records_app.system.api import (
     delete_pid_for_data,
     get_pid_xpath_by_template,
+    is_pid_defined_for_data,
+    get_data_by_pid,
 )
 from core_linked_records_app.utils.providers import AbstractIdProvider
+from core_main_app.commons.exceptions import DoesNotExist, ApiError
 from core_main_app.components.data.models import Data
 from tests.mocks import MockResponse
 
 
-class TestIsPidDefinedForDocument(TestCase):
+class TestIsPidDefinedForDocumentPsql(TestCase):
     """Test Is Pid Defined For Document"""
 
-    def test_wrong_document_id_raise_error(self):
+    @patch("core_linked_records_app.system.api.Data.get_by_id")
+    def test_wrong_document_id_raise_error(self, mock_data_get_by_id):
         """test_wrong_document_id_raise_error"""
+        mock_data_get_by_id.side_effect = DoesNotExist("mock_does_not_exist")
 
-        pass
+        with self.assertRaises(Exception):
+            is_pid_defined_for_data("mock_pid", "mock_document_id")
 
-    def test_undefined_pid_returns_false(self):
+    @override_settings(MONGODB_INDEXING=False)
+    @patch("core_linked_records_app.system.api.Data.execute_query")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    @patch("core_linked_records_app.system.api.Data.get_by_id")
+    def test_undefined_pid_returns_false(
+        self,
+        mock_data_get_by_id,
+        mock_get_pid_xpath_by_template,
+        mock_data_execute_query,
+    ):
         """test_undefined_pid_returns_false"""
+        mock_data_get_by_id.return_value = MagicMock()
+        mock_get_pid_xpath_by_template.return_value = MagicMock()
+        mock_data_execute_query.return_value = []
 
-        pass
+        self.assertFalse(
+            is_pid_defined_for_data("mock_pid", "mock_document_id")
+        )
 
-    def test_duplicate_pid_returns_false(self):
+    @override_settings(MONGODB_INDEXING=False)
+    @patch("core_linked_records_app.system.api.Data.execute_query")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    @patch("core_linked_records_app.system.api.Data.get_by_id")
+    def test_duplicate_pid_returns_false(
+        self,
+        mock_data_get_by_id,
+        mock_get_pid_xpath_by_template,
+        mock_data_execute_query,
+    ):
         """test_duplicate_pid_returns_false"""
+        mock_data_get_by_id.return_value = MagicMock()
+        mock_get_pid_xpath_by_template.return_value = MagicMock()
+        mock_data_execute_query.return_value = [MagicMock(), MagicMock()]
 
-        pass
+        self.assertFalse(
+            is_pid_defined_for_data("mock_pid", "mock_document_id")
+        )
 
-    def test_defined_pid_for_other_document_returns_false(self):
+    @override_settings(MONGODB_INDEXING=False)
+    @patch("core_linked_records_app.system.api.Data.execute_query")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    @patch("core_linked_records_app.system.api.Data.get_by_id")
+    def test_defined_pid_for_other_document_returns_false(
+        self,
+        mock_data_get_by_id,
+        mock_get_pid_xpath_by_template,
+        mock_data_execute_query,
+    ):
         """test_defined_pid_for_other_document_returns_false"""
+        mock_data_get_by_id.return_value = MagicMock()
+        mock_get_pid_xpath_by_template.return_value = MagicMock()
+        mock_result = MagicMock()
+        mock_result.pk = "mock_document_id_other"
+        mock_data_execute_query.return_value = [mock_result]
 
-        pass
+        self.assertFalse(
+            is_pid_defined_for_data("mock_pid", "mock_document_id")
+        )
 
-    def test_defined_pid_for_current_document_returns_true(self):
+    @override_settings(MONGODB_INDEXING=False)
+    @patch("core_linked_records_app.system.api.Data.execute_query")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    @patch("core_linked_records_app.system.api.Data.get_by_id")
+    def test_defined_pid_for_current_document_returns_true(
+        self,
+        mock_data_get_by_id,
+        mock_get_pid_xpath_by_template,
+        mock_data_execute_query,
+    ):
         """test_defined_pid_for_current_document_returns_true"""
+        mock_data_get_by_id.return_value = MagicMock()
+        mock_get_pid_xpath_by_template.return_value = MagicMock()
+        mock_result = MagicMock()
+        mock_result.pk = "mock_document_id"
+        mock_data_execute_query.return_value = [mock_result]
 
-        pass
+        self.assertTrue(
+            is_pid_defined_for_data("mock_pid", "mock_document_id")
+        )
+
+
+class TestIsPidDefinedForDocumentMongo(TestCase):
+    """Test Is Pid Defined For Document"""
+
+    @tag("mongodb")
+    @override_settings(MONGODB_INDEXING=True)
+    @patch("core_main_app.components.mongo.models.MongoData.execute_query")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    @patch("core_linked_records_app.system.api.Data.get_by_id")
+    def test_undefined_pid_returns_false(
+        self,
+        mock_data_get_by_id,
+        mock_get_pid_xpath_by_template,
+        mock_data_execute_query,
+    ):
+        """test_undefined_pid_returns_false"""
+        mock_data_get_by_id.return_value = MagicMock()
+        mock_get_pid_xpath_by_template.return_value = MagicMock()
+        mock_data_execute_query.return_value = []
+
+        self.assertFalse(
+            is_pid_defined_for_data("mock_pid", "mock_document_id")
+        )
+
+    @tag("mongodb")
+    @override_settings(MONGODB_INDEXING=True)
+    @patch("core_main_app.components.mongo.models.MongoData.execute_query")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    @patch("core_linked_records_app.system.api.Data.get_by_id")
+    def test_duplicate_pid_returns_false(
+        self,
+        mock_data_get_by_id,
+        mock_get_pid_xpath_by_template,
+        mock_data_execute_query,
+    ):
+        """test_duplicate_pid_returns_false"""
+        mock_data_get_by_id.return_value = MagicMock()
+        mock_get_pid_xpath_by_template.return_value = MagicMock()
+        mock_data_execute_query.return_value = [MagicMock(), MagicMock()]
+
+        self.assertFalse(
+            is_pid_defined_for_data("mock_pid", "mock_document_id")
+        )
+
+    @tag("mongodb")
+    @override_settings(MONGODB_INDEXING=True)
+    @patch("core_main_app.components.mongo.models.MongoData.execute_query")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    @patch("core_linked_records_app.system.api.Data.get_by_id")
+    def test_defined_pid_for_other_document_returns_false(
+        self,
+        mock_data_get_by_id,
+        mock_get_pid_xpath_by_template,
+        mock_data_execute_query,
+    ):
+        """test_defined_pid_for_other_document_returns_false"""
+        mock_data_get_by_id.return_value = MagicMock()
+        mock_get_pid_xpath_by_template.return_value = MagicMock()
+        mock_result = MagicMock()
+        mock_result.pk = "mock_document_id_other"
+        mock_data_execute_query.return_value = [mock_result]
+
+        self.assertFalse(
+            is_pid_defined_for_data("mock_pid", "mock_document_id")
+        )
+
+    @tag("mongodb")
+    @override_settings(MONGODB_INDEXING=True)
+    @patch("core_main_app.components.mongo.models.MongoData.execute_query")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    @patch("core_linked_records_app.system.api.Data.get_by_id")
+    def test_defined_pid_for_current_document_returns_true(
+        self,
+        mock_data_get_by_id,
+        mock_get_pid_xpath_by_template,
+        mock_data_execute_query,
+    ):
+        """test_defined_pid_for_current_document_returns_true"""
+        mock_data_get_by_id.return_value = MagicMock()
+        mock_get_pid_xpath_by_template.return_value = MagicMock()
+        mock_result = MagicMock()
+        mock_result.pk = "mock_document_id"
+        mock_data_execute_query.return_value = [mock_result]
+
+        self.assertTrue(
+            is_pid_defined_for_data("mock_pid", "mock_document_id")
+        )
 
 
 class TestIsPidDefined(TestCase):
@@ -61,23 +216,105 @@ class TestIsPidDefined(TestCase):
         pass
 
 
-class TestGetDataByPid(TestCase):
+class TestGetDataByPidPsql(TestCase):
     """Test Get Data By Pid"""
 
-    def test_query_returns_no_results_raises_error(self):
+    @override_settings(MONGODB_INDEXING=False)
+    @patch("core_linked_records_app.system.api.Data.execute_query")
+    @patch("core_linked_records_app.system.api.PidXpath.get_all")
+    def test_query_returns_no_results_raises_error(
+        self, mock_pid_xpath_get_all, mock_execute_query
+    ):
         """test_query_returns_no_results_raises_error"""
+        mock_pid_xpath_get_all.return_value = [MagicMock()]
+        mock_queryset = MagicMock()
+        mock_queryset.count.return_value = 0
+        mock_execute_query.return_value = mock_queryset
 
-        pass
+        with self.assertRaises(DoesNotExist):
+            get_data_by_pid("mock_pid")
 
-    def test_query_returns_several_results_raises_error(self):
+    @override_settings(MONGODB_INDEXING=False)
+    @patch("core_linked_records_app.system.api.Data.execute_query")
+    @patch("core_linked_records_app.system.api.PidXpath.get_all")
+    def test_query_returns_several_results_raises_error(
+        self, mock_pid_xpath_get_all, mock_execute_query
+    ):
         """test_query_returns_several_results_raises_error"""
+        mock_pid_xpath_get_all.return_value = [MagicMock()]
+        mock_queryset = MagicMock()
+        mock_queryset.count.return_value = 2
+        mock_execute_query.return_value = mock_queryset
 
-        pass
+        with self.assertRaises(ApiError):
+            get_data_by_pid("mock_pid")
 
-    def test_query_returns_single_result_returns_result(self):
+    @override_settings(MONGODB_INDEXING=False)
+    @patch("core_linked_records_app.system.api.Data.execute_query")
+    @patch("core_linked_records_app.system.api.PidXpath.get_all")
+    def test_query_returns_single_result_returns_result(
+        self, mock_pid_xpath_get_all, mock_execute_query
+    ):
         """test_query_returns_single_result_returns_result"""
+        mock_pid_xpath_get_all.return_value = [MagicMock()]
+        mock_queryset = MagicMock()
+        mock_queryset.count.return_value = 1
+        mock_queryset.__getitem__.return_value = "mock_data"
+        mock_execute_query.return_value = mock_queryset
 
-        pass
+        self.assertEquals(get_data_by_pid("mock_pid"), "mock_data")
+
+
+class TestGetDataByPidMongo(TestCase):
+    """Test Get Data By Pid"""
+
+    @tag("mongodb")
+    @override_settings(MONGODB_INDEXING=True)
+    @patch("core_main_app.components.mongo.models.MongoData.execute_query")
+    @patch("core_linked_records_app.system.api.PidXpath.get_all")
+    def test_query_returns_no_results_raises_error(
+        self, mock_pid_xpath_get_all, mock_execute_query
+    ):
+        """test_query_returns_no_results_raises_error"""
+        mock_pid_xpath_get_all.return_value = [MagicMock()]
+        mock_queryset = MagicMock()
+        mock_queryset.count.return_value = 0
+        mock_execute_query.return_value = mock_queryset
+
+        with self.assertRaises(DoesNotExist):
+            get_data_by_pid("mock_pid")
+
+    @tag("mongodb")
+    @override_settings(MONGODB_INDEXING=True)
+    @patch("core_main_app.components.mongo.models.MongoData.execute_query")
+    @patch("core_linked_records_app.system.api.PidXpath.get_all")
+    def test_query_returns_several_results_raises_error(
+        self, mock_pid_xpath_get_all, mock_execute_query
+    ):
+        """test_query_returns_several_results_raises_error"""
+        mock_pid_xpath_get_all.return_value = [MagicMock()]
+        mock_queryset = MagicMock()
+        mock_queryset.count.return_value = 2
+        mock_execute_query.return_value = mock_queryset
+
+        with self.assertRaises(ApiError):
+            get_data_by_pid("mock_pid")
+
+    @tag("mongodb")
+    @override_settings(MONGODB_INDEXING=True)
+    @patch("core_main_app.components.mongo.models.MongoData.execute_query")
+    @patch("core_linked_records_app.system.api.PidXpath.get_all")
+    def test_query_returns_single_result_returns_result(
+        self, mock_pid_xpath_get_all, mock_execute_query
+    ):
+        """test_query_returns_single_result_returns_result"""
+        mock_pid_xpath_get_all.return_value = [MagicMock()]
+        mock_queryset = MagicMock()
+        mock_queryset.count.return_value = 1
+        mock_queryset.__getitem__.return_value = "mock_data"
+        mock_execute_query.return_value = mock_queryset
+
+        self.assertEquals(get_data_by_pid("mock_pid"), "mock_data")
 
 
 class TestGetPidForData(TestCase):

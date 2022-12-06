@@ -1,2 +1,3 @@
+core-main-app[mongodb]==2.1.*
 core-federated-search-app==2.1.*
 core-explore-oaipmh-app==2.1.*
