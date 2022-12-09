@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "xml_utils",
     "core_main_app",
     "core_explore_common_app",
+    "core_explore_oaipmh_app",
     "core_federated_search_app",
     "core_oaipmh_common_app",
     "core_oaipmh_harvester_app",
