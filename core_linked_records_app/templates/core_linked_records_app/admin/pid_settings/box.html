@@ -6,16 +6,19 @@
 {% endblock %}
 
 {% block box_body %}
-<p>Sample PID: {{ data.pid_settings.sample_url }}</p>
 <table class="table table-bordered table-striped">
     <tr>
         <th>Configuration key</th>
         <th>Configuration value</th>
     </tr>
     <tr>
+        <td>Sample PID</td>
+        <td>{{ data.pid_settings.sample_url }}</td>
+    </tr>
+    <tr>
         <td>Set PID automatically</td>
         <td>
-            <div id="auto-set-pid-error" class="alert alert-error"></div>
+            <div id="auto-set-pid-error" class="alert alert-error" style="display: none"></div>
             <div id="auto-set-pid-control" class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input" id="auto-set-pid-switch">
               <label class="custom-control-label" id="auto-set-pid-label" for="auto-set-pid-switch">

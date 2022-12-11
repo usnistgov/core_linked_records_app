@@ -5,6 +5,7 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
+from core_linked_records_app.utils.dict import validate_dot_notation
 from core_main_app.commons import exceptions
 from core_main_app.commons.exceptions import ModelError
 from core_main_app.components.template.models import Template
@@ -15,7 +16,9 @@ logger = logging.getLogger(__name__)
 class PidXpath(models.Model):
     """Pid Xpath"""
 
-    xpath = models.CharField(blank=False, max_length=255)
+    xpath = models.CharField(
+        blank=False, max_length=255, validators=[validate_dot_notation]
+    )
     template = models.OneToOneField(
         Template,
         blank=False,

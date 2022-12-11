@@ -1,11 +1,51 @@
 """ Unit tests for core_linked_records_app.utils.dict
 """
 from unittest import TestCase
+from unittest.mock import patch
+
+from django.core.exceptions import ValidationError
 
 from core_linked_records_app.utils.dict import (
     get_value_from_dot_notation,
     is_dot_notation_in_dictionary,
+    validate_dot_notation,
 )
+from core_main_app.commons.exceptions import QueryError
+
+
+class TestValidateDict(TestCase):
+    """Tests for validate_dict function"""
+
+    @patch("core_linked_records_app.utils.dict.sanitize_value")
+    def test_sanitize_value_query_error_raise_validation_error(
+        self, mock_sanitize_value
+    ):
+        """test_sanitize_value_query_error_raise_validation_error"""
+        mock_sanitize_value.side_effect = QueryError(
+            "mock_sanitize_value_query_error"
+        )
+
+        with self.assertRaises(ValidationError):
+            validate_dot_notation("mock_value")
+
+    @patch("core_linked_records_app.utils.dict.sanitize_value")
+    def test_sanitize_value_exception_raise_validation_error(
+        self, mock_sanitize_value
+    ):
+        """test_sanitize_value_exception_raise_validation_error"""
+        mock_sanitize_value.side_effect = Exception(
+            "mock_sanitize_value_exception"
+        )
+
+        with self.assertRaises(ValidationError):
+            validate_dot_notation("mock_value")
+
+    @patch("core_linked_records_app.utils.dict.sanitize_value")
+    def test_sanitize_value_success_returns_none(self, mock_sanitize_value):
+        """test_sanitize_value_success_returns_none"""
+        mock_sanitize_value.return_value = None
+
+        self.assertIsNone(validate_dot_notation("mock_value"))
 
 
 class TestGetValueFromDotNotation(TestCase):

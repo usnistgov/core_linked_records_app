@@ -1,5 +1,26 @@
 """ Utilities to manipulate dictionaries
 """
+from django.core.exceptions import ValidationError
+
+from core_main_app.commons.exceptions import QueryError
+from core_main_app.utils.query.mongo.prepare import sanitize_value
+
+
+def validate_dot_notation(value):
+    """Validate value used for dot notation to avoid Mongo injection.
+
+    Args:
+        value: The value to sanitize
+
+    Raises:
+        ValidationError - If the query cannot be sanitized
+    """
+    try:
+        sanitize_value(value)
+    except QueryError as error:
+        raise ValidationError(f"Query error: {str(error)}")
+    except Exception as exception:
+        raise ValidationError(f"Unexpected error: {str(exception)}")
 
 
 def get_value_from_dot_notation(dictionary, dot_notation):

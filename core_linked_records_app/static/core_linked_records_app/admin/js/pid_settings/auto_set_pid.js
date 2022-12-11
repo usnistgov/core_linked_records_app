@@ -10,6 +10,7 @@ let displayError = (message) => {
 }
 
 let setAutoSetPidSwitch = () => {
+    $autoSetPidError.hide();
     let autoSetPidValue = $autoSetPidLabel.text().trim();
 
     if (autoSetPidValue === "True") {
@@ -18,7 +19,7 @@ let setAutoSetPidSwitch = () => {
         $autoSetPidSwitch.attr("checked", false);
     } else {
         displayError(
-            "Invalide value for 'auto_set_pid'. Contact an administrator for more " +
+            "Invalid value for 'auto_set_pid'. Contact an administrator for more " +
             "information."
         );
     }
@@ -26,13 +27,12 @@ let setAutoSetPidSwitch = () => {
 
 let initAutoSetPidSwitch = () => {
     $autoSetPidError.hide();
-    setAutoSetPidSwitch(
-
-    );
+    setAutoSetPidSwitch();
 };
 
 let processAutoSetPidClick = (event) => {
     event.preventDefault();
+    $autoSetPidError.hide();
 
     $.ajax({
         url: "/pid/rest/settings",
@@ -55,7 +55,6 @@ let processAutoSetPidClick = (event) => {
 }
 
 $( document ).ready(function() {
-
     initAutoSetPidSwitch();
     $autoSetPidControl.on("click", processAutoSetPidClick)
 });
