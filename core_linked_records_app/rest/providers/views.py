@@ -77,7 +77,7 @@ class ProviderRecordView(APIView):
             if (
                 record is not None
                 and record != ""
-                and re.match(r"^(%s|)$" % settings.PID_FORMAT, record) is None
+                and re.match(f"^({settings.PID_FORMAT}|)$", record) is None
             ):
                 return Response(
                     {
@@ -95,7 +95,7 @@ class ProviderRecordView(APIView):
             return Response(
                 provider_content, status=provider_response.status_code
             )
-        except Exception as exc:
+        except Exception as exc:  # pylint: disable=broad-except
             return Response(
                 {
                     "record": record,
@@ -105,7 +105,12 @@ class ProviderRecordView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    def put(self, request, provider, record):
+    def put(
+        self,
+        request,  # noqa, pylint: disable=unused-argument
+        provider,
+        record,
+    ):
         """Update the value of a given handle record
 
         Args:
@@ -124,7 +129,7 @@ class ProviderRecordView(APIView):
             return Response(
                 provider_content, status=provider_response.status_code
             )
-        except Exception as exc:
+        except Exception as exc:  # pylint: disable=broad-except
             return Response(
                 {
                     "message": f"An unexpected error occurred while updating "
@@ -164,7 +169,7 @@ class ProviderRecordView(APIView):
                     )
 
                     return get_file_http_response(
-                        query_result.blob, query_result.filename
+                        query_result.blob.read(), query_result.filename
                     )
                 except AccessControlError as exception:
                     content = {"message": str(exception)}
@@ -176,7 +181,7 @@ class ProviderRecordView(APIView):
                         "message": "No document with specified handle found",
                     }
                     return Response(content, status=status.HTTP_404_NOT_FOUND)
-        except Exception as exc:
+        except Exception as exc:  # pylint: disable=broad-except
             content = {
                 "status": "error",
                 "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -186,7 +191,12 @@ class ProviderRecordView(APIView):
                 content, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def delete(self, request, provider, record):
+    def delete(
+        self,
+        request,  # noqa, pylint: disable=unused-argument
+        provider,
+        record,
+    ):
         """Delete a handle record
 
         Args:
@@ -205,7 +215,7 @@ class ProviderRecordView(APIView):
             return Response(
                 provider_content, status=provider_response.status_code
             )
-        except Exception as exc:
+        except Exception as exc:  # pylint: disable=broad-except
             return Response(
                 {
                     "message": f"An unexpected error occurred while deleting "

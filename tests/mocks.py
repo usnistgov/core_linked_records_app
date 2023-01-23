@@ -8,7 +8,9 @@ from rest_framework import status
 class MockModule(Mock):
     """Mock Module"""
 
-    def get_by_id(self, *args, **kwargs):
+    def get_by_id(
+        self, *args, **kwargs
+    ):  # noqa, pylint: disable=unused-argument
         """get_by_id
 
         Returns:
@@ -95,31 +97,31 @@ class MockProviderManager(Mock):
     delete_exc = None
     delete_result = None
 
-    def create(self, *args, **kwargs):
+    def create(self, *args, **kwargs):  # noqa, pylint: disable=unused-argument
         """create"""
-        if self.create_exc:
-            raise self.create_exc
+        if self.create_exc and issubclass(self.create_exc, Exception):
+            raise self.create_exc  # pylint: disable=raising-bad-type
 
         return self.create_result
 
-    def update(self, *args, **kwargs):
+    def update(self, *args, **kwargs):  # noqa, pylint: disable=unused-argument
         """update"""
-        if self.update_exc:
-            raise self.update_exc
+        if self.update_exc and issubclass(self.update_exc, Exception):
+            raise self.update_exc  # pylint: disable=raising-bad-type
 
         return self.update_result
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs):  # noqa, pylint: disable=unused-argument
         """get"""
-        if self.get_exc:
-            raise self.get_exc
+        if self.get_exc and issubclass(self.get_exc, Exception):
+            raise self.get_exc  # pylint: disable=raising-bad-type
 
         return self.get_result
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, **kwargs):  # noqa, pylint: disable=unused-argument
         """delete"""
-        if self.delete_exc:
-            raise self.delete_exc
+        if self.delete_exc and issubclass(self.delete_exc, Exception):
+            raise self.delete_exc  # pylint: disable=raising-bad-type
 
         return self.delete_result
 
@@ -166,14 +168,14 @@ class MockSerializer(Mock):
 
     def is_valid(self):
         """is_valid"""
-        if self.is_valid_exc:
-            raise self.is_valid_exc
+        if self.is_valid_exc and issubclass(self.is_valid_exc, Exception):
+            raise self.is_valid_exc  # pylint: disable=raising-bad-type
         return self.is_valid_result
 
-    def update(self, *args):
+    def update(self, *args):  # noqa, pylint: disable=unused-argument
         """update"""
-        if self.update_exc:
-            raise self.update_exc
+        if self.update_exc and issubclass(self.update_result, Exception):
+            raise self.update_exc  # pylint: disable=raising-bad-type
         return self.update_result
 
 
@@ -187,5 +189,5 @@ class MockInstance(Mock):
 class MockBlob(Mock):
     """Mock Blob"""
 
-    blob = "mock_blob"
+    blob = Mock()
     filename = "mock_filename"
