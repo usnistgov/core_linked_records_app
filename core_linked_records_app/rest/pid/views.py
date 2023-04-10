@@ -3,13 +3,16 @@
 import json
 from urllib.parse import urljoin
 
-from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core_explore_common_app.commons.exceptions import ExploreRequestError
 from core_explore_common_app.components.query import api as query_api
+from core_explore_common_app.utils.oaipmh import oaipmh as oaipmh_utils
+from core_explore_common_app.utils.query import query as query_utils
 from core_explore_common_app.utils.protocols.oauth2 import (
     send_post_request as oauth2_post_request,
     send_get_request as oauth2_get_request,
@@ -17,9 +20,15 @@ from core_explore_common_app.utils.protocols.oauth2 import (
 from core_linked_records_app import settings
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.data import api as data_api
-from core_main_app.utils.requests_utils.requests_utils import (
-    send_get_request,
-)
+from core_linked_records_app.utils.query import execute_local_pid_query
+
+if (
+    "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
+    and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
+):  # Import OAI-PMH pid views if packages are present.
+    from core_linked_records_app.utils.query import (
+        execute_oaipmh_pid_query,
+    )
 
 
 class RetrieveDataPIDView(APIView):
@@ -34,8 +43,8 @@ class RetrieveDataPIDView(APIView):
         Returns:
         """
         try:
-            if "data_id" in request.GET:
-                return JsonResponse(
+            if "data_id" in request.GET:  # Local data
+                return Response(
                     {
                         "pid": data_api.get_pid_for_data(
                             request.GET["data_id"], request
@@ -46,12 +55,12 @@ class RetrieveDataPIDView(APIView):
                 "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
                 and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
                 and "oai_data_id" in request.GET
-            ):
+            ):  # OAI-PMH data
                 from core_linked_records_app.components.oai_record import (
                     api as oai_record_api,
                 )
 
-                return JsonResponse(
+                return Response(
                     {
                         "pid": oai_record_api.get_pid_for_data(
                             request.GET["oai_data_id"], request
@@ -62,7 +71,7 @@ class RetrieveDataPIDView(APIView):
                 "core_federated_search_app" in settings.INSTALLED_APPS
                 and "fede_data_id" in request.GET
                 and "fede_origin" in request.GET
-            ):
+            ):  # Federated data
                 from core_federated_search_app.components.instance import (
                     api as instance_api,
                 )
@@ -80,9 +89,9 @@ class RetrieveDataPIDView(APIView):
                     urljoin(instance.endpoint, url_get_data),
                     instance.access_token,
                 )
-                return JsonResponse(json.loads(data_response.text))
+                return Response(json.loads(data_response.text))
 
-            return JsonResponse(
+            return Response(
                 {
                     "message": "Impossible to retrieve PID for data with the given "
                     "parameters"
@@ -90,7 +99,7 @@ class RetrieveDataPIDView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as exc:
-            return JsonResponse(
+            return Response(
                 {
                     "message": f"An unexpected exception occurred while retrieving data "
                     f"PID: {str(exc)}"
@@ -121,13 +130,13 @@ class RetrieveBlobPIDView(APIView):
                     },
                 )
 
-                return JsonResponse(
+                return Response(
                     {
                         "pid": f"{settings.SERVER_URI}{sub_url}{blob_pid.record_name}"
                     }
                 )
             except Exception as exc:
-                return JsonResponse(
+                return Response(
                     {
                         "message": f"An unexpected exception occurred while retrieving "
                         f"blob PID: {str(exc)}"
@@ -135,7 +144,7 @@ class RetrieveBlobPIDView(APIView):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
         else:
-            return JsonResponse(
+            return Response(
                 {"message": "Missing parameter 'blob_id'."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -145,7 +154,7 @@ class RetrieveListPIDView(APIView):
     """Retrieve PIDs for a given list of data IDs."""
 
     def post(self, request):
-        """get PIDs
+        """Retrieve PIDs
         Args:
             request:
 
@@ -155,11 +164,11 @@ class RetrieveListPIDView(APIView):
         try:
             # FIXME duplicated code with core_explore_common.utils.query.send
             query = query_api.get_by_id(
-                request.POST.get("query_id", None),
+                request.data.get("query_id", None),
                 request.user,
             )
             data_source = query.data_sources[
-                int(request.POST.get("data_source_index", 0))
+                int(request.data.get("data_source_index", 0))
             ]
 
             # Build serialized query to send to data source
@@ -176,50 +185,50 @@ class RetrieveListPIDView(APIView):
             }
 
             if (
-                "capabilities" in data_source.keys()
-                and "url_pid" not in data_source["capabilities"].keys()
-            ):
-                return JsonResponse(
-                    {"error": "The remote does not have PID capabilities."},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
+                data_source["authentication"]["auth_type"] == "session"
+            ):  # Local and OAI-PMH data sources
+                if query_utils.is_local_data_source(data_source):
+                    json_response = execute_local_pid_query(
+                        json_query, request
+                    )
+                elif oaipmh_utils.is_oai_data_source(data_source):
 
-            if data_source["authentication"]["auth_type"] == "session":
-                response = send_get_request(
-                    data_source["capabilities"]["url_pid"],
-                    json=json_query,
-                    cookies={
-                        "sessionid": request.session.session_key,
-                    },
-                )
-            elif data_source["authentication"]["auth_type"] == "oauth2":
+                    json_response = execute_oaipmh_pid_query(
+                        json_query, request
+                    )
+                else:
+                    raise ExploreRequestError("Unknown data source type.")
+            elif (
+                data_source["authentication"]["auth_type"] == "oauth2"
+            ):  # Federated data sources
                 response = oauth2_post_request(
-                    data_source["capabilities"]["url_pid"],
+                    data_source["capabilities"]["query_pid"],
                     json_query,
                     data_source["authentication"]["params"]["access_token"],
                     session_time_zone=timezone.get_current_timezone(),
                 )
-            else:
-                raise Exception("Unknown authentication type.")
 
-            if response.status_code == 200:
-                return JsonResponse(
-                    {
-                        "pids": [
-                            pid for pid in response.json() if pid is not None
-                        ]
-                    },
-                    status=response.status_code,
+                if response.status_code == status.HTTP_200_OK:
+                    json_response = response.json()
+                else:
+                    return Response(
+                        {
+                            "error": f"Data source returned HTTP {response.status_code}."
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            else:
+                return Response(
+                    {"error": "Unknown authentication type."},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            return JsonResponse(
-                {
-                    "error": f"Remote service answered with status code {response.status_code}."
-                },
-                status=response.status_code,
+            return Response(
+                {"pids": [pid for pid in json_response if pid is not None]},
+                status=status.HTTP_200_OK,
             )
         except Exception as exception:
-            return JsonResponse(
+            return Response(
                 {"error": str(exception)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

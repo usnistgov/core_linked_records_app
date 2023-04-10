@@ -154,7 +154,7 @@ class MockDataSource(Mock):
 class MockAuthentication(Mock):
     """Mock Authentication"""
 
-    type = ""
+    auth_type = ""
 
 
 class MockSerializer(Mock):

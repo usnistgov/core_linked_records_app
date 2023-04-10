@@ -125,19 +125,17 @@ class TestRetrieveListPidPost(TestCase):
                 auth_type="oauth2",
                 params={"access_token": "mock_access_token"},
             ),
-            capabilities={"url_pid": True},
+            capabilities={"query_pid": "mock_url_pid_list"},
         )
 
-    def send_post_request(
-        self, mock_query_get_by_id, mock_send_get_request, user
-    ):
+    def send_oauth_request(self, mock_query_get_by_id, mock_request, user):
         """send_post_request"""
 
         mock_query_get_by_id.return_value = mocks.MockQuery(
             data_sources=[self.mock_data_source]
         )
-        mock_send_get_request.return_value = mocks.MockResponse(
-            json_data=[None]
+        mock_request.return_value = mocks.MockResponse(
+            json_data={"pids": ["mock_pid"]}
         )
 
         return RequestMock.do_request_post(
@@ -150,39 +148,39 @@ class TestRetrieveListPidPost(TestCase):
     @patch.object(pid_views, "oauth2_post_request")
     @patch.object(query_api, "get_by_id")
     def test_anonymous_returns_200(
-        self, mock_query_get_by_id, mock_send_get_request
+        self, mock_query_get_by_id, mock_oauth2_post_request
     ):
         """test_anonymous_returns_200"""
 
-        response = self.send_post_request(
-            mock_query_get_by_id, mock_send_get_request, None
+        response = self.send_oauth_request(
+            mock_query_get_by_id, mock_oauth2_post_request, None
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch.object(pid_views, "oauth2_post_request")
     @patch.object(query_api, "get_by_id")
     def test_authenticated_returns_200(
-        self, mock_query_get_by_id, mock_send_get_request
+        self, mock_query_get_by_id, mock_oauth2_post_request
     ):
         """test_authenticated_returns_200"""
 
         mock_user = create_mock_user("1")
 
-        response = self.send_post_request(
-            mock_query_get_by_id, mock_send_get_request, mock_user
+        response = self.send_oauth_request(
+            mock_query_get_by_id, mock_oauth2_post_request, mock_user
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch.object(pid_views, "oauth2_post_request")
     @patch.object(query_api, "get_by_id")
     def test_staff_returns_200(
-        self, mock_query_get_by_id, mock_send_get_request
+        self, mock_query_get_by_id, mock_oauth2_post_request
     ):
         """test_staff_returns_200"""
 
         mock_user = create_mock_user("1", is_staff=True)
 
-        response = self.send_post_request(
-            mock_query_get_by_id, mock_send_get_request, mock_user
+        response = self.send_oauth_request(
+            mock_query_get_by_id, mock_oauth2_post_request, mock_user
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)

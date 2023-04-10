@@ -2,33 +2,20 @@
 """
 from django.conf.urls import url
 
-from core_linked_records_app import settings
 from core_linked_records_app.rest.blob import views as blob_views
 from core_linked_records_app.rest.pid import views as pid_views
+from core_linked_records_app.rest.query import views as query_views
 from core_linked_records_app.rest.pid_settings import views as settings_views
 from core_linked_records_app.rest.pid_xpath import views as xpath_views
 from core_linked_records_app.rest.providers import views as providers_views
-from core_linked_records_app.rest.query import views as query_views
 
 urlpatterns = [
     url(
-        r"^query/local$",
-        query_views.ExecuteLocalPIDQueryView.as_view(),
-        name="core_linked_records_app_query_local",
+        r"^query$",
+        query_views.RetrieveQueryPidListView.as_view(),
+        name="core_linked_records_app_query_pid",
     ),
 ]
-
-if (
-    "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
-    and "core_explore_oaipmh_app" in settings.INSTALLED_APPS
-):
-    urlpatterns.append(
-        url(
-            r"^query/oaipmh$",
-            query_views.ExecuteOaiPmhPIDQueryView.as_view(),
-            name="core_linked_records_app_query_oaipmh",
-        ),
-    )
 
 urlpatterns += [
     url(
