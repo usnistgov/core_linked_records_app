@@ -3,7 +3,7 @@
 import logging
 from os.path import join
 
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_delete
 
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_settings import (
@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 def init():
     """Connect to Data object events."""
     pre_save.connect(set_data_pid, sender=Data)
+    post_delete.connect(delete_data_pid, sender=Data)
 
 
 def set_data_pid(sender, instance, **kwargs):
@@ -110,3 +111,21 @@ def set_data_pid(sender, instance, **kwargs):
 
         logger.error("%s: %s", error_message, str(exc))
         raise exceptions.CoreError(f"{error_message}.")
+
+
+def delete_data_pid(sender, instance, **kwargs):
+    """Delete a PID assigned to a Data
+
+    Args:
+        sender:
+        instance:
+        kwargs:
+    """
+    try:
+        system_api.delete_pid_for_data(instance)
+    except Exception as exc:
+        logger.warning(
+            "Trying to delete PID for data %d but an error occurred: %s",
+            instance.pk,
+            str(exc),
+        )

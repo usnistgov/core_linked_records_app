@@ -5,6 +5,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from core_linked_records_app.components.blob import api as blob_api
+from core_linked_records_app.system import api as system_api
 from core_linked_records_app.components.blob import watch as blob_watch
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
@@ -244,3 +245,31 @@ class TestSetBlobPid(TestCase):
 
         blob_watch.set_blob_pid(None, self.mock_document)
         self.assertFalse(mock_set_pid_for_blob.called)
+
+
+class TestDeleteBlobPid(TestCase):
+    """Unit tests for detele_blob_pid function."""
+
+    def setUp(self) -> None:
+        """setUp"""
+        self.mock_blob = mocks.MockDocument()
+
+    @patch.object(system_api, "delete_pid_for_blob")
+    def test_delete_pid_for_blob_is_called(self, mock_delete_pid_for_blob):
+        """test_delete_pid_for_blob_is_called"""
+        blob_watch.delete_blob_pid(None, self.mock_blob)
+
+        mock_delete_pid_for_blob.assert_called_with(self.mock_blob)
+
+    @patch.object(blob_watch, "logger")
+    @patch.object(system_api, "delete_pid_for_blob")
+    def test_delete_pid_for_blob_error_raise_warning(
+        self, mock_delete_pid_for_blob, mock_logger
+    ):
+        """test_delete_pid_for_blob_error_raise_warning"""
+        mock_delete_pid_for_blob.side_effect = Exception(
+            "mock_delete_pid_for_blob_exception"
+        )
+        blob_watch.delete_blob_pid(None, self.mock_blob)
+
+        mock_logger.warning.assert_called()

@@ -2,17 +2,17 @@
 """
 from unittest import TestCase
 from unittest.mock import patch, Mock, MagicMock
+
 from django.test import tag, override_settings
 
+from core_linked_records_app.components.local_id.models import LocalId
 from core_linked_records_app.components.pid_xpath.models import PidXpath
-from core_linked_records_app.system.api import (
-    delete_pid_for_data,
-    get_pid_xpath_by_template,
-    is_pid_defined_for_data,
-    get_data_by_pid,
-)
+from core_linked_records_app.components.local_id import api as local_id_api
+from core_linked_records_app.system import api as system_api
+from core_linked_records_app.utils.path import get_api_path_from_object
 from core_linked_records_app.utils.providers import AbstractIdProvider
 from core_main_app.commons.exceptions import DoesNotExist, ApiError
+from core_main_app.components.blob.models import Blob
 from core_main_app.components.data.models import Data
 from tests.mocks import MockResponse
 
@@ -26,7 +26,7 @@ class TestIsPidDefinedForDocumentPsql(TestCase):
         mock_data_get_by_id.side_effect = DoesNotExist("mock_does_not_exist")
 
         with self.assertRaises(Exception):
-            is_pid_defined_for_data("mock_pid", "mock_document_id")
+            system_api.is_pid_defined_for_data("mock_pid", "mock_document_id")
 
     @override_settings(MONGODB_INDEXING=False)
     @patch("core_linked_records_app.system.api.Data.execute_query")
@@ -44,7 +44,7 @@ class TestIsPidDefinedForDocumentPsql(TestCase):
         mock_data_execute_query.return_value = []
 
         self.assertFalse(
-            is_pid_defined_for_data("mock_pid", "mock_document_id")
+            system_api.is_pid_defined_for_data("mock_pid", "mock_document_id")
         )
 
     @override_settings(MONGODB_INDEXING=False)
@@ -63,7 +63,7 @@ class TestIsPidDefinedForDocumentPsql(TestCase):
         mock_data_execute_query.return_value = [MagicMock(), MagicMock()]
 
         self.assertFalse(
-            is_pid_defined_for_data("mock_pid", "mock_document_id")
+            system_api.is_pid_defined_for_data("mock_pid", "mock_document_id")
         )
 
     @override_settings(MONGODB_INDEXING=False)
@@ -84,7 +84,7 @@ class TestIsPidDefinedForDocumentPsql(TestCase):
         mock_data_execute_query.return_value = [mock_result]
 
         self.assertFalse(
-            is_pid_defined_for_data("mock_pid", "mock_document_id")
+            system_api.is_pid_defined_for_data("mock_pid", "mock_document_id")
         )
 
     @override_settings(MONGODB_INDEXING=False)
@@ -105,7 +105,7 @@ class TestIsPidDefinedForDocumentPsql(TestCase):
         mock_data_execute_query.return_value = [mock_result]
 
         self.assertTrue(
-            is_pid_defined_for_data("mock_pid", "mock_document_id")
+            system_api.is_pid_defined_for_data("mock_pid", "mock_document_id")
         )
 
 
@@ -129,7 +129,7 @@ class TestIsPidDefinedForDocumentMongo(TestCase):
         mock_data_execute_query.return_value = []
 
         self.assertFalse(
-            is_pid_defined_for_data("mock_pid", "mock_document_id")
+            system_api.is_pid_defined_for_data("mock_pid", "mock_document_id")
         )
 
     @tag("mongodb")
@@ -149,7 +149,7 @@ class TestIsPidDefinedForDocumentMongo(TestCase):
         mock_data_execute_query.return_value = [MagicMock(), MagicMock()]
 
         self.assertFalse(
-            is_pid_defined_for_data("mock_pid", "mock_document_id")
+            system_api.is_pid_defined_for_data("mock_pid", "mock_document_id")
         )
 
     @tag("mongodb")
@@ -171,7 +171,7 @@ class TestIsPidDefinedForDocumentMongo(TestCase):
         mock_data_execute_query.return_value = [mock_result]
 
         self.assertFalse(
-            is_pid_defined_for_data("mock_pid", "mock_document_id")
+            system_api.is_pid_defined_for_data("mock_pid", "mock_document_id")
         )
 
     @tag("mongodb")
@@ -193,7 +193,7 @@ class TestIsPidDefinedForDocumentMongo(TestCase):
         mock_data_execute_query.return_value = [mock_result]
 
         self.assertTrue(
-            is_pid_defined_for_data("mock_pid", "mock_document_id")
+            system_api.is_pid_defined_for_data("mock_pid", "mock_document_id")
         )
 
 
@@ -232,7 +232,7 @@ class TestGetDataByPidPsql(TestCase):
         mock_execute_query.return_value = mock_queryset
 
         with self.assertRaises(DoesNotExist):
-            get_data_by_pid("mock_pid")
+            system_api.get_data_by_pid("mock_pid")
 
     @override_settings(MONGODB_INDEXING=False)
     @patch("core_linked_records_app.system.api.Data.execute_query")
@@ -247,7 +247,7 @@ class TestGetDataByPidPsql(TestCase):
         mock_execute_query.return_value = mock_queryset
 
         with self.assertRaises(ApiError):
-            get_data_by_pid("mock_pid")
+            system_api.get_data_by_pid("mock_pid")
 
     @override_settings(MONGODB_INDEXING=False)
     @patch("core_linked_records_app.system.api.Data.execute_query")
@@ -262,7 +262,7 @@ class TestGetDataByPidPsql(TestCase):
         mock_queryset.__getitem__.return_value = "mock_data"
         mock_execute_query.return_value = mock_queryset
 
-        self.assertEquals(get_data_by_pid("mock_pid"), "mock_data")
+        self.assertEquals(system_api.get_data_by_pid("mock_pid"), "mock_data")
 
 
 class TestGetDataByPidMongo(TestCase):
@@ -282,7 +282,7 @@ class TestGetDataByPidMongo(TestCase):
         mock_execute_query.return_value = mock_queryset
 
         with self.assertRaises(DoesNotExist):
-            get_data_by_pid("mock_pid")
+            system_api.get_data_by_pid("mock_pid")
 
     @tag("mongodb")
     @override_settings(MONGODB_INDEXING=True)
@@ -298,7 +298,7 @@ class TestGetDataByPidMongo(TestCase):
         mock_execute_query.return_value = mock_queryset
 
         with self.assertRaises(ApiError):
-            get_data_by_pid("mock_pid")
+            system_api.get_data_by_pid("mock_pid")
 
     @tag("mongodb")
     @override_settings(MONGODB_INDEXING=True)
@@ -314,21 +314,7 @@ class TestGetDataByPidMongo(TestCase):
         mock_queryset.__getitem__.return_value = "mock_data"
         mock_execute_query.return_value = mock_queryset
 
-        self.assertEquals(get_data_by_pid("mock_pid"), "mock_data")
-
-
-class TestGetPidForData(TestCase):
-    """Test Get Pid For Data"""
-
-    def test_not_existing_pid_returns_none(self):
-        """test_not_existing_pid_returns_none"""
-
-        pass
-
-    def test_existing_pid_returns_pid(self):
-        """test_existing_pid_returns_pid"""
-
-        pass
+        self.assertEquals(system_api.get_data_by_pid("mock_pid"), "mock_data")
 
 
 class TestGetPidXpathByTemplate(TestCase):
@@ -339,7 +325,7 @@ class TestGetPidXpathByTemplate(TestCase):
         """Test get_by_template is called"""
         mock_template = "mock_template"
 
-        get_pid_xpath_by_template(mock_template)
+        system_api.get_pid_xpath_by_template(mock_template)
         mock_get_by_template.assert_called_with(mock_template)
 
     @patch("core_linked_records_app.system.api.PidXpath.__new__")
@@ -352,7 +338,7 @@ class TestGetPidXpathByTemplate(TestCase):
         mock_get_by_template.return_value = None
         mock_pid_xpath.return_value = expected_result
 
-        result = get_pid_xpath_by_template("mock_template")
+        result = system_api.get_pid_xpath_by_template("mock_template")
         self.assertEqual(result, expected_result)
 
     @patch("core_linked_records_app.system.api.PidXpath.get_by_template")
@@ -361,8 +347,39 @@ class TestGetPidXpathByTemplate(TestCase):
         expected_result = "mock_result"
         mock_get_by_template.return_value = expected_result
 
-        result = get_pid_xpath_by_template("mock_template")
+        result = system_api.get_pid_xpath_by_template("mock_template")
         self.assertEqual(result, expected_result)
+
+
+class TestDeletePidFromRecordName(TestCase):
+    """Test delete_pid_from_record_name"""
+
+    @patch.object(system_api, "ProviderManager")
+    def test_provider_delete_is_called(self, mock_provider_manager):
+        """test_provider_delete_is_called"""
+        mock_provider = Mock()
+        mock_record = "mock_record"
+
+        mock_provider_manager().get.return_value = mock_provider
+        mock_provider.delete.return_value = MockResponse()
+
+        system_api.delete_pid_from_record_name(mock_record)
+        mock_provider.delete.assert_called_with(mock_record)
+
+    @patch.object(system_api, "logger")
+    @patch.object(system_api, "ProviderManager")
+    def test_provider_delete_failure_raises_api_error(
+        self, mock_provider_manager, mock_logger
+    ):
+        """test_provider_delete_failure_is_logged"""
+        mock_provider = Mock()
+        mock_provider.delete.return_value = MockResponse(status_code=500)
+        mock_record = "mock_record"
+
+        mock_provider_manager().get.return_value = mock_provider
+
+        with self.assertRaises(ApiError):
+            system_api.delete_pid_from_record_name(mock_record)
 
 
 class TestDeletePidForData(TestCase):
@@ -377,55 +394,120 @@ class TestDeletePidForData(TestCase):
 
         cls.mock_provider = Mock(spec=AbstractIdProvider)
 
-    @patch("core_linked_records_app.utils.providers.ProviderManager.get")
-    @patch("core_linked_records_app.system.api.get_pid_for_data")
+    @patch("core_linked_records_app.system.api.delete_pid_from_record_name")
+    @patch("core_linked_records_app.system.api.get_value_from_dot_notation")
+    @patch("core_linked_records_app.system.api.xml_utils.raw_xml_to_dict")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    def test_get_dict_content_failure_calls_raw_xml_to_dict_utils(
+        self,
+        mock_get_pid_xpath_by_template,
+        mock_raw_xml_to_dict,
+        mock_get_value_from_dot_notation,
+        mock_delete_pid_from_record_name,
+    ):
+        """test_get_dict_content_failure_calls_raw_xml_to_dict_utils"""
+        self.mock_data.get_dict_content.side_effect = Exception(
+            "mock_get_dict_content_exception"
+        )
+        mock_get_value_from_dot_notation.return_value = None
+
+        system_api.delete_pid_for_data(self.mock_data)
+        mock_raw_xml_to_dict.assert_called()
+
+    @patch("core_linked_records_app.system.api.delete_pid_from_record_name")
+    @patch("core_linked_records_app.system.api.get_value_from_dot_notation")
+    @patch("core_linked_records_app.system.api.xml_utils.raw_xml_to_dict")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    def test_raw_xml_to_dict_failure_raises_api_error(
+        self,
+        mock_get_pid_xpath_by_template,
+        mock_raw_xml_to_dict,
+        mock_get_value_from_dot_notation,
+        mock_delete_pid_from_record_name,
+    ):
+        """test_raw_xml_to_dict_failure_raises_api_error"""
+        self.mock_data.get_dict_content.side_effect = Exception(
+            "mock_get_dict_content_exception"
+        )
+        mock_raw_xml_to_dict.side_effect = Exception(
+            "mock_raw_xml_to_dict_exception"
+        )
+        mock_get_value_from_dot_notation.return_value = None
+
+        with self.assertRaises(ApiError):
+            system_api.delete_pid_for_data(self.mock_data)
+
+    @patch("core_linked_records_app.system.api.delete_pid_from_record_name")
+    @patch("core_linked_records_app.system.api.get_value_from_dot_notation")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
     def test_empty_pid_is_not_deleted(
-        self, mock_get_pid_for_data, mock_provider_manager_get
+        self,
+        mock_get_pid_xpath_by_template,
+        mock_get_value_from_dot_notation,
+        mock_delete_pid_from_record_name,
     ):
         """test_empty_pid_is_not_deleted"""
-        mock_get_pid_for_data.return_value = None
-        mock_provider_manager_get.return_value = self.mock_provider
+        mock_get_value_from_dot_notation.return_value = None
 
-        delete_pid_for_data(self.mock_data)
-        self.mock_provider.delete.assert_not_called()
+        system_api.delete_pid_for_data(self.mock_data)
+        mock_delete_pid_from_record_name.assert_not_called()
 
-    @patch("core_linked_records_app.utils.providers.ProviderManager.get")
-    @patch("core_linked_records_app.system.api.get_pid_for_data")
-    def test_provider_delete_called(
-        self, mock_get_pid_for_data, mock_provider_manager_get
+    @patch("core_linked_records_app.system.api.delete_pid_from_record_name")
+    @patch("core_linked_records_app.system.api.get_value_from_dot_notation")
+    @patch("core_linked_records_app.system.api.get_pid_xpath_by_template")
+    def test_delete_pid_from_record_called_when_pid_exists(
+        self,
+        mock_get_pid_xpath_by_template,
+        mock_get_value_from_dot_notation,
+        mock_delete_pid_from_record_name,
     ):
-        """test_provider_delete_called"""
+        """test_delete_pid_from_record_called"""
         mock_pid = "mock_pid"
-        mock_get_pid_for_data.return_value = mock_pid
-        mock_provider_manager_get.return_value = self.mock_provider
+        mock_get_value_from_dot_notation.return_value = mock_pid
 
-        delete_pid_for_data(self.mock_data)
-        self.mock_provider.delete.assert_called_with(mock_pid)
+        system_api.delete_pid_for_data(self.mock_data)
+        mock_delete_pid_from_record_name.assert_called_with(mock_pid)
 
-    @patch("core_linked_records_app.utils.providers.ProviderManager.get")
-    @patch("core_linked_records_app.system.api.get_pid_for_data")
-    def test_pid_delete_failure_exits(
-        self, mock_get_pid_for_data, mock_provider_manager_get
+
+class TestDeletePidForBlob(TestCase):
+    """Test delete_pid_for_blob"""
+
+    def setUp(self) -> None:
+        self.blob = Mock(spec=Blob)
+
+    @patch.object(system_api, "delete_pid_from_record_name")
+    @patch.object(local_id_api, "get_by_class_and_id")
+    def test_get_by_class_and_id_called(
+        self, mock_get_by_class_and_id, mock_delete_pid_from_record_name
     ):
-        """test_pid_delete_failure_exits"""
-        mock_pid = "mock_pid"
-        mock_get_pid_for_data.return_value = mock_pid
-        mock_provider_manager_get.return_value = self.mock_provider
+        """test_get_by_class_and_id_called"""
+        system_api.delete_pid_for_blob(self.blob)
+        mock_get_by_class_and_id.assert_called_with(
+            get_api_path_from_object(Blob()), self.blob.pk
+        )
 
-        self.mock_provider.delete.return_value = MockResponse(status_code=500)
-
-        delete_pid_for_data(self.mock_data)
-
-    @patch("core_linked_records_app.utils.providers.ProviderManager.get")
-    @patch("core_linked_records_app.system.api.get_pid_for_data")
-    def test_pid_delete_success_works(
-        self, mock_get_pid_for_data, mock_provider_manager_get
+    @patch.object(system_api, "logger")
+    @patch.object(local_id_api, "get_by_class_and_id")
+    def test_does_not_exist_is_logged(
+        self, mock_get_by_class_and_id, mock_logger
     ):
-        """test_pid_delete_success_works"""
-        mock_pid = "mock_pid"
-        mock_get_pid_for_data.return_value = mock_pid
-        mock_provider_manager_get.return_value = self.mock_provider
+        """test_does_not_exist_is_logged"""
+        mock_get_by_class_and_id.side_effect = DoesNotExist(
+            "mock_get_by_class_and_id_does_not_exist"
+        )
 
-        self.mock_provider.delete.return_value = MockResponse(status_code=200)
+        system_api.delete_pid_for_blob(self.blob)
+        mock_logger.info.assert_called()
 
-        delete_pid_for_data(self.mock_data)
+    @patch.object(system_api, "delete_pid_from_record_name")
+    @patch.object(local_id_api, "get_by_class_and_id")
+    def test_delete_from_record_name_called(
+        self, mock_get_by_class_and_id, mock_delete_pid_from_record_name
+    ):
+        """test_delete_from_record_name_called"""
+        mock_local_id = Mock(spec=LocalId)
+        mock_get_by_class_and_id.return_value = mock_local_id
+        system_api.delete_pid_for_blob(self.blob)
+        mock_delete_pid_from_record_name.assert_called_with(
+            mock_local_id.record_name
+        )

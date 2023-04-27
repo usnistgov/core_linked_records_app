@@ -469,3 +469,31 @@ class TestSetDataPid(TestCase):
         mock_set_pid_value_for_data.return_value = None
 
         self.assertIsNone(data_watch.set_data_pid(**self.mock_kwargs))
+
+
+class TestDeleteDataPid(TestCase):
+    """Unit tests for detele_data_pid function."""
+
+    def setUp(self) -> None:
+        """setUp"""
+        self.mock_data = mocks.MockDocument()
+
+    @patch.object(system_api, "delete_pid_for_data")
+    def test_delete_pid_for_data_is_called(self, mock_delete_pid_for_data):
+        """test_delete_pid_for_data_is_called"""
+        data_watch.delete_data_pid(None, self.mock_data)
+
+        mock_delete_pid_for_data.assert_called_with(self.mock_data)
+
+    @patch.object(data_watch, "logger")
+    @patch.object(system_api, "delete_pid_for_data")
+    def test_delete_pid_for_data_error_raise_warning(
+        self, mock_delete_pid_for_data, mock_logger
+    ):
+        """test_delete_pid_for_data_error_raise_warning"""
+        mock_delete_pid_for_data.side_effect = Exception(
+            "mock_delete_pid_for_data_exception"
+        )
+        data_watch.delete_data_pid(None, self.mock_data)
+
+        mock_logger.warning.assert_called()

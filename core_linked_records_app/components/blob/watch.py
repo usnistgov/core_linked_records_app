@@ -3,7 +3,7 @@
 import json
 from logging import getLogger
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.urls import reverse
 
 from core_linked_records_app import settings
@@ -11,6 +11,7 @@ from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
 )
+from core_linked_records_app.system import api as system_api
 from core_main_app.commons.exceptions import CoreError, DoesNotExist
 from core_main_app.components.blob.models import Blob
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
@@ -21,9 +22,10 @@ logger = getLogger(__name__)
 def init():
     """Connect to Blob object events."""
     post_save.connect(set_blob_pid, sender=Blob)
+    post_delete.connect(delete_blob_pid, sender=Blob)
 
 
-def set_blob_pid(sender, instance, **kwargs):
+def set_blob_pid(sender, instance: Blob, **kwargs):
     """set_blob_pid
 
     Args:
@@ -61,3 +63,22 @@ def set_blob_pid(sender, instance, **kwargs):
 
         logger.error("%s: %s", error_message, str(exc))
         raise CoreError(f"{error_message}.")
+
+
+def delete_blob_pid(sender, instance: Blob, **kwargs):
+    """Delete a PID assigned to a Blob
+
+    Args:
+        sender:
+        instance:
+        kwargs:
+    """
+    try:
+        system_api.delete_pid_for_blob(instance)
+    except Exception as exc:
+        logger.warning(
+            "Trying to delete PID for blob %d (%s) but an error occurred: %s",
+            instance.pk,
+            instance.filename,
+            str(exc),
+        )
