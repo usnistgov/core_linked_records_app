@@ -22,7 +22,7 @@ from core_main_app.admin import core_admin_site
 
 admin_urls = [
     re_path(
-        r"^settings/$",
+        r"^pid/settings/$",
         staff_member_required(admin_views.PidSettingsView.as_view()),
         name="core_linked_records_app_admin_settings",
     ),
