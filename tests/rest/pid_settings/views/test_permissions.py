@@ -111,7 +111,7 @@ class TestPidSettingsViewPatch(TestCase):
 
     @patch.object(pid_settings_api, "get")
     @patch.object(PidSettingsSerializer, "__new__")
-    def test_staff_returns_200(
+    def test_superuser_returns_200(
         self, mock_pid_serializer, mock_pid_settings_get
     ):
         """test_staff_returns_200"""

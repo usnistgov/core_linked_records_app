@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     # Extra apps
     "defender",
     "django_celery_beat",
+    "drf_spectacular",
     "tz_detect",
     "menu",
     # Local apps
@@ -71,6 +72,8 @@ CUSTOM_NAME = "mock_custom_name"
 ROOT_URLCONF = "tests.test_urls"
 
 STATIC_URL = "/static/"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 SERVER_URI = "http://mock-cdcs.com"

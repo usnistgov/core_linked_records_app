@@ -34,9 +34,9 @@ class ProviderRecordView(APIView):
     parser_classes = (JSONParser,)
     renderer_classes = (DataHtmlUserRenderer, JSONRenderer, DataXmlRenderer)
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.provider_manager = ProviderManager()
-        super().__init__()
+        super().__init__(**kwargs)
 
     def post(self, request, provider, record):
         """Create a handle record

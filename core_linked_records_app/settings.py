@@ -26,7 +26,7 @@ ID_PROVIDER_SYSTEM_CONFIG = getattr(
     "ID_PROVIDER_SYSTEM_CONFIG",
     {
         "class": "core_linked_records_app.utils.providers.local.LocalIdProvider",
-        "args": [SERVER_URI],
+        "args": [],
     },
 )
 
