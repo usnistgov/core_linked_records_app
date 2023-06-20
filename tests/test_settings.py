@@ -16,7 +16,6 @@ INSTALLED_APPS = [
     "defender",
     "django_celery_beat",
     "drf_spectacular",
-    "tz_detect",
     "menu",
     # Local apps
     "xml_utils",
@@ -46,7 +45,6 @@ MIDDLEWARE = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "tz_detect.middleware.TimezoneMiddleware",
 )
 
 TEMPLATES = [
