@@ -1,7 +1,8 @@
 """ Url router for the core linked records app
 """
-from django.conf.urls import url, include
+from django.conf.urls import include
+from django.urls import re_path
 
 urlpatterns = [
-    url(r"rest/", include("core_linked_records_app.rest.urls")),
+    re_path(r"rest/", include("core_linked_records_app.rest.urls")),
 ]
