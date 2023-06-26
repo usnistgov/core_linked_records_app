@@ -28,3 +28,22 @@ def is_valid_pid_value(pid_value, pid_provider_name, pid_format):
     pid_regexp_match = f"{provider.provider_lookup_url}/(?:{pid_prefixes_regexp})/{pid_format}"
 
     return re.match(pid_regexp_match, pid_value) is not None
+
+
+def get_pid_settings_dict(pid_setting) -> dict:
+    """Retrieve all settings related to PID configuration and returns a dictionary.
+
+    Args:
+        pid_setting: PidSettings object from DB.
+
+    Returns:
+         Dictionary containing all PID settings in DB or configuration files.
+    """
+    return {
+        "auto_set_pid": pid_setting.auto_set_pid,
+        "xpath": settings.PID_XPATH,
+        "format": settings.PID_FORMAT,
+        "system_name": settings.ID_PROVIDER_SYSTEM_NAME,
+        "system_type": settings.ID_PROVIDER_SYSTEM_CONFIG["class"],
+        "prefixes": settings.ID_PROVIDER_PREFIXES,
+    }

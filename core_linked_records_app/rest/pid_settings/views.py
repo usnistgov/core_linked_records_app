@@ -5,13 +5,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core_linked_records_app import settings
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
 )
 from core_linked_records_app.rest.pid_settings.serializers import (
     PidSettingsSerializer,
 )
+from core_linked_records_app.utils.pid import get_pid_settings_dict
 
 
 class PidSettingsView(APIView):
@@ -29,20 +29,8 @@ class PidSettingsView(APIView):
         """
         try:
             pid_settings = pid_settings_api.get()
-            pid_settings_data = PidSettingsSerializer(pid_settings).data
-
-            response_data = {
-                "xpath": settings.PID_XPATH,
-                "format": settings.PID_FORMAT,
-                "system_name": settings.ID_PROVIDER_SYSTEM_NAME,
-                "system_type": settings.ID_PROVIDER_SYSTEM_CONFIG["class"],
-                "prefixes": settings.ID_PROVIDER_PREFIXES,
-            }
-
-            pid_settings_data.update(response_data)
-
             return Response(
-                pid_settings_data,
+                get_pid_settings_dict(pid_settings),
                 status=status.HTTP_200_OK,
             )
         except Exception as exc:

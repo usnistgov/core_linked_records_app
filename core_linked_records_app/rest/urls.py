@@ -19,7 +19,7 @@ urlpatterns = [
 
 urlpatterns += [
     url(
-        r"^settings$",
+        r"^settings/$",
         settings_views.PidSettingsView.as_view(),
         name="core_linked_records_app_settings",
     ),

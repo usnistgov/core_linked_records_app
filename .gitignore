@@ -212,8 +212,7 @@ apache
 conf/my-mongodb.conf
 
 # tests
-curate/tests/data/parser/schema/namespace/results*
-curate/tests/data/parser/extension/explicit-implicit/results*
+user_*
 
 # redis server
 *.rdb

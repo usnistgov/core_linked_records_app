@@ -14,6 +14,7 @@ from core_linked_records_app.rest.pid_settings.serializers import (
 )
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from tests import mocks
+from tests.mocks import MockPidSettings
 
 
 class TestPidSettingsViewGet(TestCase):
@@ -56,15 +57,11 @@ class TestPidSettingsViewGet(TestCase):
 
         self.assertEqual(response.status_code, 500)
 
-    @patch.object(PidSettingsSerializer, "__new__")
     @patch.object(pid_settings_api, "get")
-    def test_success_returns_200(
-        self, mock_pid_settings_get, mock_pid_settings_serializer
-    ):
+    def test_success_returns_200(self, mock_pid_settings_get):
         """test_success_returns_200"""
 
-        mock_pid_settings_get.return_value = "mock_pid_settings"
-        mock_pid_settings_serializer.return_value = mocks.MockSerializer()
+        mock_pid_settings_get.return_value = MockPidSettings()
 
         test_view = pid_settings_views.PidSettingsView()
         response = test_view.get(self.mock_request)
