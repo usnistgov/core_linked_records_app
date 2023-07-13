@@ -14,9 +14,9 @@ let setAutoSetPidSwitch = () => {
     let autoSetPidValue = $autoSetPidLabel.text().trim();
 
     if (autoSetPidValue === "True") {
-        $autoSetPidSwitch.attr("checked", true);
+        $autoSetPidSwitch.prop("checked", true);
     } else if (autoSetPidValue === "False") {
-        $autoSetPidSwitch.attr("checked", false);
+        $autoSetPidSwitch.prop("checked", false);
     } else {
         displayError(
             "Invalid value for 'auto_set_pid'. Contact an administrator for more " +
@@ -31,13 +31,12 @@ let initAutoSetPidSwitch = () => {
 };
 
 let processAutoSetPidClick = (event) => {
-    event.preventDefault();
     $autoSetPidError.hide();
 
     $.ajax({
-        url: "/pid/rest/settings",
+        url: "/pid/rest/settings/",
         data: {
-            "auto_set_pid": !$autoSetPidSwitch.attr("checked")
+            "auto_set_pid": $autoSetPidSwitch.prop("checked")
         },
         dataType:"json",
         type: "patch",
@@ -56,5 +55,5 @@ let processAutoSetPidClick = (event) => {
 
 $( document ).ready(function() {
     initAutoSetPidSwitch();
-    $autoSetPidControl.on("click", processAutoSetPidClick)
+    $autoSetPidControl.on("change.bootstrapSwitch", processAutoSetPidClick)
 });

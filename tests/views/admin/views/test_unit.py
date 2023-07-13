@@ -123,7 +123,7 @@ class TestPidSettingsViewGet(TestCase):
                 "js": [
                     {
                         "path": "core_linked_records_app/admin/js/pid_settings/auto_set_pid.js",
-                        "is_raw": True,
+                        "is_raw": False,
                     }
                 ],
                 "css": [
@@ -168,7 +168,7 @@ class TestPidSettingsViewGet(TestCase):
                 "js": [
                     {
                         "path": "core_linked_records_app/admin/js/pid_settings/auto_set_pid.js",
-                        "is_raw": True,
+                        "is_raw": False,
                     }
                 ],
                 "css": [
