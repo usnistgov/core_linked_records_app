@@ -36,6 +36,21 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
             else None
         )
 
+        # If the access to the data is forbidden.
+        if (
+            "response" in renderer_context
+            and renderer_context["response"].status_code == 403
+        ):
+            error_msg = (
+                "The user doesn't have enough rights to access document %s"
+                % renderer_context["kwargs"]["record"]
+            )
+            return render(
+                request,
+                "core_main_app/common/commons/error.html",
+                context={"error": error_msg},
+            )
+
         # If the data retrieved contains an error
         if "status" in data and data["status"] == "error":
             return render(

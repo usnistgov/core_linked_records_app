@@ -6,6 +6,7 @@ from unittest.mock import patch
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.components.local_id.models import LocalId
+from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.commons import exceptions
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from tests import mocks
@@ -76,6 +77,28 @@ class TestGetBlobByPid(TestCase):
         mock_getattr.side_effect = Exception("mock_getattr_exception")
 
         with self.assertRaises(exceptions.ApiError):
+            blob_api.get_blob_by_pid(mock_valid_pid, self.user)
+
+    @patch.object(blob_api, "getattr")
+    @patch.object(blob_api, "import_module")
+    @patch.object(local_id_api, "get_by_name")
+    def test_get_by_id_acl_error_raises_acl_error(
+        self, mock_get_by_name, mock_import_module, mock_getattr
+    ):
+        """test_get_by_id_acl_error_raises_acl_error"""
+
+        mock_valid_pid = "https://websi.te/provider/record"
+        mock_get_by_name.return_value = LocalId(
+            record_name=mock_valid_pid,
+            record_object_class="mock_record_object_class",
+            record_object_id="mock_record_object_id",
+        )
+        mock_import_module.return_value = None
+        mock_getattr.side_effect = AccessControlError(
+            "mock_getattr_access_control_error"
+        )
+
+        with self.assertRaises(AccessControlError):
             blob_api.get_blob_by_pid(mock_valid_pid, self.user)
 
     @patch.object(blob_api, "getattr")

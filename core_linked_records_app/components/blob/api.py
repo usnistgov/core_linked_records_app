@@ -7,6 +7,7 @@ from core_linked_records_app import settings
 from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.components.local_id.models import LocalId
 from core_linked_records_app.utils.path import get_api_path_from_object
+from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.commons import exceptions
 from core_main_app.components.blob.models import Blob
 
@@ -54,6 +55,9 @@ def get_blob_by_pid(pid, user):
 
         logger.error(error_message)
         raise exceptions.DoesNotExist(error_message)
+    except AccessControlError as acl_error:
+        logger.error(str(acl_error))
+        raise AccessControlError(str(acl_error))
     except Exception as exc:
         error_message = (
             f"An error occurred while looking up blob assigned to PID '{pid}'"
