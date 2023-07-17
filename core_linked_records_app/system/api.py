@@ -6,17 +6,17 @@ from django.conf import settings as conf_settings
 from rest_framework import status
 
 from core_linked_records_app import settings
+from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.components.local_id.models import LocalId
 from core_linked_records_app.components.pid_xpath.models import PidXpath
-from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.path import get_api_path_from_object
 from core_linked_records_app.utils.providers import ProviderManager
 from core_main_app.commons.exceptions import DoesNotExist, ApiError
 from core_main_app.components.blob.models import Blob
 from core_main_app.components.data.models import Data
-from core_main_app.utils.query.mongo.prepare import sanitize_value
 from core_main_app.utils import xml as xml_utils
+from core_main_app.utils.query.mongo.prepare import sanitize_value
 
 logger = logging.getLogger(__name__)
 

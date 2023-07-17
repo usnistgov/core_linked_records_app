@@ -3,6 +3,7 @@
 import logging
 from os.path import join
 
+from django.db import transaction
 from django.db.models.signals import pre_save, post_delete
 
 from core_linked_records_app import settings
@@ -27,14 +28,12 @@ def init():
     post_delete.connect(delete_data_pid, sender=Data)
 
 
-def set_data_pid(sender, instance, **kwargs):
+def _set_data_pid(instance: Data):
     """Set the PID in the XML field specified in the settings. If the PID
     already exists and is valid, it is not reset.
 
-    Params:
-        sender:
+    Args:
         instance:
-        kwargs:
 
     Returns:
     """
@@ -67,7 +66,9 @@ def set_data_pid(sender, instance, **kwargs):
 
         # Remove previous instance PID from DB.
         if instance.pk is not None:
-            system_api.delete_pid_for_data(instance)
+            transaction.on_commit(
+                lambda: system_api.delete_pid_for_data(instance)
+            )
 
         provider_name = providers_utils.retrieve_provider_name(pid_value)
 
@@ -113,7 +114,21 @@ def set_data_pid(sender, instance, **kwargs):
         raise exceptions.CoreError(f"{error_message}.")
 
 
-def delete_data_pid(sender, instance, **kwargs):
+def set_data_pid(sender, instance: Data, **kwargs):
+    """Wrapper around `_set_data_pid` to ensure the PID can be updated while
+    the Data is being saved without locking the DB.
+
+    Args:
+        sender:
+        instance:
+        kwargs:
+
+    Returns:
+    """
+    transaction.on_commit(lambda: _set_data_pid(instance))
+
+
+def delete_data_pid(sender, instance: Data, **kwargs):
     """Delete a PID assigned to a Data
 
     Args:

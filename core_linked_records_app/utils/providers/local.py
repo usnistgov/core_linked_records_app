@@ -161,7 +161,7 @@ class LocalIdProvider(AbstractIdProvider):
 
         try:
             record_object = record_api.get_by_name(record)
-            record_object.delete()
+            record_api.delete(record_object)
 
             response.status_code = status.HTTP_200_OK
             response._content = json.dumps(

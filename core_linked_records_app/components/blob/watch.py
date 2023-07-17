@@ -3,6 +3,7 @@
 import json
 from logging import getLogger
 
+from django.db import transaction
 from django.db.models.signals import post_save, post_delete
 from django.urls import reverse
 
@@ -25,15 +26,14 @@ def init():
     post_delete.connect(delete_blob_pid, sender=Blob)
 
 
-def set_blob_pid(sender, instance: Blob, **kwargs):
-    """set_blob_pid
+def _set_blob_pid(instance: Blob):
+    """Set the PID in the given Blob `instance`. If the PID
+    already exists and is valid, it is not reset.
 
     Args:
-        sender:
         instance:
 
     Returns:
-
     """
     try:
         if not pid_settings_api.get().auto_set_pid:
@@ -63,6 +63,20 @@ def set_blob_pid(sender, instance: Blob, **kwargs):
 
         logger.error("%s: %s", error_message, str(exc))
         raise CoreError(f"{error_message}.")
+
+
+def set_blob_pid(sender, instance: Blob, **kwargs):
+    """Wrapper around `_set_blob_pid` to ensure the PID can be updated while
+    the Blob is being saved without locking the DB.
+
+    Args:
+        sender:
+        instance:
+        kwargs:
+
+    Returns:
+    """
+    transaction.on_commit(lambda: _set_blob_pid(instance))
 
 
 def delete_blob_pid(sender, instance: Blob, **kwargs):
