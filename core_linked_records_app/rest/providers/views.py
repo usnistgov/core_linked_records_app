@@ -2,7 +2,6 @@
 """
 import json
 import logging
-import re
 
 from rest_framework import status
 from rest_framework.parsers import JSONParser
@@ -10,7 +9,6 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core_linked_records_app import settings
 from core_linked_records_app.components.blob.api import get_blob_by_pid
 from core_linked_records_app.components.data.api import get_data_by_pid
 from core_linked_records_app.rest.data.renderers.data_html_user_renderer import (
@@ -19,6 +17,11 @@ from core_linked_records_app.rest.data.renderers.data_html_user_renderer import 
 from core_linked_records_app.rest.data.renderers.data_xml_renderer import (
     DataXmlRenderer,
 )
+from core_linked_records_app.utils.exceptions import (
+    InvalidPrefixError,
+    InvalidRecordError,
+)
+from core_linked_records_app.utils.pid import split_prefix_from_record
 from core_linked_records_app.utils.providers import ProviderManager
 from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.commons.exceptions import DoesNotExist
@@ -49,41 +52,23 @@ class ProviderRecordView(APIView):
         Returns:
         """
         try:
-            # Parse record entry to split between prefix and record ID.
-            prefix_record_list = record.split("/")
-
-            if len(prefix_record_list) == 1:  # No record provided
-                prefix = prefix_record_list[0]
-                record = None
-            elif prefix_record_list[-1] == "":  # Only prefix provided
-                prefix = "/".join(prefix_record_list[:-1])
-                record = None
-            else:  # Prefix and record provided
-                prefix = "/".join(prefix_record_list[:-1])
-                record = prefix_record_list[-1]
-
-            # Assign default prefix if the prefix is undefined or not in the list of
-            # authorized ones.
-            if prefix == "" or prefix not in settings.ID_PROVIDER_PREFIXES:
+            try:
+                prefix, record = split_prefix_from_record(record)
+            except InvalidPrefixError as invalid_prefix_error:
                 return Response(
                     {
-                        "record": "/".join(prefix_record_list),
+                        "record": record,
                         "url": request.build_absolute_uri("?"),
-                        "message": "Invalid prefix specified",
+                        "message": str(invalid_prefix_error),
                     },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-
-            if (
-                record is not None
-                and record != ""
-                and re.match(f"^({settings.PID_FORMAT}|)$", record) is None
-            ):
+            except InvalidRecordError as invalid_record_error:
                 return Response(
                     {
-                        "record": "/".join(prefix_record_list),
+                        "record": record,
                         "url": request.build_absolute_uri("?"),
-                        "message": "Invalid record format",
+                        "message": str(invalid_record_error),
                     },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )

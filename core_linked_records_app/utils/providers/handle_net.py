@@ -32,6 +32,20 @@ class HandleNetSystem(AbstractIdProvider):
         402: "Authentication needed",
     }
 
+    def __init__(
+        self,
+        provider_name,
+        provider_lookup_url,
+        provider_registration_url,
+        username,
+        password,
+    ):
+        self.provider_registration_url = provider_registration_url
+        self.auth_token = b64encode(
+            f"{username}:{password}".encode("utf-8")
+        ).decode("utf-8")
+        super().__init__(provider_name, provider_lookup_url)
+
     def _get_message_for_response_code(self, return_code):
         if return_code in self.response_code_messages.keys():
             return self.response_code_messages[return_code]
@@ -70,10 +84,6 @@ class HandleNetSystem(AbstractIdProvider):
             record_data["handle"] = record
 
         return json.dumps(record_data)
-
-    def encode_token(self, username, password):
-        user_pass = f"{username}:{password}"
-        return b64encode(user_pass.encode("utf-8")).decode("utf-8")
 
     def get(self, record):
         """Retrieve an existring handle.net handle.

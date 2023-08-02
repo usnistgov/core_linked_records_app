@@ -6,11 +6,9 @@ from abc import ABC, abstractmethod
 from importlib import import_module
 
 from django.urls import reverse
-from rest_framework import status
 
 from core_linked_records_app import settings
 from core_main_app.commons import exceptions
-from core_main_app.utils.requests_utils.requests_utils import send_post_request
 
 logger = logging.getLogger(__name__)
 
@@ -18,34 +16,19 @@ logger = logging.getLogger(__name__)
 class AbstractIdProvider(ABC):
     """Abstract Id Provider"""
 
-    def __init__(
-        self,
-        provider_name,
-        provider_lookup_url,
-        provider_registration_url,
-        username,
-        password,
-    ):
+    def __init__(self, provider_name, provider_lookup_url):
+        core_linked_records_provider_records = reverse(
+            "core_linked_records_provider_record",
+            kwargs={"provider": provider_name, "record": ""},
+        )
         self.local_url = (
-            f"{settings.SERVER_URI}"
-            f'{reverse("core_linked_records_provider_record",kwargs = {"provider": provider_name, "record": ""})}'
+            f"{settings.SERVER_URI}" f"{core_linked_records_provider_records}"
         )
 
         self.local_url = self.local_url[:-1]  # Removing the final /
         self.provider_lookup_url = (
             provider_lookup_url if provider_lookup_url else self.local_url
         )
-        self.provider_registration_url = provider_registration_url
-        self.auth_token = self.encode_token(username, password)
-
-    @abstractmethod
-    def encode_token(self, username, password):
-        """encode_token
-        Args:
-            username:
-            password:
-        """
-        raise NotImplementedError()
 
     @abstractmethod
     def get(self, record):
@@ -110,10 +93,9 @@ class ProviderManager:
                 id_provider_module, id_provider_classname
             )
 
-            # Initialize handle system instance
-            if (
-                provider_name is None
-            ):  # Default provider name to the default system
+            # Initialize handle system instance, default to the system specified in
+            # settings.
+            if provider_name is None:
                 provider_name = settings.ID_PROVIDER_SYSTEM_NAME
 
             self._provider_instance = id_provider_class(
@@ -163,53 +145,3 @@ def retrieve_provider_name(pid_value):
         )
 
     return provider_name
-
-
-def register_pid_for_data_id(provider_name, pid_value, data_id):
-    """Registers a data with a set PID to a given provider.
-
-    Args:
-        provider_name:
-        pid_value:
-        data_id:
-
-    Returns:
-        str - Persistent identifier
-    """
-    from core_linked_records_app.system import api as system_api
-
-    provider_manager = ProviderManager()
-    provider = provider_manager.get(provider_name)
-    registration_url = pid_value.replace(
-        provider.provider_lookup_url, provider.local_url
-    )
-
-    document_pid_response = send_post_request(
-        f"{registration_url}?format=json"
-    )
-
-    # If an error happened during PID registration, try to relay the message from the
-    # provider, otherwise relay a default error message.
-    if (
-        document_pid_response.status_code
-        == status.HTTP_500_INTERNAL_SERVER_ERROR
-    ):
-        default_error_message = "An error occurred while creating the PID"
-        try:
-            raise exceptions.ModelError(
-                document_pid_response.json().get(
-                    "message", default_error_message
-                )
-            )
-        except Exception as exc:  # If the response is not JSON parsable
-            logger.error("%s: %s", default_error_message, str(exc))
-            raise exceptions.ModelError(default_error_message)
-
-    if (
-        document_pid_response.status_code != status.HTTP_201_CREATED
-        and document_pid_response.status_code != status.HTTP_200_OK
-        and system_api.get_data_by_pid(pid_value).pk != data_id
-    ):
-        raise exceptions.ModelError("Invalid PID provided")
-
-    return document_pid_response.json()["url"]

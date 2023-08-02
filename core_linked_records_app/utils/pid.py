@@ -3,6 +3,10 @@
 import re
 
 from core_linked_records_app import settings
+from core_linked_records_app.utils.exceptions import (
+    InvalidPrefixError,
+    InvalidRecordError,
+)
 from core_linked_records_app.utils.providers import ProviderManager
 
 
@@ -47,3 +51,43 @@ def get_pid_settings_dict(pid_setting) -> dict:
         "system_type": settings.ID_PROVIDER_SYSTEM_CONFIG["class"],
         "prefixes": settings.ID_PROVIDER_PREFIXES,
     }
+
+
+def split_prefix_from_record(record):
+    """Split prefix from record if the record is in prefix/record format.
+
+    Args:
+        record (str): The full prefix/record_name to be split
+
+    Raises:
+        InvalidPrefixError: If an undefined prefix is detected.
+        InvalidRecordError: If the record does not match the expected format.
+
+    Returns:
+        tuple[str, str|None] - prefix / record
+    """
+    prefix_record_list = record.split("/")
+
+    if len(prefix_record_list) == 1:  # No record provided
+        prefix = prefix_record_list[0]
+        record = None
+    elif prefix_record_list[-1] == "":  # Only prefix provided
+        prefix = "/".join(prefix_record_list[:-1])
+        record = None
+    else:  # Prefix and record provided
+        prefix = "/".join(prefix_record_list[:-1])
+        record = prefix_record_list[-1]
+
+    # Assign default prefix if the prefix is undefined or not in the
+    # list of authorized ones.
+    if prefix == "" or prefix not in settings.ID_PROVIDER_PREFIXES:
+        raise InvalidPrefixError(f"Prefix {prefix} is not valid.")
+
+    if (
+        record is not None
+        and record != ""
+        and re.match(f"^({settings.PID_FORMAT}|)$", record) is None
+    ):
+        raise InvalidRecordError(f"Record {record} is not valid.")
+
+    return prefix, record

@@ -243,15 +243,6 @@ class TestLocalIdProviderUpdate(TestCase):
         )
 
 
-class TestLocalIdProviderEncodeToken(TestCase):
-    """Test Local Id Provider Encode Token"""
-
-    def test_returns_none(self):
-        """test_returns_none"""
-        provider = LocalIdProvider("mock_provider")
-        self.assertIsNone(provider.encode_token("mock_admin", "mock_password"))
-
-
 class TestLocalIdProviderDelete(TestCase):
     """Test Local Id Provider Delete"""
 

@@ -23,10 +23,7 @@ class LocalIdProvider(AbstractIdProvider):
     }
 
     def __init__(self, provider_name):
-        super().__init__(provider_name, None, None, None, None)
-
-    def encode_token(self, username, password):
-        return None
+        super().__init__(provider_name, None)
 
     @staticmethod
     def _generate_id(length_id=16):
@@ -112,7 +109,6 @@ class LocalIdProvider(AbstractIdProvider):
 
         try:
             record_object = LocalId(record_name=record)
-
             record_api.insert(record_object)
 
             response.status_code = status.HTTP_201_CREATED

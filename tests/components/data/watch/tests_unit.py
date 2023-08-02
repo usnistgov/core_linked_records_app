@@ -1,7 +1,10 @@
 """ Unit tests for core_linked_records_app.components.data.watch
 """
+import json
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+
+from rest_framework import status
 
 from core_linked_records_app.components.data import watch as data_watch
 from core_linked_records_app.components.pid_settings import (
@@ -10,20 +13,249 @@ from core_linked_records_app.components.pid_settings import (
 from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils import data as data_utils
 from core_linked_records_app.utils import providers as providers_utils
-from core_main_app.commons import exceptions
+from core_linked_records_app.utils import exceptions
 from tests import mocks
 
 
+class TestRegisterPidForDataId(TestCase):
+    """Unit tests for `_register_pid_for_data_id` function."""
+
+    def setUp(self) -> None:
+        """setUp"""
+        self.mock_resolver_match = MagicMock()
+        self.mock_resolver_match.view_name = (
+            "core_linked_records_provider_record"
+        )
+
+        self.mock_provider = MagicMock()
+        self.mock_provider.provider_lookup_url = "http://cdcs.handle.net"
+        self.mock_provider.local_url = "http://cdcs.example.com/pid/rest"
+
+        self.mock_prefix = "12.34567"
+        self.mock_record = "mock_record"
+
+        self.kwargs = {
+            "provider_name": "mock_provider",
+            "pid_value": f"{self.mock_provider.provider_lookup_url}/{self.mock_prefix}/"
+            f"{self.mock_record}",
+            "data_id": 42,
+        }
+
+    @patch.object(data_watch, "ProviderManager")
+    def test_provider_manager_is_instantiated(self, mock_provider_manager):
+        """test_provider_manager_is_instantiated"""
+        with self.assertRaises(exceptions.PidResolverError):
+            data_watch._register_pid_for_data_id(**self.kwargs)
+
+        mock_provider_manager.assert_called()
+
+    @patch.object(data_watch, "ProviderManager")
+    def test_default_provider_is_retrieved(self, mock_provider_manager):
+        """test_default_provider_is_retrieved"""
+        with self.assertRaises(exceptions.PidResolverError):
+            data_watch._register_pid_for_data_id(**self.kwargs)
+
+        mock_provider_manager().get.assert_called_with(
+            self.kwargs["provider_name"]
+        )
+
+    @patch.object(data_watch, "logger")
+    @patch.object(data_watch, "resolve")
+    @patch.object(data_watch, "ProviderManager")
+    def test_resolver_error_is_logged_and_raises_core_error(
+        self, mock_provider_manager, mock_resolve, mock_logger
+    ):
+        """test_resolver_error_is_logged_and_raises_core_error"""
+        mock_provider_manager().get.return_value = self.mock_provider
+        mock_resolve.side_effect = Exception("mock_resolve_exception")
+
+        with self.assertRaises(exceptions.PidResolverError):
+            data_watch._register_pid_for_data_id(**self.kwargs)
+
+        mock_logger.error.assert_called()
+
+    @patch.object(data_watch, "logger")
+    @patch.object(data_watch, "resolve")
+    @patch.object(data_watch, "ProviderManager")
+    def test_resolver_not_matching_correct_view_is_logged_and_raises_core_error(
+        self, mock_provider_manager, mock_resolve, mock_logger
+    ):
+        """test_resolver_not_matching_correct_view_is_logged_and_raises_core_error"""
+        mock_provider_manager().get.return_value = self.mock_provider
+        mock_resolve.return_value = self.mock_resolver_match
+        self.mock_resolver_match.view_name = "mock_incorrect_view_name"
+
+        with self.assertRaises(exceptions.PidResolverError):
+            data_watch._register_pid_for_data_id(**self.kwargs)
+
+        mock_logger.error.assert_called()
+
+    @patch.object(data_watch, "logger")
+    @patch.object(data_watch, "split_prefix_from_record")
+    @patch.object(data_watch, "resolve")
+    @patch.object(data_watch, "ProviderManager")
+    def test_split_prefix_from_record_error_is_logged_and_raises_core_error(
+        self,
+        mock_provider_manager,
+        mock_resolve,
+        mock_split_prefix_from_record,
+        mock_logger,
+    ):
+        """test_split_prefix_from_record_error_is_logged_and_raises_core_error"""
+        mock_provider_manager().get.return_value = self.mock_provider
+        mock_resolve.return_value = self.mock_resolver_match
+        mock_split_prefix_from_record.side_effect = Exception(
+            "mock_split_prefix_from_record_exception"
+        )
+
+        with self.assertRaises(exceptions.PidResolverError):
+            data_watch._register_pid_for_data_id(**self.kwargs)
+
+        mock_logger.error.assert_called()
+
+    @patch.object(data_watch, "system_api")
+    @patch.object(data_watch, "split_prefix_from_record")
+    @patch.object(data_watch, "resolve")
+    @patch.object(data_watch, "ProviderManager")
+    def test_provider_create_is_called(
+        self,
+        mock_provider_manager,
+        mock_resolve,
+        mock_split_prefix_from_record,
+        mock_system_api,
+    ):
+        """test_provider_create_is_called"""
+        mock_provider_manager().get.return_value = self.mock_provider
+        mock_resolve.return_value = self.mock_resolver_match
+        mock_split_prefix_from_record.return_value = (
+            self.mock_prefix,
+            self.mock_record,
+        )
+
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._register_pid_for_data_id(**self.kwargs)
+
+        self.mock_provider.create.assert_called_with(
+            self.mock_prefix, self.mock_record
+        )
+
+    @patch.object(data_watch, "logger")
+    @patch.object(data_watch, "system_api")
+    @patch.object(data_watch, "split_prefix_from_record")
+    @patch.object(data_watch, "resolve")
+    @patch.object(data_watch, "ProviderManager")
+    def test_provider_create_unparsable_response_is_logged_and_raises_core_error(
+        self,
+        mock_provider_manager,
+        mock_resolve,
+        mock_split_prefix_from_record,
+        mock_system_api,
+        mock_logger,
+    ):
+        """test_provider_create_unparsable_response_is_logged_and_raises_core_error"""
+        mock_provider_manager().get.return_value = self.mock_provider
+        mock_resolve.return_value = self.mock_resolver_match
+        mock_split_prefix_from_record.return_value = (
+            self.mock_prefix,
+            self.mock_record,
+        )
+
+        self.mock_provider_create_response = MagicMock()
+        self.mock_provider_create_response.status_code = (
+            status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+        self.mock_provider_create_response.content = None
+        self.mock_provider.create.return_value = (
+            self.mock_provider_create_response
+        )
+
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._register_pid_for_data_id(**self.kwargs)
+
+        mock_logger.error.assert_called()
+
+    @patch.object(data_watch, "logger")
+    @patch.object(data_watch, "system_api")
+    @patch.object(data_watch, "split_prefix_from_record")
+    @patch.object(data_watch, "resolve")
+    @patch.object(data_watch, "ProviderManager")
+    def test_provider_create_parsable_response_is_logged_and_raises_core_error(
+        self,
+        mock_provider_manager,
+        mock_resolve,
+        mock_split_prefix_from_record,
+        mock_system_api,
+        mock_logger,
+    ):
+        """test_provider_create_parsable_response_is_logged_and_raises_core_error"""
+        mock_provider_manager().get.return_value = self.mock_provider
+        mock_resolve.return_value = self.mock_resolver_match
+        mock_split_prefix_from_record.return_value = (
+            self.mock_prefix,
+            self.mock_record,
+        )
+
+        self.mock_provider_create_response = MagicMock()
+        self.mock_provider_create_response.status_code = (
+            status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+        self.mock_provider_create_response.content = json.dumps(
+            {"message": "mock_error"}
+        )
+        self.mock_provider.create.return_value = (
+            self.mock_provider_create_response
+        )
+
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._register_pid_for_data_id(**self.kwargs)
+
+        mock_logger.error.assert_called()
+
+    @patch.object(data_watch, "system_api")
+    @patch.object(data_watch, "split_prefix_from_record")
+    @patch.object(data_watch, "resolve")
+    @patch.object(data_watch, "ProviderManager")
+    def test_succesful_execution_returns_record_url(
+        self,
+        mock_provider_manager,
+        mock_resolve,
+        mock_split_prefix_from_record,
+        mock_system_api,
+    ):
+        """test_succesful_execution_returns_record_url"""
+        expected_result = "mock_record_url"
+
+        mock_provider_manager().get.return_value = self.mock_provider
+        mock_resolve.return_value = self.mock_resolver_match
+        mock_split_prefix_from_record.return_value = (
+            self.mock_prefix,
+            self.mock_record,
+        )
+
+        self.mock_provider_create_response = MagicMock()
+        self.mock_provider_create_response.status_code = (
+            status.HTTP_201_CREATED
+        )
+        self.mock_provider_create_response.content = json.dumps(
+            {"url": expected_result}
+        )
+        self.mock_provider.create.return_value = (
+            self.mock_provider_create_response
+        )
+
+        result = data_watch._register_pid_for_data_id(**self.kwargs)
+
+        self.assertEqual(result, expected_result)
+
+
 class TestSetDataPid(TestCase):
-    """Test Set Data Pid"""
+    """Unit tests for `_set_data_pid` function."""
 
     def setUp(self):
         """setUp"""
-
-        mock_sender = None
         mock_document = mocks.MockData()
 
-        self.mock_kwargs = {"sender": mock_sender, "instance": mock_document}
+        self.mock_kwargs = {"instance": mock_document}
 
     @patch.object(pid_settings_api, "get")
     def test_pid_settings_get_failure_raises_core_error(
@@ -35,8 +267,8 @@ class TestSetDataPid(TestCase):
             "mock_pid_settings_get_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(system_api, "get_pid_xpath_by_template")
     @patch.object(pid_settings_api, "get")
@@ -50,8 +282,8 @@ class TestSetDataPid(TestCase):
             "mock_get_pid_xpath_by_template_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(data_watch, "get_xpath_from_dot_notation")
     @patch.object(system_api, "get_pid_xpath_by_template")
@@ -70,8 +302,8 @@ class TestSetDataPid(TestCase):
             "mock_get_xpath_from_dot_notation_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
@@ -93,8 +325,8 @@ class TestSetDataPid(TestCase):
             "mock_get_xpath_with_target_namespace_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
@@ -119,7 +351,7 @@ class TestSetDataPid(TestCase):
             "mock_get_pid_value_for_data_exception"
         )
 
-        self.assertIsNone(data_watch.set_data_pid(**self.mock_kwargs))
+        self.assertIsNone(data_watch._set_data_pid(**self.mock_kwargs))
 
     @patch.object(system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
@@ -147,10 +379,10 @@ class TestSetDataPid(TestCase):
             "mock_delete_pid_for_data_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
-    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_watch, "retrieve_provider_name")
     @patch.object(system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
@@ -179,11 +411,11 @@ class TestSetDataPid(TestCase):
             "mock_retrieve_provider_name_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_watch, "retrieve_provider_name")
     @patch.object(system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
@@ -214,12 +446,12 @@ class TestSetDataPid(TestCase):
             "mock_provider_manager_get_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_watch, "retrieve_provider_name")
     @patch.object(system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
@@ -252,13 +484,13 @@ class TestSetDataPid(TestCase):
             "mock_provider_manager_get_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_watch, "retrieve_provider_name")
     @patch.object(system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
@@ -293,13 +525,13 @@ class TestSetDataPid(TestCase):
             "mock_is_pid_defined_for_data_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_watch, "retrieve_provider_name")
     @patch.object(system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
@@ -332,14 +564,14 @@ class TestSetDataPid(TestCase):
         mock_is_pid_defined.return_value = True
         mock_is_pid_defined_for_data.return_value = False
 
-        with self.assertRaises(exceptions.ModelError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
-    @patch.object(providers_utils, "register_pid_for_data_id")
+    @patch.object(data_watch, "_register_pid_for_data_id")
     @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_watch, "retrieve_provider_name")
     @patch.object(system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
@@ -376,15 +608,15 @@ class TestSetDataPid(TestCase):
             "mock_register_pid_for_data_id_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(data_utils, "set_pid_value_for_data")
-    @patch.object(providers_utils, "register_pid_for_data_id")
+    @patch.object(data_watch, "_register_pid_for_data_id")
     @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_watch, "retrieve_provider_name")
     @patch.object(system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
@@ -423,15 +655,15 @@ class TestSetDataPid(TestCase):
             "mock_set_pid_value_for_data_exception"
         )
 
-        with self.assertRaises(exceptions.CoreError):
-            data_watch.set_data_pid(**self.mock_kwargs)
+        with self.assertRaises(exceptions.PidCreateError):
+            data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(data_utils, "set_pid_value_for_data")
-    @patch.object(providers_utils, "register_pid_for_data_id")
+    @patch.object(data_watch, "_register_pid_for_data_id")
     @patch.object(system_api, "is_pid_defined_for_data")
     @patch.object(system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_watch, "retrieve_provider_name")
     @patch.object(system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
@@ -468,11 +700,11 @@ class TestSetDataPid(TestCase):
         mock_register_pid_for_data_id.return_value = "mock_pid_value"
         mock_set_pid_value_for_data.return_value = None
 
-        self.assertIsNone(data_watch.set_data_pid(**self.mock_kwargs))
+        self.assertIsNone(data_watch._set_data_pid(**self.mock_kwargs))
 
 
 class TestDeleteDataPid(TestCase):
-    """Unit tests for detele_data_pid function."""
+    """Unit tests for `detele_data_pid` function."""
 
     def setUp(self) -> None:
         """setUp"""
