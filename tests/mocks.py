@@ -8,14 +8,16 @@ from rest_framework import status
 class MockModule(Mock):
     """Mock Module"""
 
+    get_by_id_return_value = "MockModule.get_by_id"
+
     def get_by_id(
-        self, *args, **kwargs
-    ):  # noqa, pylint: disable=unused-argument
+        self, *args, **kwargs  # noqa, pylint: disable=unused-argument
+    ):
         """get_by_id
 
         Returns:
         """
-        return "MockModule.get_by_id"
+        return self.get_by_id_return_value
 
 
 class MockLocalId(Mock):

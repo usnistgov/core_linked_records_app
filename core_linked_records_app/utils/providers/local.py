@@ -7,8 +7,8 @@ import string
 from requests import Response
 from rest_framework import status
 
-from core_linked_records_app.components.local_id import api as record_api
 from core_linked_records_app.components.local_id.models import LocalId
+from core_linked_records_app.system.local_id import api as local_id_system_api
 from core_linked_records_app.utils.providers import AbstractIdProvider
 from core_main_app.commons import exceptions
 
@@ -58,7 +58,7 @@ class LocalIdProvider(AbstractIdProvider):
         record_url = f"{self.provider_lookup_url}/{record}"
 
         try:
-            record_api.get_by_name(record)
+            local_id_system_api.get_by_name(record)
             response.status_code = status.HTTP_200_OK
             response._content = json.dumps(
                 {
@@ -109,7 +109,8 @@ class LocalIdProvider(AbstractIdProvider):
 
         try:
             record_object = LocalId(record_name=record)
-            record_api.insert(record_object)
+
+            local_id_system_api.insert(record_object)
 
             response.status_code = status.HTTP_201_CREATED
             response_content["message"] = self.messages["success"]
@@ -156,8 +157,8 @@ class LocalIdProvider(AbstractIdProvider):
         record_url = f"{self.provider_lookup_url}/{record}"
 
         try:
-            record_object = record_api.get_by_name(record)
-            record_api.delete(record_object)
+            record_object = local_id_system_api.get_by_name(record)
+            local_id_system_api.delete(record_object)
 
             response.status_code = status.HTTP_200_OK
             response._content = json.dumps(

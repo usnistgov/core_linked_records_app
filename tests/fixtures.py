@@ -1,15 +1,15 @@
 """ Fixtures for data integration tests cases.
 """
+from core_linked_records_app.components.pid_settings.models import PidSettings
+from core_linked_records_app.system.pid_settings import (
+    api as pid_settings_system_api,
+)
 from core_main_app.components.data.models import Data
-from core_main_app.system import api as system_api
 from core_main_app.components.template.models import Template
+from core_main_app.system import api as system_api
 from core_main_app.utils.integration_tests.fixture_interface import (
     FixtureInterface,
 )
-from core_linked_records_app.components.pid_settings import (
-    api as pid_settings_api,
-)
-from core_linked_records_app.components.pid_settings.models import PidSettings
 
 
 class DataFixtures(FixtureInterface):
@@ -26,12 +26,12 @@ class DataFixtures(FixtureInterface):
     def create_pid_settings(self):
         """Creates PID settings"""
         self.pid_settings = PidSettings()
-        pid_settings_api.upsert(self.pid_settings)
+        pid_settings_system_api.upsert(self.pid_settings)
 
     def auto_set_pid(self, auto_set_pid_value: bool):
         """Change the value of the auto_set_pid field, enabling or disabling PID."""
         self.pid_settings.auto_set_pid = auto_set_pid_value
-        pid_settings_api.upsert(self.pid_settings)
+        pid_settings_system_api.upsert(self.pid_settings)
 
     def insert_record(self, data_name, data_pid, user):
         """Insert a record given a name, PID and user"""

@@ -28,7 +28,7 @@ class PidSettingsView(APIView):
         Returns:
         """
         try:
-            pid_settings = pid_settings_api.get()
+            pid_settings = pid_settings_api.get(request.user)
             return Response(
                 get_pid_settings_dict(pid_settings),
                 status=status.HTTP_200_OK,
@@ -67,7 +67,8 @@ class PidSettingsView(APIView):
                 )
 
             pid_settings_serializer.update(
-                pid_settings_api.get(), pid_settings_serializer.validated_data
+                pid_settings_api.get(request.user),
+                pid_settings_serializer.validated_data,
             )
 
             return self.get(request)

@@ -3,32 +3,41 @@
 from importlib import import_module
 from logging import getLogger
 
-from core_linked_records_app import settings
-from core_linked_records_app.components.local_id import api as local_id_api
-from core_linked_records_app.components.local_id.models import LocalId
-from core_linked_records_app.utils.path import get_api_path_from_object
+from core_linked_records_app.components.blob.access_control import (
+    can_get_blob_by_pid,
+    can_get_pid_for_blob,
+    can_set_pid_for_blob,
+)
+from core_linked_records_app.system.blob import api as blob_system_api
+from core_linked_records_app.system.local_id import api as local_id_system_api
+from core_main_app.access_control.decorators import access_control
 from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.commons import exceptions
-from core_main_app.components.blob.models import Blob
 
 logger = getLogger(__name__)
 
 
+@access_control(can_get_blob_by_pid)
 def get_blob_by_pid(pid, user):
     """Return blob object with the given pid.
 
     Args:
-        pid:
-        user:
+        pid (str): PID of the blob.
+        user (User): User making the request, should have access to the Blob.
+
+    Raises:
+        DoesNotExist: The PID is not assigned to any Blob object.
+        AccessControlError: The Blob cannot be accessed by the user.
+        ApiError: Any other error occured while trying to resolve the PID.
 
     Returns:
-        Blob object
+        Blob: Blob object assigned to the given PID.
     """
     try:
         # From the PID url (e.g. https://pid-system.org/prefix/record), retrieve
         # only the prefix and record (e.g. prefix/record) stored in DB.
         pid_internal_name = "/".join(pid.split("/")[-2:])
-        local_id_object = local_id_api.get_by_name(pid_internal_name)
+        local_id_object = local_id_system_api.get_by_name(pid_internal_name)
 
         # Ensure the LocalID object refers to a Blob
         assert (
@@ -50,82 +59,49 @@ def get_blob_by_pid(pid, user):
         return getattr(module, api_module_name).get_by_id(
             local_id_object.record_object_id, user
         )
-    except (AssertionError, exceptions.DoesNotExist):
+    except (AssertionError, exceptions.DoesNotExist) as not_assigned_exc:
         error_message = f"PID '{pid}' not assigned to blob"
-
         logger.error(error_message)
-        raise exceptions.DoesNotExist(error_message)
+        raise exceptions.DoesNotExist(error_message) from not_assigned_exc
     except AccessControlError as acl_error:
         logger.error(str(acl_error))
-        raise AccessControlError(str(acl_error))
+        raise AccessControlError(str(acl_error)) from acl_error
     except Exception as exc:
         error_message = (
             f"An error occurred while looking up blob assigned to PID '{pid}'"
         )
 
         logger.error("%s: %s", error_message, str(exc))
-        raise exceptions.ApiError(error_message)
+        raise exceptions.ApiError(error_message) from exc
 
 
-def get_pid_for_blob(blob_id):
+@access_control(can_get_pid_for_blob)
+def get_pid_for_blob(blob_id, user):  # noqa, pylint: disable=unused-argument
     """Retrieve PID matching the blob ID provided.
 
     Args:
-        blob_id:
+        blob_id (str): Primary key of the Blob object.
+        user (User): User making the request, should have access to the Blob object.
 
     Returns:
         str - PID of the blob object
     """
-    try:
-        return local_id_api.get_by_class_and_id(
-            record_object_class=get_api_path_from_object(Blob()),
-            record_object_id=blob_id,
-        )
-    except exceptions.DoesNotExist as dne:
-        raise exceptions.DoesNotExist(str(dne))
-    except Exception as exc:
-        error_message = f"An error occurred while looking up PID assigned to blob '{blob_id}'"
-
-        logger.error("%s: %s", error_message, str(exc))
-        raise exceptions.ApiError(error_message)
+    return blob_system_api.get_pid_for_blob(blob_id)
 
 
-def set_pid_for_blob(blob_id, blob_pid):
-    """Retrieve PID matching the blob ID provided.
+@access_control(can_set_pid_for_blob)
+def set_pid_for_blob(
+    blob_id, blob_pid, user  # noqa, pylint: disable=unused-argument
+):
+    """Create a PID for the blob ID provided.
 
     Args:
-        blob_id:
-        blob_pid:
+        blob_id (str): Primary key of the Blob object.
+        blob_pid (str): PID to assign to the Blob.
+        user (User): User making the request, should have proper permissions to access
+            the Blob and assign a PID
+
+    Returns:
+        LocalId: PID object created for the given Blob object.
     """
-    try:
-        record_name = (
-            f"{settings.ID_PROVIDER_PREFIX_BLOB}/{blob_pid.split('/')[-1]}"
-        )
-
-        try:
-            local_id_object = get_pid_for_blob(blob_id)
-        except exceptions.DoesNotExist:
-            try:
-                local_id_object = local_id_api.get_by_name(record_name)
-            except exceptions.DoesNotExist:
-                local_id_object = None
-
-        if local_id_object:
-            local_id_object.record_name = record_name
-            local_id_object.record_object_class = get_api_path_from_object(
-                Blob()
-            )
-            local_id_object.record_object_id = str(blob_id)
-        else:
-            local_id_object = LocalId(
-                record_name=record_name,
-                record_object_class=get_api_path_from_object(Blob()),
-                record_object_id=str(blob_id),
-            )
-
-        return local_id_api.insert(local_id_object)
-    except Exception as exc:
-        error_message = f"An error occurred while assigning PID '{blob_pid}' to blob '{blob_id}'"
-
-        logger.error("%s: %s", error_message, str(exc))
-        raise exceptions.ApiError(error_message)
+    return blob_system_api.set_pid_for_blob(blob_id, blob_pid)

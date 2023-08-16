@@ -34,9 +34,9 @@ class PidXpath(models.Model):
         Returns:
         """
         try:
-            return PidXpath.objects.all()
+            return PidXpath.objects.all()  # pylint: disable=no-member
         except Exception as exc:
-            raise ModelError(str(exc))
+            raise ModelError(str(exc)) from exc
 
     @staticmethod
     def get_all_by_template_list(template_list):
@@ -48,9 +48,11 @@ class PidXpath(models.Model):
         Returns:
         """
         try:
-            return PidXpath.objects.filter(template__in=template_list)
+            return PidXpath.objects.filter(  # pylint: disable=no-member
+                template__in=template_list
+            )
         except Exception as exc:
-            raise ModelError(str(exc))
+            raise ModelError(str(exc)) from exc
 
     @staticmethod
     def get_by_template(template):
@@ -62,11 +64,13 @@ class PidXpath(models.Model):
         Returns:
         """
         try:
-            return PidXpath.objects.get(template=template)
+            return PidXpath.objects.get(  # pylint: disable=no-member
+                template=template
+            )
         except ObjectDoesNotExist:
             return None
         except Exception as exc:
-            raise exceptions.ModelError(str(exc))
+            raise exceptions.ModelError(str(exc)) from exc
 
     def __str__(self):
         """PidXpath object as string.

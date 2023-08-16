@@ -6,8 +6,8 @@ from unittest.mock import patch
 from rest_framework import status
 
 from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.rest.blob import views as blob_views
+from core_linked_records_app.system.local_id import api as local_id_system_api
 from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.rest.blob.views import BlobList
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
@@ -30,7 +30,7 @@ class TestBlobUploadWithPIDViewPost(TestCase):
 
         self.assertEqual(response.status_code, 500)
 
-    @patch.object(local_id_api, "get_by_name")
+    @patch.object(local_id_system_api, "get_by_name")
     def test_local_pid_get_by_name_fails_returns_500(self, mock_get_by_name):
         """test_local_pid_get_by_name_fails_returns_500"""
 
@@ -42,7 +42,7 @@ class TestBlobUploadWithPIDViewPost(TestCase):
 
         self.assertEqual(response.status_code, 500)
 
-    @patch.object(local_id_api, "get_by_name")
+    @patch.object(local_id_system_api, "get_by_name")
     def test_local_pid_get_by_name_succeeds_returns_500(
         self, mock_get_by_name
     ):
@@ -57,7 +57,7 @@ class TestBlobUploadWithPIDViewPost(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch.object(BlobList, "post")
-    @patch.object(local_id_api, "get_by_name")
+    @patch.object(local_id_system_api, "get_by_name")
     def test_super_post_fails_returns_500(
         self, mock_get_by_name, mock_blob_list_post
     ):
@@ -77,7 +77,7 @@ class TestBlobUploadWithPIDViewPost(TestCase):
         self.assertEqual(response.status_code, 500)
 
     @patch.object(BlobList, "post")
-    @patch.object(local_id_api, "get_by_name")
+    @patch.object(local_id_system_api, "get_by_name")
     def test_super_post_returns_400_returns_400(
         self, mock_get_by_name, mock_blob_list_post
     ):
@@ -98,7 +98,7 @@ class TestBlobUploadWithPIDViewPost(TestCase):
 
     @patch.object(blob_api, "set_pid_for_blob")
     @patch.object(BlobList, "post")
-    @patch.object(local_id_api, "get_by_name")
+    @patch.object(local_id_system_api, "get_by_name")
     def test_set_pid_for_blob_fails_returns_500(
         self, mock_get_by_name, mock_blob_list_post, mock_set_pid_for_blob
     ):
@@ -122,7 +122,7 @@ class TestBlobUploadWithPIDViewPost(TestCase):
 
     @patch.object(blob_api, "set_pid_for_blob")
     @patch.object(BlobList, "post")
-    @patch.object(local_id_api, "get_by_name")
+    @patch.object(local_id_system_api, "get_by_name")
     def test_success_returns_201(
         self, mock_get_by_name, mock_blob_list_post, mock_set_pid_for_blob
     ):

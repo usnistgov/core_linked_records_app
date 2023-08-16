@@ -3,8 +3,11 @@
 import logging
 
 from core_linked_records_app import settings
+from core_linked_records_app.components.pid_xpath.access_control import (
+    can_get_by_template,
+)
 from core_linked_records_app.components.pid_xpath.models import PidXpath
-from core_main_app.access_control.exceptions import AccessControlError
+from core_main_app.access_control.decorators import access_control
 from core_main_app.commons.exceptions import ApiError
 from core_main_app.components.template import (
     api as template_api,
@@ -13,12 +16,13 @@ from core_main_app.components.template import (
 logger = logging.getLogger(__name__)
 
 
-def get_by_template(template, request):
+@access_control(can_get_by_template)
+def get_by_template(template, user):  # noqa, pylint: disable=unused-argument
     """Retrieve XPath associated with a specific template ID
 
     Args:
         template: Template
-        request: HttpRequest
+        user: User
 
     Returns:
         str - XPath for the given template ID
@@ -34,8 +38,6 @@ def get_by_template(template, request):
             )
 
         return pid_xpath_object
-    except AccessControlError as ace:
-        raise AccessControlError(str(ace))
     except Exception as exc:
         error_message = (
             f"An unexpected error occurred while retrieving PidXpath "
@@ -43,17 +45,17 @@ def get_by_template(template, request):
         )
 
         logger.error("%s: %s", error_message, str(exc))
-        raise ApiError(str(exc))
+        raise ApiError(str(exc)) from exc
 
 
 def get_all(request):
-    """Retrieve all XPath stored in `PidSettings`
+    """Retrieve all XPath stored in `PidSettings`.
 
     Args:
-        request: HttpRequest
+        request (HttpRequest): The HTTP Request.
 
     Returns:
-        list<str> - List of XPath
+        list<str>: List of XPath.
     """
     try:
         return PidXpath.get_all_by_template_list(
@@ -65,4 +67,4 @@ def get_all(request):
         )
 
         logger.error("%s: %s", error_message, str(exc))
-        raise ApiError(str(exc))
+        raise ApiError(str(exc)) from exc

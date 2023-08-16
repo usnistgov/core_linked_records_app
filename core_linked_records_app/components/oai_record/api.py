@@ -2,8 +2,12 @@
 """
 import logging
 
+from core_linked_records_app.components.oai_record.access_control import (
+    can_get_pid_for_data,
+)
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
+from core_main_app.access_control.decorators import access_control
 from core_main_app.commons.exceptions import ApiError
 from core_oaipmh_harvester_app.components.oai_record import (
     api as oai_record_data,
@@ -12,6 +16,7 @@ from core_oaipmh_harvester_app.components.oai_record import (
 logger = logging.getLogger(__name__)
 
 
+@access_control(can_get_pid_for_data)
 def get_pid_for_data(oai_record_id, request):
     """Retrieve PID matching the document ID provided.
 
@@ -26,7 +31,7 @@ def get_pid_for_data(oai_record_id, request):
         data = oai_record_data.get_by_id(oai_record_id, request.user)
 
         pid_xpath_object = pid_xpath_api.get_by_template(
-            data.harvester_metadata_format.template, request
+            data.harvester_metadata_format.template, request.user
         )
         pid_xpath = pid_xpath_object.xpath
 
@@ -38,4 +43,4 @@ def get_pid_for_data(oai_record_id, request):
         )
 
         logger.error("%s: %s", error_message, str(exc))
-        raise ApiError(f"{error_message}.")
+        raise ApiError(f"{error_message}.") from exc

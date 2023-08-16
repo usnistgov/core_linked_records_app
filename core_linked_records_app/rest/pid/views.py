@@ -12,11 +12,11 @@ from rest_framework.views import APIView
 from core_explore_common_app.commons.exceptions import ExploreRequestError
 from core_explore_common_app.components.query import api as query_api
 from core_explore_common_app.utils.oaipmh import oaipmh as oaipmh_utils
-from core_explore_common_app.utils.query import query as query_utils
 from core_explore_common_app.utils.protocols.oauth2 import (
     send_post_request as oauth2_post_request,
     send_get_request as oauth2_get_request,
 )
+from core_explore_common_app.utils.query import query as query_utils
 from core_linked_records_app import settings
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.data import api as data_api
@@ -121,7 +121,9 @@ class RetrieveBlobPIDView(APIView):
         """
         if "blob_id" in request.GET:
             try:
-                blob_pid = blob_api.get_pid_for_blob(request.GET["blob_id"])
+                blob_pid = blob_api.get_pid_for_blob(
+                    request.GET["blob_id"], request.user
+                )
                 sub_url = reverse(
                     "core_linked_records_provider_record",
                     kwargs={

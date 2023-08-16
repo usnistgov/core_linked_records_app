@@ -10,21 +10,22 @@ from django.urls import resolve
 from rest_framework import status
 
 from core_linked_records_app import settings
-from core_linked_records_app.components.pid_settings import (
-    api as pid_settings_api,
+from core_linked_records_app.components.pid_settings.models import PidSettings
+from core_linked_records_app.system.data import api as data_system_api
+from core_linked_records_app.system.pid_xpath import (
+    api as pid_xpath_system_api,
 )
-from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils import data as data_utils
-from core_linked_records_app.utils.xml import (
-    get_xpath_from_dot_notation,
-    get_xpath_with_target_namespace,
-)
+from core_linked_records_app.utils import exceptions
+from core_linked_records_app.utils.pid import split_prefix_from_record
 from core_linked_records_app.utils.providers import (
     ProviderManager,
     retrieve_provider_name,
 )
-from core_linked_records_app.utils.pid import split_prefix_from_record
-from core_linked_records_app.utils import exceptions
+from core_linked_records_app.utils.xml import (
+    get_xpath_from_dot_notation,
+    get_xpath_with_target_namespace,
+)
 from core_main_app.components.data.models import Data
 
 logger = logging.getLogger(__name__)
@@ -88,7 +89,7 @@ def _register_pid_for_data_id(provider_name, pid_value, data_id):
     if (
         provider_response.status_code != status.HTTP_201_CREATED
         and provider_response.status_code != status.HTTP_200_OK
-        and system_api.get_data_by_pid(pid_value).pk != data_id
+        and data_system_api.get_data_by_pid(pid_value).pk != data_id
     ):
         default_error_message = "An error occurred while creating the PID"
         try:
@@ -114,12 +115,12 @@ def _set_data_pid(instance: Data):
     Returns:
     """
     try:
-        if not pid_settings_api.get().auto_set_pid:
+        if not PidSettings.get().auto_set_pid:
             return
 
         # Retrieve PID XPath from `PidSettings.xpath_list`. Skip PID assignment
         # if the PID XPath is not defined for the template.
-        template_pid_xpath = system_api.get_pid_xpath_by_template(
+        template_pid_xpath = pid_xpath_system_api.get_pid_xpath_by_template(
             instance.template
         )
         pid_xpath = get_xpath_with_target_namespace(
@@ -142,7 +143,7 @@ def _set_data_pid(instance: Data):
         # Remove previous instance PID from DB.
         if instance.pk is not None:
             transaction.on_commit(
-                lambda: system_api.delete_pid_for_data(instance)
+                lambda: data_system_api.delete_pid_for_data(instance)
             )
 
         provider_name = retrieve_provider_name(pid_value)
@@ -155,9 +156,11 @@ def _set_data_pid(instance: Data):
                 settings.ID_PROVIDER_PREFIX_DEFAULT,
             )
 
-        if system_api.is_pid_defined(pid_value) and (
+        if data_system_api.is_pid_defined(pid_value) and (
             instance.pk is None
-            or not system_api.is_pid_defined_for_data(pid_value, instance.pk)
+            or not data_system_api.is_pid_defined_for_data(
+                pid_value, instance.pk
+            )
         ):
             raise exceptions.PidCreateError(
                 "PID already defined for another instance"
@@ -214,7 +217,7 @@ def delete_data_pid(
         kwargs:
     """
     try:
-        system_api.delete_pid_for_data(instance)
+        data_system_api.delete_pid_for_data(instance)
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning(
             "Trying to delete PID for data %d but an error occurred: %s",

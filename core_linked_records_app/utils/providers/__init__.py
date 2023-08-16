@@ -6,9 +6,11 @@ from abc import ABC, abstractmethod
 from importlib import import_module
 
 from django.urls import reverse
+from rest_framework import status
 
 from core_linked_records_app import settings
 from core_main_app.commons import exceptions
+from core_main_app.commons.exceptions import CoreError
 
 logger = logging.getLogger(__name__)
 
@@ -145,3 +147,37 @@ def retrieve_provider_name(pid_value):
         )
 
     return provider_name
+
+
+def delete_record_from_provider(record_name: str):
+    """Delete a PID from the provider using the record name as stored in the
+    LocalId table.
+
+    Args:
+        record_name: str - Formatted as prefix/record.
+
+    Raises:
+        ApiError: if the HTTP status is not 200 or 404.
+    """
+    # Delete the given LocalID fron the default PID provider.
+    provider = ProviderManager().get()
+    previous_pid_delete_response = provider.delete(record_name)
+
+    if previous_pid_delete_response.status_code == status.HTTP_200_OK:
+        return
+
+    # At this point, there was some problem deleting the LocalID needed to be logged.
+    error_message = (
+        f"Deletion of LocalID {record_name} from provider "
+        f"{ProviderManager().provider_name} returned "
+        f"{previous_pid_delete_response.status_code}"
+    )
+
+    # Do not crash for a 404, but log that an error occured.
+    if previous_pid_delete_response.status_code == status.HTTP_404_NOT_FOUND:
+        logger.warning(error_message)
+        return
+
+    # Log any error that happened during PID deletion.
+    logger.error(error_message)
+    raise CoreError(error_message)

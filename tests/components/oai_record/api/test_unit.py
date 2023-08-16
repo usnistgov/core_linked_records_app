@@ -3,11 +3,14 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from core_linked_records_app.components.oai_record import api as oai_record_api
+from core_linked_records_app.components.oai_record import (
+    api as oai_record_api,
+)
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_main_app.commons.exceptions import ApiError
+from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_oaipmh_harvester_app.components.oai_record import (
-    api as oai_record_data,
+    api as oaipmh_harvester_oai_record_api,
 )
 from tests import mocks
 
@@ -15,17 +18,25 @@ from tests import mocks
 class TestGetPidForData(TestCase):
     """Test Get Pid For Data"""
 
-    @patch.object(oai_record_data, "get_by_id")
+    def setUp(self) -> None:
+        self.mock_request = mocks.MockRequest()
+        self.mock_request.user = create_mock_user("1")
+        self.kwargs = {
+            "oai_record_id": "mock_id",
+            "request": self.mock_request,
+        }
+
+    @patch.object(oaipmh_harvester_oai_record_api, "get_by_id")
     def test_get_by_id_failure_raises_api_error(self, mock_get_by_id):
         """test_get_by_id_failure_raises_api_error"""
 
         mock_get_by_id.side_effect = Exception("mock_get_by_id_exception")
 
         with self.assertRaises(ApiError):
-            oai_record_api.get_pid_for_data("mock_id", mocks.MockRequest())
+            oai_record_api.get_pid_for_data(**self.kwargs)
 
     @patch.object(pid_xpath_api, "get_by_template")
-    @patch.object(oai_record_data, "get_by_id")
+    @patch.object(oaipmh_harvester_oai_record_api, "get_by_id")
     def test_get_by_template_failure_raises_api_error(
         self, mock_get_by_id, mock_get_by_template
     ):
@@ -37,11 +48,11 @@ class TestGetPidForData(TestCase):
         )
 
         with self.assertRaises(ApiError):
-            oai_record_api.get_pid_for_data("mock_id", mocks.MockRequest())
+            oai_record_api.get_pid_for_data(**self.kwargs)
 
     @patch.object(oai_record_api, "get_value_from_dot_notation")
     @patch.object(pid_xpath_api, "get_by_template")
-    @patch.object(oai_record_data, "get_by_id")
+    @patch.object(oaipmh_harvester_oai_record_api, "get_by_id")
     def test_get_value_from_dot_notation_failure_raises_api_error(
         self,
         mock_get_by_id,
@@ -57,11 +68,11 @@ class TestGetPidForData(TestCase):
         )
 
         with self.assertRaises(ApiError):
-            oai_record_api.get_pid_for_data("mock_id", mocks.MockRequest())
+            oai_record_api.get_pid_for_data(**self.kwargs)
 
     @patch.object(oai_record_api, "get_value_from_dot_notation")
     @patch.object(pid_xpath_api, "get_by_template")
-    @patch.object(oai_record_data, "get_by_id")
+    @patch.object(oaipmh_harvester_oai_record_api, "get_by_id")
     def test_returns_get_value_from_dot_notation(
         self,
         mock_get_by_id,
@@ -76,6 +87,6 @@ class TestGetPidForData(TestCase):
         mock_get_value_from_dot_notation.return_value = expected_result
 
         self.assertEqual(
-            oai_record_api.get_pid_for_data("mock_id", mocks.MockRequest()),
+            oai_record_api.get_pid_for_data(**self.kwargs),
             expected_result,
         )

@@ -1,4 +1,4 @@
-""" Local record API
+""" System API to manage LocalId objects.
 """
 import logging
 

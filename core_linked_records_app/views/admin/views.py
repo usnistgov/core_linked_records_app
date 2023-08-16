@@ -4,12 +4,12 @@
 from django.urls import reverse
 from django.views.generic import View
 
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
-from core_linked_records_app.settings import SERVER_URI
-from core_linked_records_app.utils.pid import get_pid_settings_dict
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
 )
+from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.settings import SERVER_URI
+from core_linked_records_app.utils.pid import get_pid_settings_dict
 from core_main_app.utils.rendering import admin_render
 
 
@@ -45,7 +45,7 @@ class PidSettingsView(View):
                     ),
                 }
 
-            pid_settings = pid_settings_api.get()
+            pid_settings = pid_settings_api.get(request.user)
             response_dict = get_pid_settings_dict(pid_settings)
             response_dict["xpath"] = {
                 "default": {"xpath": response_dict["xpath"]}

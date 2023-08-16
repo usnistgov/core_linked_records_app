@@ -91,7 +91,7 @@ def execute_local_query(raw_query, request):
 
     for data in data_list:
         pid_xpath_object = pid_xpath_api.get_by_template(
-            data.template, request
+            data.template, request.user
         )
         pid_xpath = pid_xpath_object.xpath
 
@@ -149,7 +149,7 @@ def execute_oaipmh_query(raw_query, request):
 
     for data in data_list:
         pid_xpath_object = pid_xpath_api.get_by_template(
-            data.harvester_metadata_format.template, request
+            data.harvester_metadata_format.template, request.user
         )
         pid_xpath = pid_xpath_object.xpath
 

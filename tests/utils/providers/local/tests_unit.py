@@ -57,7 +57,7 @@ class TestLocalIdProviderGet(TestCase):
         self.provider = LocalIdProvider("mock_provider")
         self.record = "mock_record"
 
-    @patch("core_linked_records_app.components.local_id.api.get_by_name")
+    @patch("core_linked_records_app.system.local_id.api.get_by_name")
     def test_non_existing_record_returns_404(self, mock_get_by_name):
         """test_non_existing_record_returns_404"""
         mock_get_by_name.side_effect = exceptions.DoesNotExist(
@@ -68,7 +68,7 @@ class TestLocalIdProviderGet(TestCase):
             status.HTTP_404_NOT_FOUND,
         )
 
-    @patch("core_linked_records_app.components.local_id.api.get_by_name")
+    @patch("core_linked_records_app.system.local_id.api.get_by_name")
     def test_non_existing_record_returns_correct_content(
         self, mock_get_by_name
     ):
@@ -85,7 +85,7 @@ class TestLocalIdProviderGet(TestCase):
             },
         )
 
-    @patch("core_linked_records_app.components.local_id.api.get_by_name")
+    @patch("core_linked_records_app.system.local_id.api.get_by_name")
     def test_existing_record_returns_200(self, mock_get_by_name):
         """test_existing_record_returns_200"""
         mock_get_by_name.return_value = None
@@ -93,7 +93,7 @@ class TestLocalIdProviderGet(TestCase):
             self.provider.get(self.record).status_code, status.HTTP_200_OK
         )
 
-    @patch("core_linked_records_app.components.local_id.api.get_by_name")
+    @patch("core_linked_records_app.system.local_id.api.get_by_name")
     def test_existing_record_returns_correct_content(self, mock_get_by_name):
         """test_existing_record_returns_correct_content"""
         mock_get_by_name.return_value = None
@@ -115,7 +115,7 @@ class TestLocalIdProviderCreate(TestCase):
         self.prefix = "mock_prefix"
         self.record = "mock_record"
 
-    @patch("core_linked_records_app.components.local_id.api.insert")
+    @patch("core_linked_records_app.system.local_id.api.insert")
     @patch(
         "core_linked_records_app.utils.providers.local.LocalIdProvider.is_id_already_used"
     )
@@ -134,7 +134,7 @@ class TestLocalIdProviderCreate(TestCase):
         self.assertTrue(mock_generate_id.called)
         self.assertTrue(mock_is_id_already_used.called)
 
-    @patch("core_linked_records_app.components.local_id.api.insert")
+    @patch("core_linked_records_app.system.local_id.api.insert")
     @patch(
         "core_linked_records_app.utils.providers.local.LocalIdProvider.is_id_already_used"
     )
@@ -153,7 +153,7 @@ class TestLocalIdProviderCreate(TestCase):
         self.assertEqual(mock_generate_id.call_count, 2)
         self.assertEqual(mock_is_id_already_used.call_count, 2)
 
-    @patch("core_linked_records_app.components.local_id.api.insert")
+    @patch("core_linked_records_app.system.local_id.api.insert")
     def test_non_unique_record_returns_409(self, mock_localid_insert):
         """test_non_unique_record_returns_409"""
         mock_localid_insert.side_effect = exceptions.NotUniqueError(
@@ -163,7 +163,7 @@ class TestLocalIdProviderCreate(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
-    @patch("core_linked_records_app.components.local_id.api.insert")
+    @patch("core_linked_records_app.system.local_id.api.insert")
     def test_non_unique_record_returns_correct_content(
         self, mock_localid_insert
     ):
@@ -182,7 +182,7 @@ class TestLocalIdProviderCreate(TestCase):
             },
         )
 
-    @patch("core_linked_records_app.components.local_id.api.insert")
+    @patch("core_linked_records_app.system.local_id.api.insert")
     def test_successful_creation_returns_201(self, mock_localid_insert):
         """test_successful_creation_returns_201"""
         mock_localid_insert.return_value = None
@@ -190,7 +190,7 @@ class TestLocalIdProviderCreate(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    @patch("core_linked_records_app.components.local_id.api.insert")
+    @patch("core_linked_records_app.system.local_id.api.insert")
     def test_successful_creation_returns_correct_content(
         self, mock_localid_insert
     ):
@@ -250,7 +250,7 @@ class TestLocalIdProviderDelete(TestCase):
         self.provider = LocalIdProvider("mock_provider")
         self.record = "mock_record"
 
-    @patch("core_linked_records_app.components.local_id.api.get_by_name")
+    @patch("core_linked_records_app.system.local_id.api.get_by_name")
     def test_delete_is_called(self, mock_get_by_name):
         """test_successful_delete_returns_200"""
         mock_local_id = MockLocalId()
@@ -259,7 +259,7 @@ class TestLocalIdProviderDelete(TestCase):
         self.provider.delete(self.record)
         self.assertTrue(mock_local_id.delete.called)
 
-    @patch("core_linked_records_app.components.local_id.api.get_by_name")
+    @patch("core_linked_records_app.system.local_id.api.get_by_name")
     def test_successful_delete_returns_200(self, mock_get_by_name):
         """test_successful_delete_returns_200"""
         mock_local_id = MockLocalId()
@@ -268,7 +268,7 @@ class TestLocalIdProviderDelete(TestCase):
         response = self.provider.delete(self.record)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    @patch("core_linked_records_app.components.local_id.api.get_by_name")
+    @patch("core_linked_records_app.system.local_id.api.get_by_name")
     def test_successful_delete_returns_correct_content(self, mock_get_by_name):
         """test_successful_delete_returns_correct_content"""
         mock_local_id = MockLocalId()
@@ -284,7 +284,7 @@ class TestLocalIdProviderDelete(TestCase):
             },
         )
 
-    @patch("core_linked_records_app.components.local_id.api.get_by_name")
+    @patch("core_linked_records_app.system.local_id.api.get_by_name")
     def test_non_existing_record_returns_404(self, mock_get_by_name):
         """test_non_existing_record_returns_404"""
         mock_get_by_name.side_effect = exceptions.DoesNotExist(
@@ -294,7 +294,7 @@ class TestLocalIdProviderDelete(TestCase):
         response = self.provider.delete(self.record)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    @patch("core_linked_records_app.components.local_id.api.get_by_name")
+    @patch("core_linked_records_app.system.local_id.api.get_by_name")
     def test_non_existing_record_returns_correct_content(
         self, mock_get_by_name
     ):

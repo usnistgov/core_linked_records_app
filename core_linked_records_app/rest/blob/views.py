@@ -7,7 +7,7 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 
 from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.local_id import api as local_id_api
+from core_linked_records_app.system.local_id import api as local_id_system_api
 from core_main_app.commons.exceptions import CoreError, DoesNotExist
 from core_main_app.rest.blob.views import BlobList
 
@@ -24,7 +24,6 @@ class BlobUploadWithPIDView(BlobList):
             request: HTTP request
 
         Returns:
-
             - code: 200
               content: Created blob
             - code: 400
@@ -48,7 +47,7 @@ class BlobUploadWithPIDView(BlobList):
             try:
                 # Rebuild the PID 'prefix/record' by extracting the last 2 items
                 # of the PID path and performs the lookup.
-                local_id_api.get_by_name("/".join(pid.split("/")[-2:]))
+                local_id_system_api.get_by_name("/".join(pid.split("/")[-2:]))
                 raise CoreError("PID has already been assigned.")
             except DoesNotExist:
                 pass
@@ -64,7 +63,7 @@ class BlobUploadWithPIDView(BlobList):
 
             # Assign PID to blob
             blob_api.set_pid_for_blob(
-                serialized_data["id"], serialized_data["pid"]
+                serialized_data["id"], serialized_data["pid"], request.user
             )
 
             # Return the serialized data

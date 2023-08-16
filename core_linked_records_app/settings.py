@@ -1,4 +1,4 @@
-""" Core linked records app settings
+""" Settings for core_linked_records_app package.
 
 Settings with the following syntax can be overwritten at the project level:
 SETTING_NAME = getattr(settings, "SETTING_NAME", "Default Value")
@@ -14,6 +14,10 @@ INSTALLED_APPS = getattr(
     [],
 )
 SERVER_URI = getattr(settings, "SERVER_URI", "http://localhost")
+
+CAN_ANONYMOUS_ACCESS_PUBLIC_DOCUMENT = getattr(
+    settings, "CAN_ANONYMOUS_ACCESS_PUBLIC_DOCUMENT", False
+)
 
 PID_XPATH = getattr(settings, "PID_XPATH", "Resource.@localid")
 

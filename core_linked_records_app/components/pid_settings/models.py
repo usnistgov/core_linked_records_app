@@ -19,7 +19,7 @@ class PidSettings(models.Model):
              PidSettings - first PidSettings object
         """
         try:
-            return PidSettings.objects.first()
+            return PidSettings.objects.first()  # pylint: disable=no-member
         except ObjectDoesNotExist:
             return None
         except Exception as exc:

@@ -19,6 +19,9 @@ class LinkedRecordsAppConfig(AppConfig):
         """
         from core_main_app.commons.exceptions import CoreError
         from core_linked_records_app import settings
+        from core_linked_records_app.access_control import (
+            discover as acl_discover,
+        )
         from core_linked_records_app.components.blob import watch as blob_watch
         from core_linked_records_app.components.data import watch as data_watch
         from core_linked_records_app.components.pid_settings import (
@@ -31,6 +34,7 @@ class LinkedRecordsAppConfig(AppConfig):
             )
 
         if "migrate" not in sys.argv:
+            acl_discover.init_permissions()
             pid_settings_watch.init()
             data_watch.init()
             blob_watch.init()

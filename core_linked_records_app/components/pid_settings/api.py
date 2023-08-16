@@ -1,44 +1,23 @@
-""" API for PidSettings model
+""" Protected API to manage PidSettings object.
 """
 import logging
 
-from core_linked_records_app.components.pid_settings.models import PidSettings
-from core_main_app.commons.exceptions import ApiError
+from core_linked_records_app.components.pid_settings.access_control import (
+    can_get_pid_settings,
+)
+from core_linked_records_app.system.pid_settings import (
+    api as pid_settings_system_api,
+)
+from core_main_app.access_control.decorators import access_control
 
 logger = logging.getLogger(__name__)
 
 
-def upsert(pid_settings_object):
-    """Insert or update the PidSettings provided as parameter.
-
-    Args:
-        pid_settings_object:
-
-    Returns:
-        Saved PidSettings object
-    """
-    try:
-        pid_settings_object.save()
-        return pid_settings_object
-    except Exception as exc:
-        error_message = "An unexpected error occurred while saving PidSettings"
-
-        logger.error("%s: %s", error_message, str(exc))
-        raise ApiError(f"{error_message}.")
-
-
-def get():
+@access_control(can_get_pid_settings)
+def get(user):  # noqa, pylint: disable=unused-argument
     """Retrieve the PidSettings object from DB.
 
     Returns:
         PidSettings object
     """
-    try:
-        return PidSettings.get()
-    except Exception as exc:
-        error_message = (
-            "An unexpected error occurred while retrieving PidSettings"
-        )
-
-        logger.error("%s: %s", error_message, str(exc))
-        raise ApiError(f"{error_message}.")
+    return pid_settings_system_api.get()

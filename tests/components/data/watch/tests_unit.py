@@ -7,13 +7,14 @@ from unittest.mock import patch, MagicMock
 from rest_framework import status
 
 from core_linked_records_app.components.data import watch as data_watch
-from core_linked_records_app.components.pid_settings import (
-    api as pid_settings_api,
+from core_linked_records_app.components.pid_settings.models import PidSettings
+from core_linked_records_app.system.data import api as data_system_api
+from core_linked_records_app.system.pid_xpath import (
+    api as pid_xpath_system_api,
 )
-from core_linked_records_app.system import api as system_api
 from core_linked_records_app.utils import data as data_utils
-from core_linked_records_app.utils import providers as providers_utils
 from core_linked_records_app.utils import exceptions
+from core_linked_records_app.utils import providers as providers_utils
 from tests import mocks
 
 
@@ -113,7 +114,7 @@ class TestRegisterPidForDataId(TestCase):
 
         mock_logger.error.assert_called()
 
-    @patch.object(data_watch, "system_api")
+    @patch.object(data_watch, "data_system_api")
     @patch.object(data_watch, "split_prefix_from_record")
     @patch.object(data_watch, "resolve")
     @patch.object(data_watch, "ProviderManager")
@@ -122,7 +123,7 @@ class TestRegisterPidForDataId(TestCase):
         mock_provider_manager,
         mock_resolve,
         mock_split_prefix_from_record,
-        mock_system_api,
+        mock_data_system_api,  # noqa, pylint: disable=unused-argument
     ):
         """test_provider_create_is_called"""
         mock_provider_manager().get.return_value = self.mock_provider
@@ -140,7 +141,7 @@ class TestRegisterPidForDataId(TestCase):
         )
 
     @patch.object(data_watch, "logger")
-    @patch.object(data_watch, "system_api")
+    @patch.object(data_watch, "data_system_api")
     @patch.object(data_watch, "split_prefix_from_record")
     @patch.object(data_watch, "resolve")
     @patch.object(data_watch, "ProviderManager")
@@ -149,7 +150,7 @@ class TestRegisterPidForDataId(TestCase):
         mock_provider_manager,
         mock_resolve,
         mock_split_prefix_from_record,
-        mock_system_api,
+        mock_data_system_api,  # noqa, pylint: disable=unused-argument
         mock_logger,
     ):
         """test_provider_create_unparsable_response_is_logged_and_raises_core_error"""
@@ -160,14 +161,12 @@ class TestRegisterPidForDataId(TestCase):
             self.mock_record,
         )
 
-        self.mock_provider_create_response = MagicMock()
-        self.mock_provider_create_response.status_code = (
+        mock_provider_create_response = MagicMock()
+        mock_provider_create_response.status_code = (
             status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-        self.mock_provider_create_response.content = None
-        self.mock_provider.create.return_value = (
-            self.mock_provider_create_response
-        )
+        mock_provider_create_response.content = None
+        self.mock_provider.create.return_value = mock_provider_create_response
 
         with self.assertRaises(exceptions.PidCreateError):
             data_watch._register_pid_for_data_id(**self.kwargs)
@@ -175,7 +174,7 @@ class TestRegisterPidForDataId(TestCase):
         mock_logger.error.assert_called()
 
     @patch.object(data_watch, "logger")
-    @patch.object(data_watch, "system_api")
+    @patch.object(data_watch, "data_system_api")
     @patch.object(data_watch, "split_prefix_from_record")
     @patch.object(data_watch, "resolve")
     @patch.object(data_watch, "ProviderManager")
@@ -184,7 +183,7 @@ class TestRegisterPidForDataId(TestCase):
         mock_provider_manager,
         mock_resolve,
         mock_split_prefix_from_record,
-        mock_system_api,
+        mock_data_system_api,  # noqa, pylint: disable=unused-argument
         mock_logger,
     ):
         """test_provider_create_parsable_response_is_logged_and_raises_core_error"""
@@ -195,23 +194,21 @@ class TestRegisterPidForDataId(TestCase):
             self.mock_record,
         )
 
-        self.mock_provider_create_response = MagicMock()
-        self.mock_provider_create_response.status_code = (
+        mock_provider_create_response = MagicMock()
+        mock_provider_create_response.status_code = (
             status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-        self.mock_provider_create_response.content = json.dumps(
+        mock_provider_create_response.content = json.dumps(
             {"message": "mock_error"}
         )
-        self.mock_provider.create.return_value = (
-            self.mock_provider_create_response
-        )
+        self.mock_provider.create.return_value = mock_provider_create_response
 
         with self.assertRaises(exceptions.PidCreateError):
             data_watch._register_pid_for_data_id(**self.kwargs)
 
         mock_logger.error.assert_called()
 
-    @patch.object(data_watch, "system_api")
+    @patch.object(data_watch, "data_system_api")
     @patch.object(data_watch, "split_prefix_from_record")
     @patch.object(data_watch, "resolve")
     @patch.object(data_watch, "ProviderManager")
@@ -220,7 +217,7 @@ class TestRegisterPidForDataId(TestCase):
         mock_provider_manager,
         mock_resolve,
         mock_split_prefix_from_record,
-        mock_system_api,
+        mock_data_system_api,  # noqa, pylint: disable=unused-argument
     ):
         """test_succesful_execution_returns_record_url"""
         expected_result = "mock_record_url"
@@ -232,16 +229,12 @@ class TestRegisterPidForDataId(TestCase):
             self.mock_record,
         )
 
-        self.mock_provider_create_response = MagicMock()
-        self.mock_provider_create_response.status_code = (
-            status.HTTP_201_CREATED
-        )
-        self.mock_provider_create_response.content = json.dumps(
+        mock_provider_create_response = MagicMock()
+        mock_provider_create_response.status_code = status.HTTP_201_CREATED
+        mock_provider_create_response.content = json.dumps(
             {"url": expected_result}
         )
-        self.mock_provider.create.return_value = (
-            self.mock_provider_create_response
-        )
+        self.mock_provider.create.return_value = mock_provider_create_response
 
         result = data_watch._register_pid_for_data_id(**self.kwargs)
 
@@ -253,11 +246,15 @@ class TestSetDataPid(TestCase):
 
     def setUp(self):
         """setUp"""
-        mock_document = mocks.MockData()
+        self.mock_kwargs = {"instance": mocks.MockData()}
 
-        self.mock_kwargs = {"instance": mock_document}
+    @patch.object(data_watch, "transaction")
+    def test_transaction_on_commit_is_called(self, mock_transaction):
+        """test_transaction_on_commit_is_called"""
+        data_watch.set_data_pid(None, self.mock_kwargs["instance"])
+        mock_transaction.on_commit.assert_called()
 
-    @patch.object(pid_settings_api, "get")
+    @patch.object(PidSettings, "get")
     def test_pid_settings_get_failure_raises_core_error(
         self, mock_pid_settings_get
     ):
@@ -270,8 +267,8 @@ class TestSetDataPid(TestCase):
         with self.assertRaises(exceptions.PidCreateError):
             data_watch._set_data_pid(**self.mock_kwargs)
 
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_get_pid_xpath_by_template_failure_raises_core_error(
         self, mock_pid_settings_get, mock_get_pid_xpath_by_template
     ):
@@ -286,8 +283,8 @@ class TestSetDataPid(TestCase):
             data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_get_xpath_from_dot_notation_failure_raises_core_error(
         self,
         mock_pid_settings_get,
@@ -307,8 +304,8 @@ class TestSetDataPid(TestCase):
 
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_get_xpath_with_target_namespace_failure_raises_core_error(
         self,
         mock_pid_settings_get,
@@ -331,8 +328,8 @@ class TestSetDataPid(TestCase):
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_get_pid_value_for_data_failure_returns_none(
         self,
         mock_pid_settings_get,
@@ -353,12 +350,12 @@ class TestSetDataPid(TestCase):
 
         self.assertIsNone(data_watch._set_data_pid(**self.mock_kwargs))
 
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_delete_pid_for_data_raises_core_error(
         self,
         mock_pid_settings_get,
@@ -382,13 +379,13 @@ class TestSetDataPid(TestCase):
         with self.assertRaises(exceptions.PidCreateError):
             data_watch._set_data_pid(**self.mock_kwargs)
 
-    @patch.object(data_watch, "retrieve_provider_name")
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_retrieve_provider_name_failure_raise_core_error(
         self,
         mock_pid_settings_get,
@@ -415,13 +412,13 @@ class TestSetDataPid(TestCase):
             data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(data_watch, "retrieve_provider_name")
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_provider_manager_get_failure_raise_core_error(
         self,
         mock_pid_settings_get,
@@ -449,15 +446,15 @@ class TestSetDataPid(TestCase):
         with self.assertRaises(exceptions.PidCreateError):
             data_watch._set_data_pid(**self.mock_kwargs)
 
-    @patch.object(system_api, "is_pid_defined")
+    @patch.object(data_system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(data_watch, "retrieve_provider_name")
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_is_pid_defined_failure_raise_core_error(
         self,
         mock_pid_settings_get,
@@ -487,16 +484,16 @@ class TestSetDataPid(TestCase):
         with self.assertRaises(exceptions.PidCreateError):
             data_watch._set_data_pid(**self.mock_kwargs)
 
-    @patch.object(system_api, "is_pid_defined_for_data")
-    @patch.object(system_api, "is_pid_defined")
+    @patch.object(data_system_api, "is_pid_defined_for_data")
+    @patch.object(data_system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(data_watch, "retrieve_provider_name")
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_is_pid_defined_for_data_failure_raise_core_error(
         self,
         mock_pid_settings_get,
@@ -528,16 +525,16 @@ class TestSetDataPid(TestCase):
         with self.assertRaises(exceptions.PidCreateError):
             data_watch._set_data_pid(**self.mock_kwargs)
 
-    @patch.object(system_api, "is_pid_defined_for_data")
-    @patch.object(system_api, "is_pid_defined")
+    @patch.object(data_system_api, "is_pid_defined_for_data")
+    @patch.object(data_system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(data_watch, "retrieve_provider_name")
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_pid_already_defined_raise_model_error(
         self,
         mock_pid_settings_get,
@@ -568,16 +565,16 @@ class TestSetDataPid(TestCase):
             data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(data_watch, "_register_pid_for_data_id")
-    @patch.object(system_api, "is_pid_defined_for_data")
-    @patch.object(system_api, "is_pid_defined")
+    @patch.object(data_system_api, "is_pid_defined_for_data")
+    @patch.object(data_system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(data_watch, "retrieve_provider_name")
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_register_pid_for_data_id_failure_raise_core_error(
         self,
         mock_pid_settings_get,
@@ -613,16 +610,16 @@ class TestSetDataPid(TestCase):
 
     @patch.object(data_utils, "set_pid_value_for_data")
     @patch.object(data_watch, "_register_pid_for_data_id")
-    @patch.object(system_api, "is_pid_defined_for_data")
-    @patch.object(system_api, "is_pid_defined")
+    @patch.object(data_system_api, "is_pid_defined_for_data")
+    @patch.object(data_system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(data_watch, "retrieve_provider_name")
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_set_pid_value_for_data_failure_raise_core_error(
         self,
         mock_pid_settings_get,
@@ -660,16 +657,16 @@ class TestSetDataPid(TestCase):
 
     @patch.object(data_utils, "set_pid_value_for_data")
     @patch.object(data_watch, "_register_pid_for_data_id")
-    @patch.object(system_api, "is_pid_defined_for_data")
-    @patch.object(system_api, "is_pid_defined")
+    @patch.object(data_system_api, "is_pid_defined_for_data")
+    @patch.object(data_system_api, "is_pid_defined")
     @patch.object(providers_utils.ProviderManager, "get")
-    @patch.object(data_watch, "retrieve_provider_name")
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(providers_utils, "retrieve_provider_name")
+    @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
     @patch.object(data_watch, "get_xpath_with_target_namespace")
     @patch.object(data_watch, "get_xpath_from_dot_notation")
-    @patch.object(system_api, "get_pid_xpath_by_template")
-    @patch.object(pid_settings_api, "get")
+    @patch.object(pid_xpath_system_api, "get_pid_xpath_by_template")
+    @patch.object(PidSettings, "get")
     def test_default_execution_returns_none(
         self,
         mock_pid_settings_get,
@@ -710,7 +707,7 @@ class TestDeleteDataPid(TestCase):
         """setUp"""
         self.mock_data = mocks.MockDocument()
 
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(data_system_api, "delete_pid_for_data")
     def test_delete_pid_for_data_is_called(self, mock_delete_pid_for_data):
         """test_delete_pid_for_data_is_called"""
         data_watch.delete_data_pid(None, self.mock_data)
@@ -718,7 +715,7 @@ class TestDeleteDataPid(TestCase):
         mock_delete_pid_for_data.assert_called_with(self.mock_data)
 
     @patch.object(data_watch, "logger")
-    @patch.object(system_api, "delete_pid_for_data")
+    @patch.object(data_system_api, "delete_pid_for_data")
     def test_delete_pid_for_data_error_raise_warning(
         self, mock_delete_pid_for_data, mock_logger
     ):

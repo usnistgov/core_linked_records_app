@@ -1,4 +1,4 @@
-""" Signals to trigger after Blob save
+""" Signals to trigger after Blob modificaations.
 """
 import json
 from logging import getLogger
@@ -8,11 +8,8 @@ from django.db.models.signals import post_save, post_delete
 from django.urls import reverse
 
 from core_linked_records_app import settings
-from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.pid_settings import (
-    api as pid_settings_api,
-)
-from core_linked_records_app.system import api as system_api
+from core_linked_records_app.components.pid_settings.models import PidSettings
+from core_linked_records_app.system.blob import api as blob_system_api
 from core_main_app.commons.exceptions import CoreError, DoesNotExist
 from core_main_app.components.blob.models import Blob
 from core_main_app.utils.requests_utils.requests_utils import send_post_request
@@ -33,14 +30,15 @@ def _set_blob_pid(instance: Blob):
     Args:
         instance:
 
-    Returns:
+    Raises:
+        CoreError: If any exception occur while executing the function.
     """
     try:
-        if not pid_settings_api.get().auto_set_pid:
+        if not PidSettings.get().auto_set_pid:
             return
 
         try:
-            blob_api.get_pid_for_blob(str(instance.pk))
+            blob_system_api.get_pid_for_blob(str(instance.pk))
         except DoesNotExist:
             # Register new PID for the saved Blob.
             sub_url = reverse(
@@ -55,17 +53,19 @@ def _set_blob_pid(instance: Blob):
             )
             blob_pid = json.loads(pid_response.content)["url"]
 
-            blob_api.set_pid_for_blob(instance.pk, blob_pid)
+            blob_system_api.set_pid_for_blob(instance.pk, blob_pid)
     except Exception as exc:
         error_message = (
             f"An error occurred while setting a PID for blob '{instance.pk}'"
         )
 
         logger.error("%s: %s", error_message, str(exc))
-        raise CoreError(f"{error_message}.")
+        raise CoreError(f"{error_message}.") from exc
 
 
-def set_blob_pid(sender, instance: Blob, **kwargs):
+def set_blob_pid(
+    sender, instance: Blob, **kwargs  # noqa, pylint: disable=unused-argument
+):
     """Wrapper around `_set_blob_pid` to ensure the PID can be updated while
     the Blob is being saved without locking the DB.
 
@@ -73,13 +73,13 @@ def set_blob_pid(sender, instance: Blob, **kwargs):
         sender:
         instance:
         kwargs:
-
-    Returns:
     """
     transaction.on_commit(lambda: _set_blob_pid(instance))
 
 
-def delete_blob_pid(sender, instance: Blob, **kwargs):
+def delete_blob_pid(
+    sender, instance: Blob, **kwargs  # noqa, pylint: disable=unused-argument
+):
     """Delete a PID assigned to a Blob
 
     Args:
@@ -88,8 +88,8 @@ def delete_blob_pid(sender, instance: Blob, **kwargs):
         kwargs:
     """
     try:
-        system_api.delete_pid_for_blob(instance)
-    except Exception as exc:
+        blob_system_api.delete_pid_for_blob(instance)
+    except Exception as exc:  # pylint: disable=broad-except
         logger.warning(
             "Trying to delete PID for blob %d (%s) but an error occurred: %s",
             instance.pk,

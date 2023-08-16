@@ -5,8 +5,8 @@ import re
 
 from django.urls import reverse
 
-from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.local_id import api as local_id_api
+from core_linked_records_app.system.blob import api as blob_system_api
+from core_linked_records_app.system.local_id import api as local_id_system_api
 
 logger = logging.getLogger(__name__)
 
@@ -35,18 +35,18 @@ def get_blob_download_regex(xml_string):
         f">(http[s]?:[^<>]+{blob_pid_url}[^/]+/[^/]+/[^/]+/?)<", xml_string
     )
 
-    blob_urls = list()
+    blob_url_list = []
 
     for document_pid in document_pid_list:
         try:
             record_name = "/".join(document_pid.split("/")[-2:])
-            record_object = local_id_api.get_by_name(record_name)
-            blob_api.get_pid_for_blob(record_object.record_object_id)
-            blob_urls.append(document_pid)
-        except Exception as exc:
+            record_object = local_id_system_api.get_by_name(record_name)
+            blob_system_api.get_pid_for_blob(record_object.record_object_id)
+            blob_url_list.append(document_pid)
+        except Exception as exc:  # pylint: disable=broad-except
             logger.warning(
                 "Retrieving blob URL raised an exception: %s", str(exc)
             )
             continue
 
-    return blob_urls
+    return blob_url_list

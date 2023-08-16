@@ -1,131 +1,21 @@
 """ Unit tests for core_linked_records_app.components.blob.api
 """
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
-from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.components.local_id.models import LocalId
-from core_main_app.access_control.exceptions import AccessControlError
+from core_linked_records_app.system.blob import api as blob_system_api
+from core_linked_records_app.system.local_id import api as local_id_system_api
+from core_linked_records_app.utils.path import get_api_path_from_object
 from core_main_app.commons import exceptions
-from core_main_app.utils.tests_tools.MockUser import create_mock_user
+from core_main_app.components.blob.models import Blob
 from tests import mocks
-
-
-class TestGetBlobByPid(TestCase):
-    """Test Get Blob By Pid"""
-
-    def setUp(self):
-        """setUp"""
-        self.user = create_mock_user("1")
-
-    @patch.object(local_id_api, "get_by_name")
-    def test_get_by_name_error_raises_api_error(self, mock_get_by_name):
-        """test_get_by_name_error_raises_api_error"""
-
-        mock_get_by_name.side_effect = Exception("mock_get_by_name_exception")
-        mock_valid_pid = "https://websi.te/provider/record"
-
-        with self.assertRaises(exceptions.ApiError):
-            blob_api.get_blob_by_pid(mock_valid_pid, self.user)
-
-    @patch.object(local_id_api, "get_by_name")
-    def test_undefined_classpath_raises_does_not_exist(self, mock_get_by_name):
-        """test_undefined_classpath_raises_does_not_exist"""
-
-        mock_valid_pid = "https://websi.te/provider/record"
-        mock_get_by_name.return_value = LocalId(record_name=mock_valid_pid)
-
-        with self.assertRaises(exceptions.DoesNotExist):
-            blob_api.get_blob_by_pid(mock_valid_pid, self.user)
-
-    @patch.object(blob_api, "import_module")
-    @patch.object(local_id_api, "get_by_name")
-    def test_failed_import_raises_api_error(
-        self, mock_get_by_name, mock_import_module
-    ):
-        """test_failed_import_raises_api_error"""
-
-        mock_valid_pid = "https://websi.te/provider/record"
-        mock_get_by_name.return_value = LocalId(
-            record_name=mock_valid_pid,
-            record_object_class="mock_record_object_class",
-            record_object_id="mock_record_object_id",
-        )
-        mock_import_module.side_effect = Exception(
-            "mock_import_module_exception"
-        )
-
-        with self.assertRaises(exceptions.ApiError):
-            blob_api.get_blob_by_pid(mock_valid_pid, self.user)
-
-    @patch.object(blob_api, "getattr")
-    @patch.object(blob_api, "import_module")
-    @patch.object(local_id_api, "get_by_name")
-    def test_get_by_id_exception_raises_api_error(
-        self, mock_get_by_name, mock_import_module, mock_getattr
-    ):
-        """test_get_by_id_exception_raises_api_error"""
-
-        mock_valid_pid = "https://websi.te/provider/record"
-        mock_get_by_name.return_value = LocalId(
-            record_name=mock_valid_pid,
-            record_object_class="mock_record_object_class",
-            record_object_id="mock_record_object_id",
-        )
-        mock_import_module.return_value = None
-        mock_getattr.side_effect = Exception("mock_getattr_exception")
-
-        with self.assertRaises(exceptions.ApiError):
-            blob_api.get_blob_by_pid(mock_valid_pid, self.user)
-
-    @patch.object(blob_api, "getattr")
-    @patch.object(blob_api, "import_module")
-    @patch.object(local_id_api, "get_by_name")
-    def test_get_by_id_acl_error_raises_acl_error(
-        self, mock_get_by_name, mock_import_module, mock_getattr
-    ):
-        """test_get_by_id_acl_error_raises_acl_error"""
-
-        mock_valid_pid = "https://websi.te/provider/record"
-        mock_get_by_name.return_value = LocalId(
-            record_name=mock_valid_pid,
-            record_object_class="mock_record_object_class",
-            record_object_id="mock_record_object_id",
-        )
-        mock_import_module.return_value = None
-        mock_getattr.side_effect = AccessControlError(
-            "mock_getattr_access_control_error"
-        )
-
-        with self.assertRaises(AccessControlError):
-            blob_api.get_blob_by_pid(mock_valid_pid, self.user)
-
-    @patch.object(blob_api, "getattr")
-    @patch.object(blob_api, "import_module")
-    @patch.object(local_id_api, "get_by_name")
-    def test_returns_expected_get_by_id_output(
-        self, mock_get_by_name, mock_import_module, mock_getattr
-    ):
-        """test_returns_expected_get_by_id_output"""
-
-        mock_valid_pid = "https://websi.te/provider/record"
-        mock_get_by_name.return_value = LocalId(
-            record_name=mock_valid_pid,
-            record_object_class="mock_record_object_class",
-            record_object_id="mock_record_object_id",
-        )
-        mock_import_module.return_value = None
-        mock_getattr.return_value = mocks.MockModule()
-
-        result = blob_api.get_blob_by_pid(mock_valid_pid, self.user)
-        self.assertEqual(result, mocks.MockModule().get_by_id())
 
 
 class TestGetPidForBlob(TestCase):
     """Test Get Pid For Blob"""
 
-    @patch.object(blob_api, "get_api_path_from_object")
+    @patch.object(blob_system_api, "get_api_path_from_object")
     def test_get_api_path_from_object_exception_raises_api_error(
         self, mock_get_api_path_from_object
     ):
@@ -136,10 +26,10 @@ class TestGetPidForBlob(TestCase):
         )
 
         with self.assertRaises(exceptions.ApiError):
-            blob_api.get_pid_for_blob("mock_blob_id")
+            blob_system_api.get_pid_for_blob("mock_blob_id")
 
-    @patch.object(local_id_api, "get_by_class_and_id")
-    @patch.object(blob_api, "get_api_path_from_object")
+    @patch.object(local_id_system_api, "get_by_class_and_id")
+    @patch.object(blob_system_api, "get_api_path_from_object")
     def test_get_by_class_and_id_exception_raises_api_error(
         self, mock_get_api_path_from_object, mock_get_by_class_and_id
     ):
@@ -151,10 +41,24 @@ class TestGetPidForBlob(TestCase):
         )
 
         with self.assertRaises(exceptions.ApiError):
-            blob_api.get_pid_for_blob("mock_blob_id")
+            blob_system_api.get_pid_for_blob("mock_blob_id")
 
-    @patch.object(local_id_api, "get_by_class_and_id")
-    @patch.object(blob_api, "get_api_path_from_object")
+    @patch.object(local_id_system_api, "get_by_class_and_id")
+    @patch.object(blob_system_api, "get_api_path_from_object")
+    def test_get_by_class_and_id_does_not_exist_raises_does_not_exists_error(
+        self, mock_get_api_path_from_object, mock_get_by_class_and_id
+    ):
+        """test_get_by_class_and_id_does_not_exist_raises_does_not_exists_error"""
+        mock_get_api_path_from_object.return_value = ""
+        mock_get_by_class_and_id.side_effect = exceptions.DoesNotExist(
+            "mock_get_by_class_and_id_does_not_exist"
+        )
+
+        with self.assertRaises(exceptions.DoesNotExist):
+            blob_system_api.get_pid_for_blob("mock_blob_id")
+
+    @patch.object(local_id_system_api, "get_by_class_and_id")
+    @patch.object(blob_system_api, "get_api_path_from_object")
     def test_returns_get_by_class_and_id_output(
         self, mock_get_api_path_from_object, mock_get_by_class_and_id
     ):
@@ -164,14 +68,14 @@ class TestGetPidForBlob(TestCase):
         mock_get_api_path_from_object.return_value = ""
         mock_get_by_class_and_id.return_value = mock_pid_value
 
-        result = blob_api.get_pid_for_blob("mock_blob_id")
+        result = blob_system_api.get_pid_for_blob("mock_blob_id")
         self.assertEqual(result, mock_pid_value)
 
 
 class TestSetPidForBlob(TestCase):
     """Test Set Pid For Blob"""
 
-    @patch.object(blob_api, "get_pid_for_blob")
+    @patch.object(blob_system_api, "get_pid_for_blob")
     def test_get_pid_for_blob_exception_raises_api_error(
         self, mock_get_pid_for_blob
     ):
@@ -184,10 +88,10 @@ class TestSetPidForBlob(TestCase):
         )
 
         with self.assertRaises(exceptions.ApiError):
-            blob_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
+            blob_system_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
 
-    @patch.object(local_id_api, "get_by_name")
-    @patch.object(blob_api, "get_pid_for_blob")
+    @patch.object(local_id_system_api, "get_by_name")
+    @patch.object(blob_system_api, "get_pid_for_blob")
     def test_get_by_name_exception_raises_api_error(
         self, mock_get_pid_for_blob, mock_get_by_name
     ):
@@ -201,11 +105,11 @@ class TestSetPidForBlob(TestCase):
         mock_get_by_name.side_effect = Exception("mock_get_by_name_exception")
 
         with self.assertRaises(exceptions.ApiError):
-            blob_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
+            blob_system_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
 
-    @patch.object(blob_api, "get_api_path_from_object")
-    @patch.object(local_id_api, "get_by_name")
-    @patch.object(blob_api, "get_pid_for_blob")
+    @patch.object(blob_system_api, "get_api_path_from_object")
+    @patch.object(local_id_system_api, "get_by_name")
+    @patch.object(blob_system_api, "get_pid_for_blob")
     def test_new_local_id_get_api_path_from_object_exception_raises_api_error(
         self,
         mock_get_pid_for_blob,
@@ -227,11 +131,11 @@ class TestSetPidForBlob(TestCase):
         )
 
         with self.assertRaises(exceptions.ApiError):
-            blob_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
+            blob_system_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
 
-    @patch.object(blob_api, "get_api_path_from_object")
-    @patch.object(local_id_api, "get_by_name")
-    @patch.object(blob_api, "get_pid_for_blob")
+    @patch.object(blob_system_api, "get_api_path_from_object")
+    @patch.object(local_id_system_api, "get_by_name")
+    @patch.object(blob_system_api, "get_pid_for_blob")
     def test_edit_local_id_get_api_path_from_object_exception_raises_api_error(
         self,
         mock_get_pid_for_blob,
@@ -251,12 +155,12 @@ class TestSetPidForBlob(TestCase):
         )
 
         with self.assertRaises(exceptions.ApiError):
-            blob_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
+            blob_system_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
 
-    @patch.object(local_id_api, "insert")
-    @patch.object(blob_api, "get_api_path_from_object")
-    @patch.object(local_id_api, "get_by_name")
-    @patch.object(blob_api, "get_pid_for_blob")
+    @patch.object(local_id_system_api, "insert")
+    @patch.object(blob_system_api, "get_api_path_from_object")
+    @patch.object(local_id_system_api, "get_by_name")
+    @patch.object(blob_system_api, "get_pid_for_blob")
     def test_new_local_id_insert_exception_raises_api_error(
         self,
         mock_get_pid_for_blob,
@@ -278,12 +182,12 @@ class TestSetPidForBlob(TestCase):
         mock_insert.side_effect = Exception("mock_side_effect_exception")
 
         with self.assertRaises(exceptions.ApiError):
-            blob_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
+            blob_system_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
 
-    @patch.object(local_id_api, "insert")
-    @patch.object(blob_api, "get_api_path_from_object")
-    @patch.object(local_id_api, "get_by_name")
-    @patch.object(blob_api, "get_pid_for_blob")
+    @patch.object(local_id_system_api, "insert")
+    @patch.object(blob_system_api, "get_api_path_from_object")
+    @patch.object(local_id_system_api, "get_by_name")
+    @patch.object(blob_system_api, "get_pid_for_blob")
     def test_edit_local_id_insert_exception_raises_api_error(
         self,
         mock_get_pid_for_blob,
@@ -303,12 +207,12 @@ class TestSetPidForBlob(TestCase):
         mock_insert.side_effect = Exception("mock_side_effect_exception")
 
         with self.assertRaises(exceptions.ApiError):
-            blob_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
+            blob_system_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
 
-    @patch.object(local_id_api, "insert")
-    @patch.object(blob_api, "get_api_path_from_object")
-    @patch.object(local_id_api, "get_by_name")
-    @patch.object(blob_api, "get_pid_for_blob")
+    @patch.object(local_id_system_api, "insert")
+    @patch.object(blob_system_api, "get_api_path_from_object")
+    @patch.object(local_id_system_api, "get_by_name")
+    @patch.object(blob_system_api, "get_pid_for_blob")
     def test_new_local_id_returns_insert_output(
         self,
         mock_get_pid_for_blob,
@@ -330,13 +234,13 @@ class TestSetPidForBlob(TestCase):
         mock_get_api_path_from_object.return_value = "mock_api_path"
         mock_insert.return_value = mock_insert_result
 
-        result = blob_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
+        result = blob_system_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
         self.assertEqual(result, mock_insert_result)
 
-    @patch.object(local_id_api, "insert")
-    @patch.object(blob_api, "get_api_path_from_object")
-    @patch.object(local_id_api, "get_by_name")
-    @patch.object(blob_api, "get_pid_for_blob")
+    @patch.object(local_id_system_api, "insert")
+    @patch.object(blob_system_api, "get_api_path_from_object")
+    @patch.object(local_id_system_api, "get_by_name")
+    @patch.object(blob_system_api, "get_pid_for_blob")
     def test_edit_local_id_returns_insert_output(
         self,
         mock_get_pid_for_blob,
@@ -356,5 +260,51 @@ class TestSetPidForBlob(TestCase):
         mock_get_api_path_from_object.return_value = "mock_api_path"
         mock_insert.return_value = mock_insert_result
 
-        result = blob_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
+        result = blob_system_api.set_pid_for_blob(mock_blob_id, mock_blob_pid)
         self.assertEqual(result, mock_insert_result)
+
+
+class TestDeletePidForBlob(TestCase):
+    """Test delete_pid_for_blob"""
+
+    def setUp(self) -> None:
+        self.blob = Mock(spec=Blob)
+
+    @patch.object(blob_system_api, "delete_record_from_provider")
+    @patch.object(local_id_system_api, "get_by_class_and_id")
+    def test_get_by_class_and_id_called(
+        self,
+        mock_get_by_class_and_id,
+        mock_delete_record_from_provider,  # noqa, pylint: disable=unused-argument
+    ):
+        """test_get_by_class_and_id_called"""
+        blob_system_api.delete_pid_for_blob(self.blob)
+        mock_get_by_class_and_id.assert_called_with(
+            get_api_path_from_object(Blob()), self.blob.pk
+        )
+
+    @patch.object(blob_system_api, "logger")
+    @patch.object(local_id_system_api, "get_by_class_and_id")
+    def test_does_not_exist_is_logged(
+        self, mock_get_by_class_and_id, mock_logger
+    ):
+        """test_does_not_exist_is_logged"""
+        mock_get_by_class_and_id.side_effect = exceptions.DoesNotExist(
+            "mock_get_by_class_and_id_does_not_exist"
+        )
+
+        blob_system_api.delete_pid_for_blob(self.blob)
+        mock_logger.info.assert_called()
+
+    @patch.object(blob_system_api, "delete_record_from_provider")
+    @patch.object(local_id_system_api, "get_by_class_and_id")
+    def test_delete_from_record_name_called(
+        self, mock_get_by_class_and_id, mock_delete_record_from_provider
+    ):
+        """test_delete_from_record_name_called"""
+        mock_local_id = Mock(spec=LocalId)
+        mock_get_by_class_and_id.return_value = mock_local_id
+        blob_system_api.delete_pid_for_blob(self.blob)
+        mock_delete_record_from_provider.assert_called_with(
+            mock_local_id.record_name
+        )

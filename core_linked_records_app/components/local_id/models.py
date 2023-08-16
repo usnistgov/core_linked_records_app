@@ -37,7 +37,9 @@ class LocalId(models.Model):
             LocalId - LocalId object if found.
         """
         try:
-            return LocalId.objects.get(record_name=record_name)
+            return LocalId.objects.get(  # pylint: disable=no-member
+                record_name=record_name
+            )
         except ObjectDoesNotExist as dne:
             raise exceptions.DoesNotExist(str(dne))
         except Exception as exc:
@@ -55,7 +57,7 @@ class LocalId(models.Model):
             LocalId - LocalId object if found.
         """
         try:
-            return LocalId.objects.get(
+            return LocalId.objects.get(  # pylint: disable=no-member
                 record_object_class=record_object_class,
                 record_object_id=record_object_id,
             )

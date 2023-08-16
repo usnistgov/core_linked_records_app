@@ -4,12 +4,12 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from core_linked_records_app.components.pid_settings import (
-    api as pid_settings_api,
-)
-from core_linked_records_app.components.pid_settings import (
     watch as pid_settings_watch,
 )
 from core_linked_records_app.components.pid_settings.models import PidSettings
+from core_linked_records_app.system.pid_settings import (
+    api as pid_settings_system_api,
+)
 
 
 class TestInit(TestCase):
@@ -49,7 +49,7 @@ class TestInit(TestCase):
 
         self.assertIsNone(pid_settings_watch.init())
 
-    @patch.object(pid_settings_api, "upsert")
+    @patch.object(pid_settings_system_api, "upsert")
     @patch.object(PidSettings, "__init__")
     @patch.object(PidSettings, "get")
     def test_pid_settings_upsert_failure_returns_none(
@@ -68,7 +68,7 @@ class TestInit(TestCase):
 
         self.assertIsNone(pid_settings_watch.init())
 
-    @patch.object(pid_settings_api, "upsert")
+    @patch.object(pid_settings_system_api, "upsert")
     @patch.object(PidSettings, "__init__")
     @patch.object(PidSettings, "get")
     def test_pid_settings_get_false_returns_none(

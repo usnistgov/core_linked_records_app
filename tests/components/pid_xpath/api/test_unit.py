@@ -3,12 +3,15 @@
 from unittest import TestCase
 from unittest.mock import patch
 
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.components.pid_xpath import (
+    api as pid_xpath_api,
+)
 from core_linked_records_app.components.pid_xpath.models import PidXpath
 from core_main_app.commons.exceptions import ApiError
 from core_main_app.components.template import (
     api as template_api,
 )
+from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from tests import mocks
 
 
@@ -16,10 +19,12 @@ class TestGetByTemplateId(TestCase):
     """Test Get By Template Id"""
 
     def setUp(self) -> None:
+        self.mock_user = create_mock_user("1")
         self.mock_template = mocks.MockDocument()
+        self.mock_template.user = self.mock_user.id
         self.kwargs = {
             "template": self.mock_template,
-            "request": mocks.MockRequest(),
+            "user": self.mock_user,
         }
 
     @patch.object(PidXpath, "get_by_template")
@@ -51,7 +56,9 @@ class TestGetByTemplateId(TestCase):
     @patch.object(PidXpath, "__init__")
     @patch.object(PidXpath, "get_by_template")
     def test_returns_new_pid_xpath_if_not_exists(
-        self, mock_get_by_template, mock_pid_xpath
+        self,
+        mock_get_by_template,
+        mock_pid_xpath,  # noqa, pylint: disable=unused-argument
     ):
         """test_returns_new_pid_xpath_if_not_exists"""
 
@@ -66,10 +73,12 @@ class TestGetByTemplateId(TestCase):
     @patch.object(template_api, "get_by_id")
     @patch.object(PidXpath, "get_by_template")
     def test_returns_pid_xpath_if_exists(
-        self, mock_get_by_template, mock_get_by_id, mock_pid_xpath
+        self,
+        mock_get_by_template,
+        mock_get_by_id,
+        mock_pid_xpath,
     ):
         """test_returns_pid_xpath_if_exists"""
-
         expected_result = "mock_pid_xpath"
         mock_get_by_template.return_value = None
         mock_get_by_id.return_value = self.mock_template
@@ -83,6 +92,10 @@ class TestGetByTemplateId(TestCase):
 class TestGetAll(TestCase):
     """Test Get All"""
 
+    def setUp(self) -> None:
+        self.mock_request = mocks.MockRequest()
+        self.mock_request.user = create_mock_user("1")
+
     @patch.object(template_api, "get_all")
     def test_template_api_get_all_failure_raises_api_error(self, mock_get_all):
         """test_template_api_get_all_failure_raises_api_error"""
@@ -90,7 +103,7 @@ class TestGetAll(TestCase):
         mock_get_all.side_effect = Exception("mock_get_all_exception")
 
         with self.assertRaises(ApiError):
-            pid_xpath_api.get_all(mocks.MockRequest())
+            pid_xpath_api.get_all(self.mock_request)
 
     @patch.object(PidXpath, "get_all_by_template_list")
     @patch.object(template_api, "get_all")
@@ -105,7 +118,7 @@ class TestGetAll(TestCase):
         )
 
         with self.assertRaises(ApiError):
-            pid_xpath_api.get_all(mocks.MockRequest())
+            pid_xpath_api.get_all(self.mock_request)
 
     @patch.object(PidXpath, "get_all_by_template_list")
     @patch.object(template_api, "get_all")
@@ -119,5 +132,5 @@ class TestGetAll(TestCase):
         mock_get_all_by_template_list.return_value = expected_result
 
         self.assertEqual(
-            pid_xpath_api.get_all(mocks.MockRequest()), expected_result
+            pid_xpath_api.get_all(self.mock_request), expected_result
         )

@@ -3,18 +3,24 @@
 from logging import getLogger
 
 from core_linked_records_app import settings
+from core_linked_records_app.components.data.access_control import (
+    can_get_pid_for_data,
+    can_get_data_by_pid,
+)
 from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
 from core_linked_records_app.utils.dict import (
     is_dot_notation_in_dictionary,
     get_value_from_dot_notation,
 )
 from core_linked_records_app.utils.pid import is_valid_pid_value
+from core_main_app.access_control.decorators import access_control
 from core_main_app.commons.exceptions import ApiError, DoesNotExist
 from core_main_app.components.data import api as data_api
 
 logger = getLogger(__name__)
 
 
+@access_control(can_get_data_by_pid)
 def get_data_by_pid(pid, request):
     """Return data object with the given pid.
 
@@ -47,7 +53,7 @@ def get_data_by_pid(pid, request):
         )
 
         logger.error("%s: %s", error_message, str(exc))
-        raise ApiError(f"{error_message}.")
+        raise ApiError(f"{error_message}.") from exc
 
     if query_result_length == 0:
         raise DoesNotExist("PID is not attached to any data.")
@@ -57,24 +63,7 @@ def get_data_by_pid(pid, request):
     return query_result[0]
 
 
-def get_pids_for_data_list(data_id_list, request):
-    """Retrieve PID matching the document list provided.
-
-    Args:
-        data_id_list:
-        request: HttpRequest
-
-    Returns:
-    """
-    try:
-        return [get_pid_for_data(data_id, request) for data_id in data_id_list]
-    except Exception as exc:
-        error_message = "An error occurred while retrieving PIDs for data list"
-
-        logger.error("%s: %s", error_message, str(exc))
-        raise ApiError(f"{error_message}.")
-
-
+@access_control(can_get_pid_for_data)
 def get_pid_for_data(data_id, request):
     """Retrieve PID matching the document ID provided.
 
@@ -91,7 +80,7 @@ def get_pid_for_data(data_id, request):
         # Return PID value from the document and the pid_xpath retrieved from
         # `PidSettings`
         pid_xpath_object = pid_xpath_api.get_by_template(
-            data.template, request
+            data.template, request.user
         )
         pid_xpath = pid_xpath_object.xpath
 
@@ -116,4 +105,4 @@ def get_pid_for_data(data_id, request):
         error_message = f"An error occurred while looking up PID assigned to data '{data_id}'"
 
         logger.error("%s: %s", error_message, str(exc))
-        raise ApiError(f"{error_message}.")
+        raise ApiError(f"{error_message}.") from exc

@@ -6,8 +6,8 @@ from unittest.mock import patch
 from rest_framework import status
 
 from core_linked_records_app.components.blob import api as blob_api
-from core_linked_records_app.components.local_id import api as local_id_api
 from core_linked_records_app.rest.blob import views as blob_views
+from core_linked_records_app.system.local_id import api as local_id_system_api
 from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.rest.blob.views import BlobList
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
@@ -51,7 +51,7 @@ class TestBlobUploadWithPIDViewPost(TestCase):
 
     @patch.object(blob_api, "set_pid_for_blob")
     @patch.object(BlobList, "post")
-    @patch.object(local_id_api, "get_by_name")
+    @patch.object(local_id_system_api, "get_by_name")
     def test_superuser_returns_201(
         self, mock_get_by_name, mock_blob_list_post, mock_set_pid_for_blob
     ):
