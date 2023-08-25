@@ -50,7 +50,7 @@ def get_pid_value_for_data(data, pid_xpath):
 
     try:  # Get the PID from the `pid_xpath` value
         pid_value = get_value_at_xpath(xml_tree, pid_xpath, target_namespace)
-        if type(pid_value) == str and pid_value.endswith(
+        if isinstance(pid_value, str) and pid_value.endswith(
             "/"
         ):  # Cleanup PID if it ends with a '/'
             pid_value = pid_value[:-1]
