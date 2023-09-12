@@ -30,4 +30,4 @@ class PidSettingsSerializer(serializers.ModelSerializer):
             Updated PidSettings instance
         """
         instance.auto_set_pid = validated_data["auto_set_pid"]
-        return pid_settings_api.upsert(instance)
+        return pid_settings_api.upsert(instance, self.context["request"].user)

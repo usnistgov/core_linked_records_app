@@ -58,7 +58,9 @@ class PidSettingsView(APIView):
             )
 
         try:
-            pid_settings_serializer = PidSettingsSerializer(data=request.data)
+            pid_settings_serializer = PidSettingsSerializer(
+                data=request.data, context={"request": request}
+            )
 
             if not pid_settings_serializer.is_valid():
                 return Response(

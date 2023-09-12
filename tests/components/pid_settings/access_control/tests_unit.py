@@ -11,8 +11,35 @@ from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 
 
-class TestCanGetDataByPid(TestCase):
-    """Unit tests for `can_get_data_by_pid` function."""
+class TestCanUpsertPidSetting(TestCase):
+    """Unit tests for `can_upsert_pid_settings` function."""
+
+    def setUp(self) -> None:
+        """setUp"""
+        self.user = create_mock_user("1")
+        self.mock_kwargs = {
+            "func": MagicMock(),
+            "pid_settings_object": MagicMock(),
+            "user": self.user,
+        }
+
+    def test_superuser_returns_func(self):
+        """test_superuser_returns_func"""
+        self.user.is_superuser = True
+
+        pid_settings_acl.can_upsert_pid_settings(**self.mock_kwargs)
+        self.mock_kwargs["func"].assert_called_with(
+            self.mock_kwargs["pid_settings_object"], self.mock_kwargs["user"]
+        )
+
+    def test_not_superuser_raises_acl_error(self):
+        """test_not_superuser_raises_acl_error"""
+        with self.assertRaises(AccessControlError):
+            pid_settings_acl.can_upsert_pid_settings(**self.mock_kwargs)
+
+
+class TestCanGetPidSetting(TestCase):
+    """Unit tests for `can_get_pid_settings` function."""
 
     def setUp(self) -> None:
         self.mock_kwargs = {
