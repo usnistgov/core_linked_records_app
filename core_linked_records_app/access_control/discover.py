@@ -24,7 +24,7 @@ def init_permissions():
             codename=rights.CAN_READ_PID_SETTINGS
         )
 
-        # Add permissions to default group
+        # Add permissions to default group.
         default_group.permissions.add(
             can_read_pid_settings_perm,
         )
