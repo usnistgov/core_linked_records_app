@@ -345,7 +345,7 @@ class TestGetPidForData(TestCase):
     def test_anonymous_user_not_public_cannot_access(
         self,
         mock_settings,
-        mock_workspace_api,  # noqa, pylint: disable=unused-argument
+        mock_workspace_api,
         mock_data,
         mock_get_by_id,
         mock_get_by_template,  # noqa, pylint: disable=unused-argument
@@ -354,7 +354,12 @@ class TestGetPidForData(TestCase):
         mock_is_valid_pid_value,  # noqa, pylint: disable=unused-argument
     ):
         """test_anonymous_user_not_public_cannot_access"""
-        mock_settings.CAN_ANONYMOUS_ACCESS_PUBLIC_DOCUMENT = True
+        mock_public_workspace = MagicMock()
+        self.mock_data.workspace = mock_public_workspace
+        mock_settings.CAN_ANONYMOUS_ACCESS_PUBLIC_DOCUMENT = False
+        mock_workspace_api.get_all_workspaces_with_read_access_by_user.return_value = [
+            mock_public_workspace
+        ]
         user = create_mock_user("1", is_anonymous=True)
 
         self.setup_mocks(
