@@ -1,7 +1,8 @@
-""" XML utilities functions
+""" XML utilities functions.
 """
 import logging
 
+from xml_utils.commons import exceptions as xml_utils_exceptions
 from core_main_app.utils.xml import validate_xml_data
 from xml_utils.xpath import create_tree_from_xpath
 from xml_utils.xsd_tree.operations.namespaces import (
@@ -115,8 +116,11 @@ def get_value_at_xpath(xml_tree, xpath, namespaces):
     """
     xpath_element_list = xml_tree.xpath(xpath, namespaces=namespaces)
 
-    # Assert that we found exactly one element matching the given xpath
-    assert len(xpath_element_list) == 1
+    # Check that we found exactly one element matching the given xpath
+    if len(xpath_element_list) != 1:
+        raise xml_utils_exceptions.XPathError(
+            f"Expected to find a single element, {len(xpath_element_list)} found"
+        )
 
     try:
         xpath_value = xpath_element_list[0].text
@@ -149,8 +153,12 @@ def can_create_value_at_xpath(xml_string, xsd_string, xpath, value):
         )
         set_value_at_xpath(modified_xml_tree, xpath, value, target_namespace)
         xsd_tree = XSDTree.build_tree(xsd_string)
-        assert validate_xml_data(xsd_tree, modified_xml_tree) is None
+
+        validation_error = validate_xml_data(xsd_tree, modified_xml_tree)
+        if validation_error is not None:
+            raise Exception(f"Error while validating XML: {validation_error}")
+
         return True
-    except Exception as exc:
-        logger.info(f"Function 'can_create_url_at_xpath' raised {str(exc)}")
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.info("Function 'can_create_value_at_xpath' raised %s", str(exc))
         return False

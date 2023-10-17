@@ -27,6 +27,18 @@ class PidResolverError(CoreError):
         super().__init__(message)
 
 
+class InvalidPidError(CoreError):
+    """Exception raised when a PID is not valid."""
+
+    def __init__(self, message):
+        """Initialize exception
+
+        Args:
+            message (str): Error message
+        """
+        super().__init__(message)
+
+
 class InvalidPrefixError(CoreError):
     """Exception raised if an invalid prefix is detected."""
 

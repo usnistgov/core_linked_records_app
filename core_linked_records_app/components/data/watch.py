@@ -22,10 +22,6 @@ from core_linked_records_app.utils.providers import (
     ProviderManager,
     retrieve_provider_name,
 )
-from core_linked_records_app.utils.xml import (
-    get_xpath_from_dot_notation,
-    get_xpath_with_target_namespace,
-)
 from core_main_app.components.data.models import Data
 
 logger = logging.getLogger(__name__)
@@ -106,7 +102,7 @@ def _register_pid_for_data_id(provider_name, pid_value, data_id):
 
 
 def _set_data_pid(instance: Data):
-    """Set the PID in the XML field specified in the settings. If the PID
+    """Set the PID in the field specified in the settings. If the PID
     already exists and is valid, it is not reset.
 
     Args:
@@ -123,10 +119,7 @@ def _set_data_pid(instance: Data):
         template_pid_xpath = pid_xpath_system_api.get_pid_xpath_by_template(
             instance.template
         )
-        pid_xpath = get_xpath_with_target_namespace(
-            get_xpath_from_dot_notation(template_pid_xpath.xpath),
-            instance.template.content,
-        )
+        pid_xpath = template_pid_xpath.xpath
 
         try:  # Retrieve the PID located at predefined XPath.
             pid_value = data_utils.get_pid_value_for_data(instance, pid_xpath)
