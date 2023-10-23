@@ -2,7 +2,6 @@
 """
 import json
 import logging
-from os.path import join
 
 from django.db import transaction
 from django.db.models.signals import pre_save, post_delete
@@ -144,9 +143,9 @@ def _set_data_pid(instance: Data):
         # Assign default value for undefined PID and check that the PID is not
         # defined for a instance other than the current instance.
         if pid_value is None or pid_value == "":
-            pid_value = join(
-                ProviderManager().get(provider_name).provider_lookup_url,
-                settings.ID_PROVIDER_PREFIX_DEFAULT,
+            pid_value = (
+                f"{ProviderManager().get(provider_name).provider_lookup_url}/"
+                f"{settings.ID_PROVIDER_PREFIX_DEFAULT}"
             )
 
         if data_system_api.is_pid_defined(pid_value) and (
