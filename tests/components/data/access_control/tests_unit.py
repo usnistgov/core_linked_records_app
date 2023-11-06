@@ -36,6 +36,19 @@ class TestCanGetDataByPid(TestCase):
         )
 
     @patch.object(data_acl, "check_can_read_document")
+    def test_check_can_read_document_not_called_for_superuser(
+        self,
+        mock_check_can_read_document,
+    ):
+        """test_check_can_read_document_not_called_for_superuser"""
+        self.mock_kwargs["request"].user = create_mock_user(
+            "1", is_superuser=True
+        )
+        data_acl.can_get_data_by_pid(**self.mock_kwargs)
+
+        mock_check_can_read_document.assert_not_called()
+
+    @patch.object(data_acl, "check_can_read_document")
     def test_check_can_read_document_called(
         self,
         mock_check_can_read_document,
@@ -109,6 +122,19 @@ class TestCanGetPidForData(TestCase):
         mock_check_can_read_document.assert_called_with(
             mock_data_object, self.mock_kwargs["request"].user
         )
+
+    @patch.object(data_acl, "check_can_read_document")
+    def test_check_can_read_document_not_called_for_superuser(
+        self,
+        mock_check_can_read_document,
+    ):
+        """test_check_can_read_document_not_called_for_superuser"""
+        self.mock_kwargs["request"].user = create_mock_user(
+            "1", is_superuser=True
+        )
+        data_acl.can_get_pid_for_data(**self.mock_kwargs)
+
+        mock_check_can_read_document.assert_not_called()
 
     @patch.object(data_acl, "check_can_read_document")
     @patch.object(data_acl, "Data")

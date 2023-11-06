@@ -15,7 +15,10 @@ def can_get_data_by_pid(func, pid, request):
     Returns:
     """
     data = func(pid, request)
-    check_can_read_document(data, request.user)
+
+    if not request.user.is_superuser:
+        check_can_read_document(data, request.user)
+
     return data
 
 
@@ -29,5 +32,6 @@ def can_get_pid_for_data(func, data_id, request):
 
     Returns:
     """
-    check_can_read_document(Data.get_by_id(data_id), request.user)
+    if not request.user.is_superuser:
+        check_can_read_document(Data.get_by_id(data_id), request.user)
     return func(data_id, request)

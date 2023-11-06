@@ -35,22 +35,32 @@ class TestCanGetBlobByPid(TestCase):
         )
 
     @patch.object(blob_acl, "check_can_read_document")
-    def test_check_can_read_document_blob_called(
+    def test_check_can_read_document_not_called_for_superuser(
         self,
         mock_check_can_read_document,
     ):
-        """test_check_can_read_document_blob_called"""
+        """test_check_can_read_document_not_called_for_superuser"""
+        self.mock_kwargs["user"] = create_mock_user("1", is_superuser=True)
+        blob_acl.can_get_blob_by_pid(**self.mock_kwargs)
+        mock_check_can_read_document.assert_not_called()
+
+    @patch.object(blob_acl, "check_can_read_document")
+    def test_check_can_read_document_called(
+        self,
+        mock_check_can_read_document,
+    ):
+        """test_check_can_read_document_called"""
         blob_acl.can_get_blob_by_pid(**self.mock_kwargs)
         mock_check_can_read_document.assert_called_with(
             self.mock_func_retval, self.mock_kwargs["user"]
         )
 
     @patch.object(blob_acl, "check_can_read_document")
-    def test_check_can_read_document_blob_exception_fails(
+    def test_check_can_read_document_exception_fails(
         self,
         mock_check_can_read_document,
     ):
-        """test_check_can_read_document_blob_exception_fails"""
+        """test_check_can_read_document_exception_fails"""
         mock_check_can_read_document.side_effect = AccessControlError(
             "mock_check_can_read_document_acl_error"
         )
@@ -100,6 +110,16 @@ class TestCanGetPidForBlob(TestCase):
         mock_check_can_read_document.assert_called_with(
             self.mock_blob_object, self.mock_kwargs["user"]
         )
+
+    @patch.object(blob_acl, "check_can_read_document")
+    def test_check_can_read_document_not_called_for_superuser(
+        self,
+        mock_check_can_read_document,
+    ):
+        """test_check_can_read_document_not_called_for_superuser"""
+        self.mock_kwargs["user"] = create_mock_user("1", is_superuser=True)
+        blob_acl.can_get_pid_for_blob(**self.mock_kwargs)
+        mock_check_can_read_document.assert_not_called()
 
     @patch.object(blob_acl, "check_can_read_document")
     @patch.object(blob_acl, "Blob")
@@ -167,6 +187,16 @@ class TestCanSetPidForBlob(TestCase):
         mock_check_can_read_document.assert_called_with(
             self.mock_blob_object, self.mock_kwargs["user"]
         )
+
+    @patch.object(blob_acl, "check_can_read_document")
+    def test_check_can_read_document_not_called_for_superuser(
+        self,
+        mock_check_can_read_document,
+    ):
+        """test_check_can_read_document_not_called_for_superuser"""
+        self.mock_kwargs["user"] = create_mock_user("1", is_superuser=True)
+        blob_acl.can_set_pid_for_blob(**self.mock_kwargs)
+        mock_check_can_read_document.assert_not_called()
 
     @patch.object(blob_acl, "check_can_read_document")
     @patch.object(blob_acl, "Blob")

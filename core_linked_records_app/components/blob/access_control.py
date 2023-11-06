@@ -19,7 +19,9 @@ def can_get_blob_by_pid(func, pid, user):
         Blob: Blob object to be returned by the function.
     """
     blob = func(pid, user)
-    check_can_read_document(blob, user)
+
+    if not user.is_superuser:
+        check_can_read_document(blob, user)
     return blob
 
 
@@ -38,7 +40,8 @@ def can_get_pid_for_blob(func, blob_id, user):
     Returns:
         any: Runs the function specified in parameters.
     """
-    check_can_read_document(Blob.get_by_id(blob_id), user)
+    if not user.is_superuser:
+        check_can_read_document(Blob.get_by_id(blob_id), user)
     return func(blob_id, user)
 
 
@@ -57,5 +60,6 @@ def can_set_pid_for_blob(func, blob_id, blob_pid, user):
     Returns:
         any: Runs the function specified in parameters.
     """
-    check_can_read_document(Blob.get_by_id(blob_id), user)
+    if not user.is_superuser:
+        check_can_read_document(Blob.get_by_id(blob_id), user)
     return func(blob_id, blob_pid, user)
