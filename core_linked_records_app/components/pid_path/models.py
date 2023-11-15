@@ -1,4 +1,4 @@
-""" Linked records PID XPath objects.
+""" Linked records PID Path objects.
 """
 import logging
 
@@ -13,10 +13,10 @@ from core_main_app.components.template.models import Template
 logger = logging.getLogger(__name__)
 
 
-class PidXpath(models.Model):
-    """Pid Xpath"""
+class PidPath(models.Model):
+    """PidPath model"""
 
-    xpath = models.CharField(
+    path = models.CharField(
         blank=False, max_length=255, validators=[validate_dot_notation]
     )
     template = models.OneToOneField(
@@ -29,18 +29,18 @@ class PidXpath(models.Model):
 
     @staticmethod
     def get_all():
-        """Retrieve all PidXpath objects.
+        """Retrieve all PidPath objects.
 
         Returns:
         """
         try:
-            return PidXpath.objects.all()  # pylint: disable=no-member
+            return PidPath.objects.all()  # pylint: disable=no-member
         except Exception as exc:
             raise ModelError(str(exc)) from exc
 
     @staticmethod
     def get_all_by_template_list(template_list):
-        """Retrieve a list of PidXpath given a list of templates.
+        """Retrieve a list of PidPath given a list of templates.
 
         Args:
             template_list:
@@ -48,7 +48,7 @@ class PidXpath(models.Model):
         Returns:
         """
         try:
-            return PidXpath.objects.filter(  # pylint: disable=no-member
+            return PidPath.objects.filter(  # pylint: disable=no-member
                 template__in=template_list
             )
         except Exception as exc:
@@ -56,7 +56,7 @@ class PidXpath(models.Model):
 
     @staticmethod
     def get_by_template(template):
-        """Return all PidXpath defined for a given template.
+        """Return all PidPath defined for a given template.
 
         Args:
             template:
@@ -64,7 +64,7 @@ class PidXpath(models.Model):
         Returns:
         """
         try:
-            return PidXpath.objects.get(  # pylint: disable=no-member
+            return PidPath.objects.get(  # pylint: disable=no-member
                 template=template
             )
         except ObjectDoesNotExist:
@@ -73,9 +73,9 @@ class PidXpath(models.Model):
             raise exceptions.ModelError(str(exc)) from exc
 
     def __str__(self):
-        """PidXpath object as string.
+        """PidPath object as string.
 
         Returns:
-            str - String representation of PidXpath object.
+            str - String representation of PidPath object.
         """
-        return f"PID xpath '{self.xpath}' for template '{self.template}'"
+        return f"PID path '{self.path}' for template '{self.template}'"

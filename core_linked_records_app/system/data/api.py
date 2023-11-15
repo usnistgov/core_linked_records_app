@@ -5,9 +5,9 @@ import logging
 from django.conf import settings as conf_settings
 
 from core_linked_records_app import settings
-from core_linked_records_app.components.pid_xpath.models import PidXpath
-from core_linked_records_app.system.pid_xpath.api import (
-    get_pid_xpath_by_template,
+from core_linked_records_app.components.pid_path.models import PidPath
+from core_linked_records_app.system.pid_path.api import (
+    get_pid_path_by_template,
 )
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.providers import delete_record_from_provider
@@ -30,10 +30,10 @@ def is_pid_defined_for_data(pid, document_id):
     """
     data = Data.get_by_id(document_id)
 
-    pid_xpath_object = get_pid_xpath_by_template(data.template)
-    pid_xpath = pid_xpath_object.xpath
+    pid_path_object = get_pid_path_by_template(data.template)
+    pid_path = pid_path_object.path
     query = {
-        f"dict_content__{pid_xpath.replace('.', '__')}__exact": sanitize_value(
+        f"dict_content__{pid_path.replace('.', '__')}__exact": sanitize_value(
             pid
         )
     }
@@ -82,11 +82,11 @@ def delete_pid_for_data(data: Data):
     Args:
         data: Data - The data for which the PID needs to be deleted.
     """
-    # Retrieve the PID_XPATH associated with the data template.
-    pid_xpath_object = get_pid_xpath_by_template(data.template)
-    pid_xpath = pid_xpath_object.xpath
+    # Retrieve the PID_PATH associated with the data template.
+    pid_path_object = get_pid_path_by_template(data.template)
+    pid_path = pid_path_object.path
 
-    # Retrieve the data dict content to search for the PID_XPATH using dot notation.
+    # Retrieve the data dict content to search for the PID_PATH using dot notation.
     try:  # Try to retrieve the dict content using data model
         dict_content = data.get_dict_content()
     except Exception:  # noqa, pylint: disable=broad-except
@@ -98,10 +98,10 @@ def delete_pid_for_data(data: Data):
                 f"Impossible to retrieve the dict content for the data: {str(exc)}"
             ) from exc
 
-    # Return PID value from the document and the PID_XPATH
+    # Return PID value from the document and the PID_PATH
     current_pid = get_value_from_dot_notation(
         dict_content,
-        pid_xpath,
+        pid_path,
     )
 
     if not current_pid:  # If there is no previous PID assigned.
@@ -130,19 +130,19 @@ def get_data_by_pid(pid):
     else:
         from django.db.models import Q
 
-    pid_xpath_query = Q(
+    pid_path_query = Q(
         **{
-            f"dict_content__{settings.PID_XPATH.replace('.', '__')}__exact": sanitize_value(
+            f"dict_content__{settings.PID_PATH.replace('.', '__')}__exact": sanitize_value(
                 pid
             )
         }
     )
 
-    # Create the or query with all the different PID Xpath available.
-    for pid_xpath_object in PidXpath.get_all():
-        pid_xpath_query |= Q(
+    # Create the or query with all the different PID path available.
+    for pid_path_object in PidPath.get_all():
+        pid_path_query |= Q(
             **{
-                f"dict_content__{pid_xpath_object.xpath.replace('.', '__')}__exact": sanitize_value(
+                f"dict_content__{pid_path_object.path.replace('.', '__')}__exact": sanitize_value(
                     pid
                 )
             }
@@ -152,12 +152,12 @@ def get_data_by_pid(pid):
         from core_main_app.components.mongo.models import MongoData
 
         query_result = MongoData.execute_query(
-            pid_xpath_query,
+            pid_path_query,
             order_by_field=[],
         )
     else:
         query_result = Data.execute_query(
-            pid_xpath_query,
+            pid_path_query,
             order_by_field=[],
         )
 

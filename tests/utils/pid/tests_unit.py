@@ -83,7 +83,7 @@ class TestGetPidSettingsDict(TestCase):
         """test_returns_expected_keys"""
         expected_keys = [
             "auto_set_pid",
-            "xpath",
+            "path",
             "format",
             "system_name",
             "system_type",

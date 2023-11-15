@@ -1,4 +1,4 @@
-""" Access control helpers for PidXpath APIs.
+""" Access control helpers for PidPath APIs.
 """
 from core_main_app.components.template.access_control import (
     check_can_read_template,
@@ -15,6 +15,6 @@ def can_get_by_template(func, template, user):
 
     Returns:
     """
-    # Check can read template and PidXpath
+    # Check can read template and PidPath
     check_can_read_template(template, user)
     return func(template, user)

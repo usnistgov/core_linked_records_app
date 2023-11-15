@@ -45,7 +45,7 @@ def get_pid_settings_dict(pid_setting) -> dict:
     """
     return {
         "auto_set_pid": pid_setting.auto_set_pid,
-        "xpath": settings.PID_XPATH,
+        "path": settings.PID_PATH,
         "format": settings.PID_FORMAT,
         "system_name": settings.ID_PROVIDER_SYSTEM_NAME,
         "system_type": settings.ID_PROVIDER_SYSTEM_CONFIG["class"],

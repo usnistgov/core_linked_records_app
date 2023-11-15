@@ -1,4 +1,4 @@
-""" Permission tests for core_linked_records_app.rest.pid_xpath.views
+""" Permission tests for core_linked_records_app.rest.pid_path.views
 """
 from unittest import TestCase
 from unittest.mock import patch
@@ -10,19 +10,19 @@ from rest_framework.generics import (
 )
 from rest_framework.response import Response
 
-from core_linked_records_app.rest.pid_xpath import views as pid_xpath_views
+from core_linked_records_app.rest.pid_path import views as pid_path_views
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_main_app.utils.tests_tools.RequestMock import RequestMock
 
 
-class TestPidXpathListViewGet(TestCase):
-    """Test Pid Xpath List View Get"""
+class TestPidPathListViewGet(TestCase):
+    """Unit tests for `PidPathListView.get` method."""
 
     def test_anonymous_returns_403(self):
         """test_anonymous_returns_403"""
 
         response = RequestMock.do_request_get(
-            pid_xpath_views.PidXpathListView.as_view(), None
+            pid_path_views.PidPathListView.as_view(), None
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -33,7 +33,7 @@ class TestPidXpathListViewGet(TestCase):
         mock_user = create_mock_user("1")
 
         response = RequestMock.do_request_get(
-            pid_xpath_views.PidXpathListView.as_view(), mock_user
+            pid_path_views.PidPathListView.as_view(), mock_user
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -44,22 +44,22 @@ class TestPidXpathListViewGet(TestCase):
         mock_user = create_mock_user("1", is_staff=True)
 
         response = RequestMock.do_request_get(
-            pid_xpath_views.PidXpathListView.as_view(), mock_user
+            pid_path_views.PidPathListView.as_view(), mock_user
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-class TestPidXpathListViewPost(TestCase):
-    """Test Pid Xpath List View Post"""
+class TestPidPathListViewPost(TestCase):
+    """Unit tests for `PidPathListView.post` method."""
 
     def test_anonymous_returns_403(self):
         """test_anonymous_returns_403"""
 
         response = RequestMock.do_request_post(
-            pid_xpath_views.PidXpathListView.as_view(),
+            pid_path_views.PidPathListView.as_view(),
             None,
-            data={"xpath": "mock.xpath", "template": "mock_template_id"},
+            data={"path": "mock.path", "template": "mock_template_id"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -72,9 +72,9 @@ class TestPidXpathListViewPost(TestCase):
 
         mock_view_post.return_value = Response(status=status.HTTP_201_CREATED)
         response = RequestMock.do_request_post(
-            pid_xpath_views.PidXpathListView.as_view(),
+            pid_path_views.PidPathListView.as_view(),
             mock_user,
-            data={"xpath": "mock.xpath", "template": "mock_template_id"},
+            data={"path": "mock.path", "template": "mock_template_id"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -87,22 +87,22 @@ class TestPidXpathListViewPost(TestCase):
 
         mock_view_post.return_value = Response(status=status.HTTP_201_CREATED)
         response = RequestMock.do_request_post(
-            pid_xpath_views.PidXpathListView.as_view(),
+            pid_path_views.PidPathListView.as_view(),
             mock_user,
-            data={"xpath": "mock.xpath", "template": "mock_template_id"},
+            data={"path": "mock.path", "template": "mock_template_id"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
-class TestPidXpathDetailViewGet(TestCase):
-    """Test Pid Xpath Detail View Get"""
+class TestPidPathDetailViewGet(TestCase):
+    """Unit tests for `PidPathDetailView.get` method."""
 
     def test_anonymous_returns_403(self):
         """test_anonymous_returns_403"""
 
         response = RequestMock.do_request_get(
-            pid_xpath_views.PidXpathDetailView.as_view(), None, param={"id": 0}
+            pid_path_views.PidPathDetailView.as_view(), None, param={"id": 0}
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -115,7 +115,7 @@ class TestPidXpathDetailViewGet(TestCase):
 
         mock_view_get.return_value = Response(status=status.HTTP_200_OK)
         response = RequestMock.do_request_get(
-            pid_xpath_views.PidXpathDetailView.as_view(),
+            pid_path_views.PidPathDetailView.as_view(),
             mock_user,
             param={"id": 0},
         )
@@ -130,7 +130,7 @@ class TestPidXpathDetailViewGet(TestCase):
 
         mock_view_get.return_value = Response(status=status.HTTP_200_OK)
         response = RequestMock.do_request_get(
-            pid_xpath_views.PidXpathDetailView.as_view(),
+            pid_path_views.PidPathDetailView.as_view(),
             mock_user,
             param={"id": 0},
         )
@@ -138,16 +138,16 @@ class TestPidXpathDetailViewGet(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-class TestPidXpathDetailViewPatch(TestCase):
-    """Test Pid Xpath Detail View Patch"""
+class TestPidPathDetailViewPatch(TestCase):
+    """Unit tests for `PidPathDetailView.patch` method."""
 
     def test_anonymous_returns_403(self):
         """test_anonymous_returns_403"""
 
         response = RequestMock.do_request_patch(
-            pid_xpath_views.PidXpathDetailView.as_view(),
+            pid_path_views.PidPathDetailView.as_view(),
             None,
-            data={"xpath": "mock.xpath", "template": "mock_template_id"},
+            data={"path": "mock.path", "template": "mock_template_id"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -160,9 +160,9 @@ class TestPidXpathDetailViewPatch(TestCase):
 
         mock_view_patch.return_value = Response(status=status.HTTP_200_OK)
         response = RequestMock.do_request_patch(
-            pid_xpath_views.PidXpathDetailView.as_view(),
+            pid_path_views.PidPathDetailView.as_view(),
             mock_user,
-            data={"xpath": "mock.xpath", "template": "mock_template_id"},
+            data={"path": "mock.path", "template": "mock_template_id"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -175,22 +175,22 @@ class TestPidXpathDetailViewPatch(TestCase):
 
         mock_view_patch.return_value = Response(status=status.HTTP_200_OK)
         response = RequestMock.do_request_patch(
-            pid_xpath_views.PidXpathDetailView.as_view(),
+            pid_path_views.PidPathDetailView.as_view(),
             mock_user,
-            data={"xpath": "mock.xpath", "template": "mock_template_id"},
+            data={"path": "mock.path", "template": "mock_template_id"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-class TestPidXpathDetailViewDelete(TestCase):
-    """Test Pid Xpath Detail View Delete"""
+class TestPidPathDetailViewDelete(TestCase):
+    """Unit tests for `PidPathDetailView.delete` method."""
 
     def test_anonymous_returns_403(self):
         """test_anonymous_returns_403"""
 
         response = RequestMock.do_request_delete(
-            pid_xpath_views.PidXpathDetailView.as_view(),
+            pid_path_views.PidPathDetailView.as_view(),
             None,
         )
 
@@ -206,7 +206,7 @@ class TestPidXpathDetailViewDelete(TestCase):
             status=status.HTTP_204_NO_CONTENT
         )
         response = RequestMock.do_request_delete(
-            pid_xpath_views.PidXpathDetailView.as_view(),
+            pid_path_views.PidPathDetailView.as_view(),
             mock_user,
         )
 
@@ -222,7 +222,7 @@ class TestPidXpathDetailViewDelete(TestCase):
             status=status.HTTP_204_NO_CONTENT
         )
         response = RequestMock.do_request_delete(
-            pid_xpath_views.PidXpathDetailView.as_view(),
+            pid_path_views.PidPathDetailView.as_view(),
             mock_user,
         )
 

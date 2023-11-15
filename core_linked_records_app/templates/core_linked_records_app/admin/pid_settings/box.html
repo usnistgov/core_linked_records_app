@@ -40,14 +40,17 @@
         </td>
     </tr>
     <tr>
-        <td>PID XPath</td>
+        <td>PID Path</td>
         <td>
             <ul>
-                {% for key, value in data.pid_settings.xpath.items %}
+                {% for key, value in data.pid_settings.path.items %}
                     <li>
-                        {{ key }}: <code>{{ value.xpath }}</code>
+                        {{ key }}: <code>{{ value.path }}</code>
                         {% if key != "default" %}
-                        <a class="{% if BOOTSTRAP_VERSION|first == "4" %}ml-2{% elif BOOTSTRAP_VERSION|first == "5"  %}ms-2{% endif %}" href="{{ value.edit_url }}">
+                        <a class="{% if BOOTSTRAP_VERSION|first == "4" %}ml-2
+                                  {% elif BOOTSTRAP_VERSION|first == "5"  %}ms-2
+                                  {% endif %}"
+                            href="{{ value.edit_url }}">
                             <i class="fa fa-edit"></i> Edit
                         </a>
                         {% endif %}
@@ -55,9 +58,9 @@
                 {% endfor %}
             </ul>
             <a class="btn btn-sm btn-success"
-               href="{{ data.pid_settings.add_xpath_url }}"
+               href="{{ data.pid_settings.add_path_url }}"
                 target="_blank" rel="noopener noreferrer">
-                <i class="fa fa-plus-circle"></i> Add another xpath
+                <i class="fa fa-plus-circle"></i> Add another PID path
             </a>
         </td>
     </tr>

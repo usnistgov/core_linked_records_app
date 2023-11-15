@@ -13,10 +13,10 @@ from core_linked_records_app.components.pid_settings.admin_site import (
     CustomPidSettingsAdmin,
 )
 from core_linked_records_app.components.pid_settings.models import PidSettings
-from core_linked_records_app.components.pid_xpath.admin_site import (
-    CustomPidXpathAdmin,
+from core_linked_records_app.components.pid_path.admin_site import (
+    CustomPidPathAdmin,
 )
-from core_linked_records_app.components.pid_xpath.models import PidXpath
+from core_linked_records_app.components.pid_path.models import PidPath
 from core_linked_records_app.views.admin import views as admin_views
 from core_main_app.admin import core_admin_site
 
@@ -30,7 +30,7 @@ admin_urls = [
 
 admin.site.register(LocalId, CustomLocalIdAdmin)
 admin.site.register(PidSettings, CustomPidSettingsAdmin)
-admin.site.register(PidXpath, CustomPidXpathAdmin)
+admin.site.register(PidPath, CustomPidPathAdmin)
 
 urls = core_admin_site.get_urls()
 core_admin_site.get_urls = lambda: admin_urls + urls

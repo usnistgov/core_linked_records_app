@@ -3,7 +3,7 @@
 
 from core_explore_common_app.rest.query.views import build_local_query
 from core_linked_records_app import settings
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.components.pid_path import api as pid_path_api
 from core_linked_records_app.utils.dict import get_value_from_dot_notation
 from core_linked_records_app.utils.pid import is_valid_pid_value
 from core_main_app.access_control.exceptions import AccessControlError
@@ -27,16 +27,16 @@ def build_pid_query(query, build_fn, request):
     query = query["$and"] if "$and" in query.keys() else [query]
 
     # build PID query and append the raw query to it
-    pid_xpath_list = [
-        pid_xpath_object.xpath
-        for pid_xpath_object in pid_xpath_api.get_all(request)
-    ] + [settings.PID_XPATH]
+    pid_path_list = [
+        pid_path_object.path
+        for pid_path_object in pid_path_api.get_all(request)
+    ] + [settings.PID_PATH]
     pid_query = {
         "$and": [
             {
                 "$or": [
-                    {f"dict_content.{pid_xpath}": {"$exists": 1}}
-                    for pid_xpath in pid_xpath_list
+                    {f"dict_content.{pid_path}": {"$exists": 1}}
+                    for pid_path in pid_path_list
                 ]
             }
         ]
@@ -90,14 +90,14 @@ def execute_local_query(raw_query, request):
     data_list = data_api.execute_json_query(raw_query, request.user)
 
     for data in data_list:
-        pid_xpath_object = pid_xpath_api.get_by_template(
+        pid_path_object = pid_path_api.get_by_template(
             data.template, request.user
         )
-        pid_xpath = pid_xpath_object.xpath
+        pid_path = pid_path_object.path
 
         data_pid = get_value_from_dot_notation(
             data.get_dict_content(),
-            pid_xpath,
+            pid_path,
         )
 
         if not is_valid_pid_value(
@@ -148,14 +148,14 @@ def execute_oaipmh_query(raw_query, request):
     data_list = oai_record_api.execute_json_query(raw_query, request.user)
 
     for data in data_list:
-        pid_xpath_object = pid_xpath_api.get_by_template(
+        pid_path_object = pid_path_api.get_by_template(
             data.harvester_metadata_format.template, request.user
         )
-        pid_xpath = pid_xpath_object.xpath
+        pid_path = pid_path_object.path
 
         data_pid = get_value_from_dot_notation(
             data.get_dict_content(),
-            pid_xpath,
+            pid_path,
         )
 
         if not data_pid:

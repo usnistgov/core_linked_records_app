@@ -20,7 +20,7 @@ class TestSetPidValueForDataForXMLData(TestCase):
 
         self.kwargs = {
             "data": self.mock_data,
-            "pid_xpath": "mock_pid_xpath",
+            "pid_path": "mock_pid_path",
             "pid_value": "pid_value",
         }
 
@@ -35,7 +35,7 @@ class TestSetPidValueForDataForXMLData(TestCase):
 
         mock_pid_xml_utils.get_xpath_with_target_namespace.assert_called_with(
             mock_pid_xml_utils.get_xpath_from_dot_notation(
-                self.kwargs["pid_xpath"]
+                self.kwargs["pid_path"]
             ),
             self.kwargs["data"].template.content,
         )
@@ -173,7 +173,7 @@ class TestSetPidValueForDataForJsonData(TestCase):
 
         self.kwargs = {
             "data": self.mock_data,
-            "pid_xpath": "mock_pid_xpath",
+            "pid_path": "mock_pid_path",
             "pid_value": "pid_value",
         }
 
@@ -199,7 +199,7 @@ class TestSetPidValueForDataForJsonData(TestCase):
 
         mock_pid_json_utils.set_value_at_dict_path.assert_called_with(
             mock_json_content,
-            self.kwargs["pid_xpath"],
+            self.kwargs["pid_path"],
             self.kwargs["pid_value"],
         )
 
@@ -253,7 +253,7 @@ class TestSetPidValueForDataForUnsupportedFormats(TestCase):
 
         self.kwargs = {
             "data": self.mock_data,
-            "pid_xpath": "mock_pid_xpath",
+            "pid_path": "mock_pid_path",
             "pid_value": "pid_value",
         }
 
@@ -275,7 +275,7 @@ class TestGetPidValueForDataForXMLData(TestCase):
         self.mock_data = MagicMock()
         self.mock_data.template.format = template_format
 
-        self.kwargs = {"data": self.mock_data, "pid_xpath": "mock_pid_xpath"}
+        self.kwargs = {"data": self.mock_data, "pid_path": "mock_pid_path"}
 
     @patch.object(data_utils, "XSDTree")
     @patch.object(data_utils, "pid_xml_utils")
@@ -287,7 +287,7 @@ class TestGetPidValueForDataForXMLData(TestCase):
 
         mock_pid_xml_utils.get_xpath_with_target_namespace.assert_called_with(
             mock_pid_xml_utils.get_xpath_from_dot_notation(
-                self.kwargs["pid_xpath"]
+                self.kwargs["pid_path"]
             ),
             self.kwargs["data"].template.content,
         )
@@ -438,7 +438,7 @@ class TestGetPidValueForDataForJsonData(TestCase):
 
         self.kwargs = {
             "data": self.mock_data,
-            "pid_xpath": "mock_pid_xpath",
+            "pid_path": "mock_pid_path",
         }
 
     @patch.object(data_utils, "pid_json_utils")
@@ -466,7 +466,7 @@ class TestGetPidValueForDataForJsonData(TestCase):
         data_utils.get_pid_value_for_data(**self.kwargs)
 
         mock_pid_dict_utils.get_value_from_dot_notation.assert_called_with(
-            mock_json_content, self.kwargs["pid_xpath"]
+            mock_json_content, self.kwargs["pid_path"]
         )
 
     @patch.object(data_utils, "pid_json_utils")
@@ -486,7 +486,7 @@ class TestGetPidValueForDataForJsonData(TestCase):
         mock_pid_json_utils.can_create_value_at_dict_path.assert_called_with(
             mock_json_content,
             self.kwargs["data"].template.content,
-            self.kwargs["pid_xpath"],
+            self.kwargs["pid_path"],
             "http://sample_pid.org",
         )
 
@@ -551,7 +551,7 @@ class TestGetPidValueForDataForUnsupportedFormats(TestCase):
 
         self.kwargs = {
             "data": self.mock_data,
-            "pid_xpath": "mock_pid_xpath",
+            "pid_path": "pid_path",
         }
 
     @patch.object(data_utils, "logger")

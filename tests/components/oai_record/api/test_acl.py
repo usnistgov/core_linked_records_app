@@ -4,7 +4,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from core_linked_records_app.components.oai_record import api as oai_record_api
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.components.pid_path import api as pid_path_api
 from core_main_app.access_control import api as main_acl_api
 from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
@@ -40,7 +40,7 @@ class TestGetPidForData(TestCase):
         )
 
     @patch.object(oai_record_api, "get_value_from_dot_notation")
-    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(pid_path_api, "get_by_template")
     @patch.object(oaipmh_harvester_oai_record_api, "get_by_id")
     def test_superuser_can_access(
         self,
@@ -66,7 +66,7 @@ class TestGetPidForData(TestCase):
         )
 
     @patch.object(oai_record_api, "get_value_from_dot_notation")
-    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(pid_path_api, "get_by_template")
     @patch.object(oaipmh_harvester_oai_record_api, "get_by_id")
     def test_registered_user_can_access(
         self,
@@ -92,7 +92,7 @@ class TestGetPidForData(TestCase):
         )
 
     @patch.object(oai_record_api, "get_value_from_dot_notation")
-    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(pid_path_api, "get_by_template")
     @patch.object(oaipmh_harvester_oai_record_api, "get_by_id")
     @patch.object(main_acl_api, "settings")
     def test_anonymous_user_not_public_cannot_access(
@@ -119,7 +119,7 @@ class TestGetPidForData(TestCase):
             )
 
     @patch.object(oai_record_api, "get_value_from_dot_notation")
-    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(pid_path_api, "get_by_template")
     @patch.object(oaipmh_harvester_oai_record_api, "get_by_id")
     @patch.object(main_acl_api, "settings")
     def test_anonymous_user_and_public_can_access(

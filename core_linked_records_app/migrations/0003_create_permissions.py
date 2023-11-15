@@ -30,10 +30,7 @@ class Migration(migrations.Migration):
             options={
                 "verbose_name": "core_linked_records_app",
                 "permissions": (
-                    ("read_pid_xpath", "Can read pid xpath"),
                     ("read_pid_settings", "Can read pid settings"),
-                    ("read_pid_value", "Can read pid value"),
-                    ("write_pid_value", "Can write pid value"),
                 ),
                 "default_permissions": (),
             },

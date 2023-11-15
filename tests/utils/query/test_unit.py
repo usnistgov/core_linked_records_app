@@ -3,7 +3,7 @@
 from unittest import TestCase
 from unittest.mock import patch, Mock
 
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.components.pid_path import api as pid_path_api
 from core_linked_records_app.utils import query as query_utils
 from core_main_app.access_control.exceptions import AccessControlError
 from core_main_app.commons.exceptions import ApiError, CoreError
@@ -20,11 +20,11 @@ class TestBuildPidQuery(TestCase):
     def setUp(self) -> None:
         self.mock_request = mocks.MockRequest()
 
-    @patch.object(pid_xpath_api, "get_all")
-    def test_add_pid_query_if_init_query_has_and(self, mock_pid_xpath_get_all):
+    @patch.object(pid_path_api, "get_all")
+    def test_add_pid_query_if_init_query_has_and(self, mock_pid_path_get_all):
         """test_add_pid_query_if_init_query_has_and"""
 
-        mock_pid_xpath_get_all.return_value = []
+        mock_pid_path_get_all.return_value = []
         mock_function = Mock()
         mock_function.return_value = {"mock_key": "mock_value"}
 
@@ -34,13 +34,13 @@ class TestBuildPidQuery(TestCase):
 
         self.assertEqual(len(result["$and"]), 2)
 
-    @patch.object(pid_xpath_api, "get_all")
+    @patch.object(pid_path_api, "get_all")
     def test_append_pid_query_if_init_query_has_no_and(
-        self, mock_pid_xpath_get_all
+        self, mock_pid_path_get_all
     ):
         """test_append_pid_query_if_init_query_has_no_and"""
 
-        mock_pid_xpath_get_all.return_value = []
+        mock_pid_path_get_all.return_value = []
         mock_function = Mock()
         mock_function.return_value = {"$and": ["query1", "query2"]}
 
@@ -138,7 +138,7 @@ class TestExecuteLocalQuery(TestCase):
 
     @patch.object(query_utils, "is_valid_pid_value")
     @patch.object(query_utils, "get_value_from_dot_notation")
-    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(pid_path_api, "get_by_template")
     @patch.object(data_api, "execute_json_query")
     def test_returns_data_with_valid_pid(
         self,
@@ -151,7 +151,7 @@ class TestExecuteLocalQuery(TestCase):
 
         mock_data_pid = "mock_data_pid"
         mock_execute_query.return_value = [mocks.MockData() for _ in range(5)]
-        mock_get_by_template.return_value = mocks.MockPidXpath()
+        mock_get_by_template.return_value = mocks.MockPidPath()
         mock_get_value_from_dot_notation.return_value = mock_data_pid
         # Return True every time the call count is odd (3 times for a list of 5
         # elements, at index 0, 2 and 4).
@@ -205,7 +205,7 @@ class TestExecuteOaiPmhQuery(TestCase):
         self.assertEqual(result, [])
 
     @patch.object(query_utils, "get_value_from_dot_notation")
-    @patch.object(pid_xpath_api, "get_by_template")
+    @patch.object(pid_path_api, "get_by_template")
     @patch.object(oai_record_api, "execute_json_query")
     def test_returns_data_with_valid_pid(
         self,
@@ -217,7 +217,7 @@ class TestExecuteOaiPmhQuery(TestCase):
 
         mock_data_pid = "mock_data_pid"
         mock_execute_query.return_value = [mocks.MockData() for _ in range(5)]
-        mock_get_by_template.return_value = mocks.MockPidXpath()
+        mock_get_by_template.return_value = mocks.MockPidPath()
         # Return `mock_data_pid` every time the call count is odd (3 times for a list
         # of 5 elements, at index 0, 2 and 4), otherwise returns None.
         mock_get_value_from_dot_notation.side_effect = (

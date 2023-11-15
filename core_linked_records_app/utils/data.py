@@ -17,17 +17,17 @@ from xml_utils.xsd_tree.xsd_tree import XSDTree
 logger = logging.getLogger(__name__)
 
 
-def set_pid_value_for_data(data, pid_xpath, pid_value):
+def set_pid_value_for_data(data, pid_path, pid_value):
     """Set the document PID into XML data and update `content` in place.
 
     Args:
         data:
-        pid_xpath:
+        pid_path:
         pid_value:
     """
     if data.template.format == Template.XSD:
         pid_xpath = pid_xml_utils.get_xpath_with_target_namespace(
-            pid_xml_utils.get_xpath_from_dot_notation(pid_xpath),
+            pid_xml_utils.get_xpath_from_dot_notation(pid_path),
             data.template.content,
         )
 
@@ -46,7 +46,7 @@ def set_pid_value_for_data(data, pid_xpath, pid_value):
     elif data.template.format == Template.JSON:
         json_content = json.loads(data.content)
         json_content = pid_json_utils.set_value_at_dict_path(
-            json_content, pid_xpath, pid_value
+            json_content, pid_path, pid_value
         )
         data.content = json.dumps(json_content)
     else:
@@ -59,20 +59,20 @@ def set_pid_value_for_data(data, pid_xpath, pid_value):
     data.convert_to_dict()
 
 
-def get_pid_value_for_data(data, pid_xpath):
-    """Retrieve value located at `pid_xpath` of the data passed in parameter.
+def get_pid_value_for_data(data, pid_path):
+    """Retrieve value located at `pid_path` of the data passed in parameter.
 
     Args:
         data:
-        pid_xpath:
+        pid_path:
 
     Returns:
         str - Persitstent identifier
     """
     if data.template.format == Template.XSD:
-        # Transform the dot notation XPath into an XML XPath.
-        pid_xpath = pid_xml_utils.get_xpath_with_target_namespace(
-            pid_xml_utils.get_xpath_from_dot_notation(pid_xpath),
+        # Transform the dot notation path into an XML XPath.
+        pid_path = pid_xml_utils.get_xpath_with_target_namespace(
+            pid_xml_utils.get_xpath_from_dot_notation(pid_path),
             data.template.content,
         )
 
@@ -81,39 +81,39 @@ def get_pid_value_for_data(data, pid_xpath):
         )
         xml_tree = XSDTree.build_tree(data.content)
 
-        try:  # Get the PID from the `pid_xpath` value
+        try:  # Get the PID from the `pid_path` value
             pid_value = pid_xml_utils.get_value_at_xpath(
-                xml_tree, pid_xpath, target_namespace
+                xml_tree, pid_path, target_namespace
             )
-        except XPathError as xpath_error_exc:  # PID XPath not found in document
+        except XPathError as xpath_error_exc:  # PID path not found in document
             if not pid_xml_utils.can_create_value_at_xpath(
                 data.content,
                 data.template.content,
-                pid_xpath,
+                pid_path,
                 "http://sample_pid.org",
             ):
                 raise exceptions.PidCreateError(
-                    f"Cannot create pid value at {pid_xpath}"
+                    f"Cannot create pid value at {pid_path}"
                 ) from xpath_error_exc
             pid_value = None
     elif data.template.format == Template.JSON:
         json_content = json.loads(data.content)
         pid_value = pid_dict_utils.get_value_from_dot_notation(
-            json_content, pid_xpath
+            json_content, pid_path
         )
 
-        # PID XPath has not been found in document and cannot be created.
+        # PID path has not been found in document and cannot be created.
         if (
             pid_value is None
             and not pid_json_utils.can_create_value_at_dict_path(
                 json_content,
                 data.template.content,
-                pid_xpath,
+                pid_path,
                 "http://sample_pid.org",
             )
         ):
             raise exceptions.PidCreateError(
-                f"Cannot create pid value at {pid_xpath}"
+                f"Cannot create pid value at {pid_path}"
             )
     else:
         error_message = "Cannot create PID. Invalid template format."

@@ -5,6 +5,8 @@ SETTING_NAME = getattr(settings, "SETTING_NAME", "Default Value")
 """
 from django.conf import settings
 
+from core_main_app.utils.settings import getattr_from_deprecated_var
+
 if not settings.configured:
     settings.configure()
 
@@ -19,7 +21,9 @@ CAN_ANONYMOUS_ACCESS_PUBLIC_DOCUMENT = getattr(
     settings, "CAN_ANONYMOUS_ACCESS_PUBLIC_DOCUMENT", False
 )
 
-PID_XPATH = getattr(settings, "PID_XPATH", "Resource.@localid")
+PID_PATH = getattr_from_deprecated_var(
+    settings, "PID_XPATH", "PID_PATH", "Resource.@localid"
+)
 
 PID_FORMAT = getattr(settings, "PID_FORMAT", r"[a-zA-Z0-9_\-]+")
 

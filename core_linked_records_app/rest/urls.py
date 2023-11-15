@@ -6,7 +6,7 @@ from django.urls import re_path
 from core_linked_records_app.rest.blob import views as blob_views
 from core_linked_records_app.rest.pid import views as pid_views
 from core_linked_records_app.rest.pid_settings import views as settings_views
-from core_linked_records_app.rest.pid_xpath import views as xpath_views
+from core_linked_records_app.rest.pid_path import views as pid_path_views
 from core_linked_records_app.rest.providers import views as providers_views
 from core_linked_records_app.rest.query import views as query_views
 
@@ -25,14 +25,14 @@ urlpatterns += [
         name="core_linked_records_app_settings",
     ),
     re_path(
-        r"^settings/xpath/$",
-        xpath_views.PidXpathListView.as_view(),
-        name="core_linked_records_app_settings_xpath_list",
+        r"^settings/path/$",
+        pid_path_views.PidPathListView.as_view(),
+        name="core_linked_records_app_settings_path_list",
     ),
     re_path(
-        r"^settings/xpath/(?P<pk>[0-9]+)/$",
-        xpath_views.PidXpathDetailView.as_view(),
-        name="core_linked_records_app_settings_xpath_detail",
+        r"^settings/path/(?P<pk>[0-9]+)/$",
+        pid_path_views.PidPathDetailView.as_view(),
+        name="core_linked_records_app_settings_path_detail",
     ),
     re_path(
         r"^retrieve-list-pid",

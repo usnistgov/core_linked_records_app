@@ -11,8 +11,8 @@ from rest_framework import status
 from core_linked_records_app import settings
 from core_linked_records_app.components.pid_settings.models import PidSettings
 from core_linked_records_app.system.data import api as data_system_api
-from core_linked_records_app.system.pid_xpath import (
-    api as pid_xpath_system_api,
+from core_linked_records_app.system.pid_path import (
+    api as pid_path_system_api,
 )
 from core_linked_records_app.utils import data as data_utils
 from core_linked_records_app.utils import exceptions
@@ -113,20 +113,20 @@ def _set_data_pid(instance: Data):
         if not PidSettings.get().auto_set_pid:
             return
 
-        # Retrieve PID XPath from `PidSettings.xpath_list`. Skip PID assignment
-        # if the PID XPath is not defined for the template.
-        template_pid_xpath = pid_xpath_system_api.get_pid_xpath_by_template(
+        # Retrieve PID path from `PidSettings.path_list`. Skip PID assignment
+        # if the PID path is not defined for the template.
+        template_pid_path = pid_path_system_api.get_pid_path_by_template(
             instance.template
         )
-        pid_xpath = template_pid_xpath.xpath
+        pid_path = template_pid_path.path
 
-        try:  # Retrieve the PID located at predefined XPath.
-            pid_value = data_utils.get_pid_value_for_data(instance, pid_xpath)
+        try:  # Retrieve the PID located at predefined dot notation path.
+            pid_value = data_utils.get_pid_value_for_data(instance, pid_path)
         except Exception as exc:  # pylint: disable=broad-except
-            # XPath is not valid for current instance.
+            # PID path is not valid for current instance.
             logger.warning(
                 "Cannot create PID at %s for data %s: %s",
-                pid_xpath,
+                pid_path,
                 instance.pk,
                 str(exc),
             )
@@ -162,7 +162,7 @@ def _set_data_pid(instance: Data):
         pid_value = _register_pid_for_data_id(
             provider_name, pid_value, instance.pk
         )
-        data_utils.set_pid_value_for_data(instance, pid_xpath, pid_value)
+        data_utils.set_pid_value_for_data(instance, pid_path, pid_value)
     except exceptions.PidCreateError as pid_create_error:
         logger.error(
             "An error occurred while assigning PID: %s", str(pid_create_error)

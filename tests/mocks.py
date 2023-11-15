@@ -53,10 +53,10 @@ class MockPidSettings(Mock):
     auto_set_pid = True
 
 
-class MockPidXpath(MockDocument):
-    """Mock Pid Xpath"""
+class MockPidPath(MockDocument):
+    """Mock PidPath object"""
 
-    xpath = "mock.xpath"
+    path = "mock.path"
     template = 1234
 
 

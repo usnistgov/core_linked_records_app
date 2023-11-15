@@ -7,7 +7,7 @@ from django.views.generic import View
 from core_linked_records_app.components.pid_settings import (
     api as pid_settings_api,
 )
-from core_linked_records_app.components.pid_xpath import api as pid_xpath_api
+from core_linked_records_app.components.pid_path import api as pid_path_api
 from core_linked_records_app.settings import SERVER_URI
 from core_linked_records_app.utils.pid import get_pid_settings_dict
 from core_main_app.utils.rendering import admin_render
@@ -32,28 +32,28 @@ class PidSettingsView(View):
             ],
         }
 
-        xpath_settings = {}
+        pid_path_settings = {}
 
-        # Retrieve existing PidXpath
+        # Retrieve existing PidPath
         try:
-            for xpath_item in pid_xpath_api.get_all(request):
-                xpath_settings[xpath_item.template.display_name] = {
-                    "xpath": xpath_item.xpath,
+            for pid_path_item in pid_path_api.get_all(request):
+                pid_path_settings[pid_path_item.template.display_name] = {
+                    "path": pid_path_item.path,
                     "edit_url": reverse(
-                        "admin:core_linked_records_app_pidxpath_change",
-                        args=(xpath_item.pk,),
+                        "admin:core_linked_records_app_pidpath_change",
+                        args=(pid_path_item.pk,),
                     ),
                 }
 
             pid_settings = pid_settings_api.get(request.user)
             response_dict = get_pid_settings_dict(pid_settings)
-            response_dict["xpath"] = {
-                "default": {"xpath": response_dict["xpath"]}
+            response_dict["path"] = {
+                "default": {"path": response_dict["path"]}
             }
-            response_dict["xpath"].update(xpath_settings)
+            response_dict["path"].update(pid_path_settings)
 
-            response_dict["add_xpath_url"] = reverse(
-                "admin:core_linked_records_app_pidxpath_add"
+            response_dict["add_path_url"] = reverse(
+                "admin:core_linked_records_app_pidpath_add"
             )
 
             record_sample_url = reverse(

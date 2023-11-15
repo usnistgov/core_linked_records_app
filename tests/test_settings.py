@@ -76,7 +76,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 SERVER_URI = "http://mock-cdcs.com"
 
-PID_XPATH = "mock.pid"
+PID_PATH = "mock.pid"
 
 ID_PROVIDER_PREFIXES = ["mock_cdcs"]
 

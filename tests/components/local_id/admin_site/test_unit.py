@@ -1,4 +1,4 @@
-""" Unit tests for PidXPath admin site
+""" Unit tests for PidPath admin site
 """
 from unittest import TestCase
 from unittest.mock import Mock
