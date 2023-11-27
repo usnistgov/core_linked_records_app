@@ -1,2 +1,2 @@
-core-main-app==2.6.*
-core-explore-common-app==2.6.*
+core-main-app==2.7.*
+core-explore-common-app==2.7.*
