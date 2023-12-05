@@ -71,7 +71,7 @@ class TestGetBlobByPid(TestCase):
     def test_registered_user_not_owner_cannot_access_private(
         self,
         mock_settings,
-        mock_workspace_api,
+        mock_workspace_api,  # noqa, pylint: disable=unused-argument
         mock_get_by_name,
         mock_import_module,
         mock_getattr,
@@ -127,7 +127,7 @@ class TestGetBlobByPid(TestCase):
     def test_registered_user_and_owner_can_access_private(
         self,
         mock_settings,
-        mock_workspace_api,
+        mock_workspace_api,  # noqa, pylint: disable=unused-argument
         mock_get_by_name,
         mock_import_module,
         mock_getattr,
@@ -152,7 +152,7 @@ class TestGetBlobByPid(TestCase):
     def test_anonymous_user_not_publc_cannot_access(
         self,
         mock_settings,
-        mock_workspace_api,
+        mock_workspace_api,  # noqa, pylint: disable=unused-argument
         mock_get_by_name,
         mock_import_module,
         mock_getattr,

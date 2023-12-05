@@ -27,6 +27,18 @@ class PidResolverError(CoreError):
         super().__init__(message)
 
 
+class InvalidProviderError(CoreError):
+    """Exception raised when a provider is not valid."""
+
+    def __init__(self, message):
+        """Initialize exception
+
+        Args:
+            message (str): Error message
+        """
+        super().__init__(message)
+
+
 class InvalidPidError(CoreError):
     """Exception raised when a PID is not valid."""
 

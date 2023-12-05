@@ -10,6 +10,7 @@ from core_linked_records_app.utils.providers import delete_record_from_provider
 from core_main_app.commons import exceptions
 from core_main_app.commons.exceptions import DoesNotExist
 from core_main_app.components.blob.models import Blob
+from core_main_app.system.blob import api as blob_system_api
 
 logger = logging.getLogger(__name__)
 
@@ -102,3 +103,47 @@ def delete_pid_for_blob(blob: Blob):
             blob.filename,
         )
         return
+
+
+def get_blob_by_pid(pid):
+    """Return blob object with the given pid.
+
+    Args:
+        pid (str): PID of the blob.
+
+    Raises:
+        DoesNotExist: The PID is not assigned to any Blob object.
+        AccessControlError: The Blob cannot be accessed by the user.
+        ApiError: Any other error occured while trying to resolve the PID.
+
+    Returns:
+        Blob: Blob object assigned to the given PID.
+    """
+    try:
+        # From the PID url (e.g. https://pid-system.org/prefix/record), retrieve
+        # only the prefix and record (e.g. prefix/record) stored in DB.
+        pid_internal_name = "/".join(pid.split("/")[-2:])
+        local_id_object = local_id_system_api.get_by_name(pid_internal_name)
+
+        # Ensure the LocalID object refers to a Blob
+        if not (
+            local_id_object.record_object_class
+            and local_id_object.record_object_id
+        ):
+            raise exceptions.DoesNotExist("PID not assigned to blob")
+
+        # Retrieve the blob object using the blob system API.
+        # FIXME should be made more generic (using local_id_object.record_object_class)
+        #  to retrieve any kind of object.
+        return blob_system_api.get_by_id(local_id_object.record_object_id)
+    except exceptions.DoesNotExist as not_assigned_exc:
+        error_message = f"PID '{pid}' not assigned to blob"
+        logger.error(error_message)
+        raise exceptions.DoesNotExist(error_message) from not_assigned_exc
+    except Exception as exc:
+        error_message = (
+            f"An error occurred while looking up blob assigned to PID '{pid}'"
+        )
+
+        logger.error("%s: %s", error_message, str(exc))
+        raise exceptions.ApiError(error_message) from exc

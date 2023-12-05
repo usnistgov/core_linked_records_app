@@ -1,7 +1,7 @@
 """ Unit tests for core_linked_records_app.components.blob.api
 """
 from unittest import TestCase
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, MagicMock
 
 from core_linked_records_app.components.local_id.models import LocalId
 from core_linked_records_app.system.blob import api as blob_system_api
@@ -307,4 +307,96 @@ class TestDeletePidForBlob(TestCase):
         blob_system_api.delete_pid_for_blob(self.blob)
         mock_delete_record_from_provider.assert_called_with(
             mock_local_id.record_name
+        )
+
+
+class TestGetBlobByPid(TestCase):
+    """Unit tests for `get_blob_by_pid` function."""
+
+    def setUp(self):
+        """setUp"""
+        self.mock_kwargs = {"pid": MagicMock()}
+
+    @patch.object(blob_system_api, "local_id_system_api")
+    def test_get_by_name_called(self, mock_local_id_system_api):
+        """test_get_by_name_called"""
+        with self.assertRaises(exceptions.ApiError):
+            blob_system_api.get_blob_by_pid(**self.mock_kwargs)
+
+        mock_local_id_system_api.get_by_name.assert_called_with(
+            "/".join(self.mock_kwargs["pid"].split("/")[-2:])
+        )
+
+    @patch.object(blob_system_api, "local_id_system_api")
+    def test_get_by_name_exception_raises_api_error(
+        self, mock_local_id_system_api
+    ):
+        """test_get_by_name_exception_raises_api_error"""
+        mock_local_id_system_api.get_by_name.side_effect = Exception(
+            "mock_local_id_system_api_get_by_name_exception"
+        )
+
+        with self.assertRaises(exceptions.ApiError):
+            blob_system_api.get_blob_by_pid(**self.mock_kwargs)
+
+    @patch.object(blob_system_api, "local_id_system_api")
+    def test_local_id_object_empty_raises_does_not_exists_exception(
+        self, mock_local_id_system_api
+    ):
+        """test_local_id_object_empty_raises_does_not_exists_exception"""
+        mock_local_id_object = MagicMock()
+        mock_local_id_object.record_object_class = None
+        mock_local_id_object.record_object_id = None
+        mock_local_id_system_api.get_by_name.return_value = (
+            mock_local_id_object
+        )
+
+        with self.assertRaises(exceptions.DoesNotExist):
+            blob_system_api.get_blob_by_pid(**self.mock_kwargs)
+
+    @patch.object(blob_system_api, "blob_system_api")
+    @patch.object(blob_system_api, "local_id_system_api")
+    def test_get_by_id_called(
+        self, mock_local_id_system_api, mock_blob_system_api
+    ):
+        """test_get_by_id_called"""
+        mock_local_id_object_record_id = MagicMock()
+        mock_local_id_object = MagicMock()
+        mock_local_id_object.record_object_class = MagicMock()
+        mock_local_id_object.record_object_id = mock_local_id_object_record_id
+        mock_local_id_system_api.get_by_name.return_value = (
+            mock_local_id_object
+        )
+
+        blob_system_api.get_blob_by_pid(**self.mock_kwargs)
+        mock_blob_system_api.get_by_id.assert_called_with(
+            mock_local_id_object_record_id
+        )
+
+    @patch.object(blob_system_api, "blob_system_api")
+    @patch.object(blob_system_api, "local_id_system_api")
+    def test_get_by_id_does_not_exists_raises_does_not_exist(
+        self, mock_local_id_system_api, mock_blob_system_api
+    ):
+        """test_get_by_id_does_not_exists_raises_does_not_exist"""
+        mock_local_id_system_api.get_by_name.return_value = MagicMock()
+        mock_blob_system_api.get_by_id.side_effect = exceptions.DoesNotExist(
+            "mock_get_by_id_exception"
+        )
+
+        with self.assertRaises(exceptions.DoesNotExist):
+            blob_system_api.get_blob_by_pid(**self.mock_kwargs)
+
+    @patch.object(blob_system_api, "blob_system_api")
+    @patch.object(blob_system_api, "local_id_system_api")
+    def test_successful_execution_returns_get_by_id(
+        self, mock_local_id_system_api, mock_blob_system_api
+    ):
+        """test_successful_execution_returns_get_by_id"""
+        mock_local_id_system_api.get_by_name.return_value = MagicMock()
+        mock_blob = MagicMock()
+        mock_blob_system_api.get_by_id.return_value = mock_blob
+
+        self.assertEqual(
+            blob_system_api.get_blob_by_pid(**self.mock_kwargs), mock_blob
         )
