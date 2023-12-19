@@ -68,3 +68,7 @@ HANDLE_NET_ADMIN_DATA = getattr(
 )
 
 AUTO_SET_PID = getattr(settings, "AUTO_SET_PID", False)
+
+BACKWARD_COMPATIBILITY_DATA_XML_CONTENT = getattr(
+    settings, "BACKWARD_COMPATIBILITY_DATA_XML_CONTENT", True
+)

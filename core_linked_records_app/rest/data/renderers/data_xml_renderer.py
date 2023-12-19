@@ -6,6 +6,9 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+from core_linked_records_app.settings import (
+    BACKWARD_COMPATIBILITY_DATA_XML_CONTENT,
+)
 
 
 class DataXmlRenderer(renderers.BaseRenderer):
@@ -33,4 +36,8 @@ class DataXmlRenderer(renderers.BaseRenderer):
 
             return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return data["xml_content"]
+        return data[
+            "xml_content"
+            if BACKWARD_COMPATIBILITY_DATA_XML_CONTENT
+            else "content"
+        ]
