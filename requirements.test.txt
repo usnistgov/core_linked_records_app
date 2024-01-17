@@ -1,3 +1,3 @@
-core-main-app[mongodb]==2.7.*
-core-federated-search-app==2.7.*
-core-explore-oaipmh-app==2.7.*
+core-main-app[mongodb]==2.8.*
+core-federated-search-app==2.8.*
+core-explore-oaipmh-app==2.8.*
