@@ -178,22 +178,26 @@ class TestSetPidValueForDataForJsonData(TestCase):
         }
 
     @patch.object(data_utils, "pid_json_utils")
+    @patch.object(data_utils, "load_json_string")
     @patch.object(data_utils, "json")
-    def test_json_loads_called(self, mock_json, mock_pid_json_utils):
+    def test_json_loads_called(
+        self, mock_json, mock_load_json_string, mock_pid_json_utils
+    ):
         """test_json_loads_called"""
         mock_data_init_content = deepcopy(self.mock_data.content)
         data_utils.set_pid_value_for_data(**self.kwargs)
 
-        mock_json.loads.assert_called_with(mock_data_init_content)
+        mock_load_json_string.assert_called_with(mock_data_init_content)
 
     @patch.object(data_utils, "pid_json_utils")
+    @patch.object(data_utils, "load_json_string")
     @patch.object(data_utils, "json")
     def test_set_value_at_dict_path_called(
-        self, mock_json, mock_pid_json_utils
+        self, mock_json, mock_load_json_string, mock_pid_json_utils
     ):
         """test_set_value_at_dict_path_called"""
         mock_json_content = MagicMock()
-        mock_json.loads.return_value = mock_json_content
+        mock_load_json_string.return_value = mock_json_content
 
         data_utils.set_pid_value_for_data(**self.kwargs)
 
@@ -204,8 +208,11 @@ class TestSetPidValueForDataForJsonData(TestCase):
         )
 
     @patch.object(data_utils, "pid_json_utils")
+    @patch.object(data_utils, "load_json_string")
     @patch.object(data_utils, "json")
-    def test_json_dumps_called(self, mock_json, mock_pid_json_utils):
+    def test_json_dumps_called(
+        self, mock_json, mock_load_json_string, mock_pid_json_utils
+    ):
         """test_json_dumps_called"""
         mock_json_content = MagicMock()
         mock_pid_json_utils.set_value_at_dict_path.return_value = (
@@ -217,25 +224,32 @@ class TestSetPidValueForDataForJsonData(TestCase):
         mock_json.dumps.assert_called_with(mock_json_content)
 
     @patch.object(data_utils, "pid_json_utils")
+    @patch.object(data_utils, "load_json_string")
     @patch.object(data_utils, "json")
-    def test_convert_to_file_called(self, mock_json, mock_pid_json_utils):
+    def test_convert_to_file_called(
+        self, mock_json, mock_load_json_string, mock_pid_json_utils
+    ):
         """test_convert_to_file_called"""
         data_utils.set_pid_value_for_data(**self.kwargs)
 
         self.kwargs["data"].convert_to_file.assert_called()
 
     @patch.object(data_utils, "pid_json_utils")
+    @patch.object(data_utils, "load_json_string")
     @patch.object(data_utils, "json")
-    def test_convert_to_dict_called(self, mock_json, mock_pid_json_utils):
+    def test_convert_to_dict_called(
+        self, mock_json, mock_load_json_string, mock_pid_json_utils
+    ):
         """test_convert_to_dict_called"""
         data_utils.set_pid_value_for_data(**self.kwargs)
 
         self.kwargs["data"].convert_to_dict.assert_called()
 
     @patch.object(data_utils, "pid_json_utils")
+    @patch.object(data_utils, "load_json_string")
     @patch.object(data_utils, "json")
     def test_succesful_execution_returns_none(
-        self, mock_json, mock_pid_json_utils
+        self, mock_json, mock_load_json_string, mock_pid_json_utils
     ):
         """test_succesful_execution_returns_none"""
         self.assertIsNone(data_utils.set_pid_value_for_data(**self.kwargs))
@@ -443,25 +457,25 @@ class TestGetPidValueForDataForJsonData(TestCase):
 
     @patch.object(data_utils, "pid_json_utils")
     @patch.object(data_utils, "pid_dict_utils")
-    @patch.object(data_utils, "json")
+    @patch.object(data_utils, "load_json_string")
     def test_json_loads_called(
-        self, mock_json, mock_pid_dict_utils, mock_pid_json_utils
+        self, mock_load_json_string, mock_pid_dict_utils, mock_pid_json_utils
     ):
         """test_json_loads_called"""
         mock_data_init_content = self.kwargs["data"].content
         data_utils.get_pid_value_for_data(**self.kwargs)
 
-        mock_json.loads.assert_called_with(mock_data_init_content)
+        mock_load_json_string.assert_called_with(mock_data_init_content)
 
     @patch.object(data_utils, "pid_json_utils")
     @patch.object(data_utils, "pid_dict_utils")
-    @patch.object(data_utils, "json")
+    @patch.object(data_utils, "load_json_string")
     def test_get_value_from_dot_notation_called(
-        self, mock_json, mock_pid_dict_utils, mock_pid_json_utils
+        self, mock_load_json_string, mock_pid_dict_utils, mock_pid_json_utils
     ):
         """test_get_value_from_dot_notation_called"""
         mock_json_content = MagicMock()
-        mock_json.loads.return_value = mock_json_content
+        mock_load_json_string.return_value = mock_json_content
 
         data_utils.get_pid_value_for_data(**self.kwargs)
 
@@ -471,15 +485,15 @@ class TestGetPidValueForDataForJsonData(TestCase):
 
     @patch.object(data_utils, "pid_json_utils")
     @patch.object(data_utils, "pid_dict_utils")
-    @patch.object(data_utils, "json")
+    @patch.object(data_utils, "load_json_string")
     def test_can_create_value_at_dict_path_called(
-        self, mock_json, mock_pid_dict_utils, mock_pid_json_utils
+        self, mock_load_json_string, mock_pid_dict_utils, mock_pid_json_utils
     ):
         """test_cannot_create_value_at_dict_path_raises_pid_create_error"""
         mock_json_content = MagicMock()
 
         mock_pid_dict_utils.get_value_from_dot_notation.return_value = None
-        mock_json.loads.return_value = mock_json_content
+        mock_load_json_string.return_value = mock_json_content
 
         data_utils.get_pid_value_for_data(**self.kwargs)
 
@@ -492,9 +506,9 @@ class TestGetPidValueForDataForJsonData(TestCase):
 
     @patch.object(data_utils, "pid_json_utils")
     @patch.object(data_utils, "pid_dict_utils")
-    @patch.object(data_utils, "json")
+    @patch.object(data_utils, "load_json_string")
     def test_cannot_create_value_at_dict_path_raises_pid_create_error(
-        self, mock_json, mock_pid_dict_utils, mock_pid_json_utils
+        self, mock_load_json_string, mock_pid_dict_utils, mock_pid_json_utils
     ):
         """test_cannot_create_value_at_dict_path_raises_pid_create_error"""
         mock_pid_dict_utils.get_value_from_dot_notation.return_value = None
@@ -505,11 +519,11 @@ class TestGetPidValueForDataForJsonData(TestCase):
 
     @patch.object(data_utils, "pid_json_utils")
     @patch.object(data_utils, "pid_dict_utils")
-    @patch.object(data_utils, "json")
-    def test_successful_executiopn_returns_pid_value(
-        self, mock_json, mock_pid_dict_utils, mock_pid_json_utils
+    @patch.object(data_utils, "load_json_string")
+    def test_successful_execution_returns_pid_value(
+        self, mock_load_json_string, mock_pid_dict_utils, mock_pid_json_utils
     ):
-        """test_successful_executiopn_returns_pid_value"""
+        """test_successful_execution_returns_pid_value"""
         mock_pid_value = "mock_pid_value"
 
         mock_pid_dict_utils.get_value_from_dot_notation.return_value = (
@@ -522,9 +536,9 @@ class TestGetPidValueForDataForJsonData(TestCase):
 
     @patch.object(data_utils, "pid_json_utils")
     @patch.object(data_utils, "pid_dict_utils")
-    @patch.object(data_utils, "json")
+    @patch.object(data_utils, "load_json_string")
     def test_pid_value_truncated_if_ending_with_slash(
-        self, mock_json, mock_pid_dict_utils, mock_pid_json_utils
+        self, mock_load_json_string, mock_pid_dict_utils, mock_pid_json_utils
     ):
         """test_pid_value_truncated_if_ending_with_slash"""
         mock_pid_value = "mock_pid_value/"

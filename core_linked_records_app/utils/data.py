@@ -10,6 +10,7 @@ from core_linked_records_app.utils import (
     dict as pid_dict_utils,
 )
 from core_main_app.components.template.models import Template
+from core_main_app.utils.json_utils import load_json_string
 from xml_utils.commons.exceptions import XPathError
 from xml_utils.xpath import create_tree_from_xpath
 from xml_utils.xsd_tree.xsd_tree import XSDTree
@@ -44,7 +45,7 @@ def set_pid_value_for_data(data, pid_path, pid_value):
         )
         data.content = XSDTree.tostring(xml_tree)
     elif data.template.format == Template.JSON:
-        json_content = json.loads(data.content)
+        json_content = load_json_string(data.content)
         json_content = pid_json_utils.set_value_at_dict_path(
             json_content, pid_path, pid_value
         )
@@ -97,7 +98,7 @@ def get_pid_value_for_data(data, pid_path):
                 ) from xpath_error_exc
             pid_value = None
     elif data.template.format == Template.JSON:
-        json_content = json.loads(data.content)
+        json_content = load_json_string(data.content)
         pid_value = pid_dict_utils.get_value_from_dot_notation(
             json_content, pid_path
         )
