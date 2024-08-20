@@ -1,5 +1,6 @@
 """ Signals to trigger before Data save
 """
+
 import json
 import logging
 

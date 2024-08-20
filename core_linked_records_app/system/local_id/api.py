@@ -1,5 +1,6 @@
 """ System API to manage LocalId objects.
 """
+
 import logging
 
 from core_linked_records_app.components.local_id.models import LocalId

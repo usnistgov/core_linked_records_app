@@ -1,5 +1,6 @@
 """ System API to manage Data objects.
 """
+
 import logging
 
 from django.conf import settings as conf_settings
@@ -93,7 +94,9 @@ def delete_pid_for_data(data: Data):
         # Retrieving the dict content is not possible, convert the xml to dict
         try:
             dict_content = xml_utils.raw_xml_to_dict(data.xml_content)
-        except Exception as exc:  # Converting the xml to dict is not possible either
+        except (
+            Exception
+        ) as exc:  # Converting the xml to dict is not possible either
             raise ApiError(
                 f"Impossible to retrieve the dict content for the data: {str(exc)}"
             ) from exc

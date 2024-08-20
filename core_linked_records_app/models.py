@@ -1,5 +1,6 @@
 """Linked records models
 """
+
 from django.db import models
 
 from core_linked_records_app.access_control import rights

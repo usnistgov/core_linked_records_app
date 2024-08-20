@@ -1,5 +1,6 @@
 """ Handle.net implementation class
 """
+
 import json
 import logging
 from base64 import b64encode
@@ -59,9 +60,9 @@ class HandleNetSystem(AbstractIdProvider):
             json_response_content["responseCode"]
         )
 
-        json_response_content[
-            "url"
-        ] = f'{self.provider_lookup_url}/{ json_response_content["handle"]}'
+        json_response_content["url"] = (
+            f'{self.provider_lookup_url}/{ json_response_content["handle"]}'
+        )
 
         return json.dumps(json_response_content)
 

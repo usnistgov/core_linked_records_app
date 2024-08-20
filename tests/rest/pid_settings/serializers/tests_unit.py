@@ -1,5 +1,6 @@
 """ Unit tests for `core_linked_records.rest.pid_settings.serializers`.
 """
+
 from unittest import TestCase
 from unittest.mock import patch, Mock, MagicMock
 

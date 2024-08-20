@@ -1,5 +1,6 @@
 """ Access control for `core_linked_records_app.components.blob.api`.
 """
+
 from core_main_app.access_control.api import check_can_read_document
 from core_main_app.components.blob.models import Blob
 

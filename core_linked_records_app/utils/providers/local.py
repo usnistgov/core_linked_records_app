@@ -1,5 +1,6 @@
 """ Local record system implementation
 """
+
 import json
 import random
 import string

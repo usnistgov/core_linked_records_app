@@ -1,5 +1,6 @@
 """ Data HTML renderer for django REST API
 """
+
 import logging
 
 from rest_framework import renderers, status

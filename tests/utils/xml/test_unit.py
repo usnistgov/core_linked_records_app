@@ -1,5 +1,6 @@
 """ Unit tests for `core_linked_records_app.utils.xml`.
 """
+
 from unittest import TestCase
 from unittest.mock import patch, MagicMock, call
 from core_linked_records_app.utils import xml as linked_records_xml_utils
@@ -270,4 +271,54 @@ class TestCanCreateValueAtXpath(TestCase):
             linked_records_xml_utils.can_create_value_at_xpath(
                 **self.mock_kwargs
             )
+        )
+
+
+class TestSetValueAtXPath(TestCase):
+    """Unit tests for `set_value_at_xpath` function."""
+
+    def setUp(self):
+        """setUp"""
+        self.mock_kwargs = {
+            "xml_tree": MagicMock(),
+            "xpath": MagicMock(),
+            "value": MagicMock(),
+            "namespaces": MagicMock(),
+        }
+
+    def test_xml_tree_xpath_called(self):
+        """test_xml_tree_xpath_called"""
+        linked_records_xml_utils.set_value_at_xpath(**self.mock_kwargs)
+
+        self.mock_kwargs["xml_tree"].xpath.assert_called_with(
+            self.mock_kwargs["xpath"],
+            namespaces=self.mock_kwargs["namespaces"],
+        )
+
+    def test_xml_tree_xpath_called_when_attribute_error_raised(self):
+        """test_xml_tree_xpath_called_when_attribute_error_raised"""
+        mock_attribute = MagicMock()
+        mock_xpath_elem = "xpath_elem_0"
+        mock_xpath_list = [mock_xpath_elem, mock_attribute]
+        self.mock_kwargs["xpath"].split.return_value = mock_xpath_list
+
+        self.mock_kwargs["xml_tree"].xpath.side_effect = [
+            AttributeError("mock_xpath_text_attribute_error"),
+            MagicMock(),
+        ]
+
+        linked_records_xml_utils.set_value_at_xpath(**self.mock_kwargs)
+
+        mock_attribute.replace.assert_called_with("@", "")
+        self.mock_kwargs["xml_tree"].xpath.assert_has_calls(
+            [
+                call(
+                    self.mock_kwargs["xpath"],
+                    namespaces=self.mock_kwargs["namespaces"],
+                ),
+                call(
+                    f"/{mock_xpath_elem}",
+                    namespaces=self.mock_kwargs["namespaces"],
+                ),
+            ]
         )

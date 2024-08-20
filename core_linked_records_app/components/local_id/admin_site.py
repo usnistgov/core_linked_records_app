@@ -1,5 +1,6 @@
 """ Custom admin site for the LocalId model
 """
+
 from django.contrib import admin
 
 

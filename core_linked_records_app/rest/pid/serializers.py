@@ -1,5 +1,6 @@
 """ Serializer classes for LocalID object
 """
+
 from rest_framework.serializers import ModelSerializer
 
 from core_linked_records_app.components.local_id.models import LocalId

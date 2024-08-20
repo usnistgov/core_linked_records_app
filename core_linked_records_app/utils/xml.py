@@ -1,5 +1,6 @@
 """ XML utilities functions.
 """
+
 import logging
 
 from xml_utils.commons import exceptions as xml_utils_exceptions
@@ -96,11 +97,11 @@ def set_value_at_xpath(xml_tree, xpath, value, namespaces):
     except AttributeError:
         xpath_list = xpath.split("/")
         attribute = xpath_list[-1].replace("@", "")
-        xpath = "/%s" % "/".join(xpath_list[:-1])
+        xpath = f"/{'/'.join(xpath_list[:-1])}"
 
-        xml_tree.xpath(xpath, namespaces=namespaces)[0].attrib[
-            attribute
-        ] = value
+        xml_tree.xpath(xpath, namespaces=namespaces)[0].attrib[attribute] = (
+            value
+        )
 
 
 def get_value_at_xpath(xml_tree, xpath, namespaces):

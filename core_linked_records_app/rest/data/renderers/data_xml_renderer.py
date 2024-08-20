@@ -1,5 +1,6 @@
 """ Data Xml renderer for django REST API
 """
+
 from django.http import HttpResponse
 from rest_framework import renderers
 from rest_framework.status import (
@@ -37,7 +38,9 @@ class DataXmlRenderer(renderers.BaseRenderer):
             return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
 
         return data[
-            "xml_content"
-            if BACKWARD_COMPATIBILITY_DATA_XML_CONTENT
-            else "content"
+            (
+                "xml_content"
+                if BACKWARD_COMPATIBILITY_DATA_XML_CONTENT
+                else "content"
+            )
         ]

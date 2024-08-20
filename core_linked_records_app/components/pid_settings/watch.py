@@ -1,5 +1,6 @@
 """ Initialization function for PID Settings
 """
+
 import logging
 
 from core_linked_records_app import settings

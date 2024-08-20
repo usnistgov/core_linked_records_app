@@ -1,5 +1,6 @@
 """ Local resolver API
 """
+
 import logging
 
 from core_linked_records_app.components.oai_record.access_control import (

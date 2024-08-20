@@ -1,5 +1,6 @@
 """ Linked records PID Path objects.
 """
+
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist

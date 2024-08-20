@@ -1,5 +1,6 @@
 """ Mock classes for objects used within core_linked_records_app
 """
+
 from unittest.mock import Mock
 
 from rest_framework import status

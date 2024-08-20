@@ -1,5 +1,6 @@
 """ Fixtures for data integration tests cases.
 """
+
 from core_linked_records_app.components.pid_settings.models import PidSettings
 from core_linked_records_app.system.pid_settings import (
     api as pid_settings_system_api,

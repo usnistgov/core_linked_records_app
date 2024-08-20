@@ -1,6 +1,7 @@
 """ Integration tests for data watchers (creation / deletion of PIDs when data are
 created / deleted).
 """
+
 from os.path import join
 
 from core_linked_records_app.settings import (

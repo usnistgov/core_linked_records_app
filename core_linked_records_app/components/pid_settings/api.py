@@ -1,5 +1,6 @@
 """ Protected API to manage PidSettings object.
 """
+
 import logging
 
 from core_linked_records_app.components.pid_settings.access_control import (

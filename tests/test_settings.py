@@ -13,6 +13,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.staticfiles",
     # Extra apps
+    "oauth2_provider",
     "django_celery_beat",
     "drf_spectacular",
     "menu",

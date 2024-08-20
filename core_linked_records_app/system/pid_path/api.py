@@ -1,5 +1,6 @@
 """ System API to manage PidPath objects.
 """
+
 import logging
 
 from core_linked_records_app import settings

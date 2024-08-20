@@ -1,5 +1,6 @@
 """ System API to manage PidSettings objects.
 """
+
 import logging
 
 from core_linked_records_app.components.pid_settings.models import PidSettings

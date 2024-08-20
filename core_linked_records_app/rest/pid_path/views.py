@@ -1,5 +1,6 @@
 """ REST views for PidPath collection
 """
+
 from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,

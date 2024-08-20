@@ -1,5 +1,6 @@
 """ Apps file for setting linked records when app is ready
 """
+
 import sys
 
 from django.apps import AppConfig

@@ -1,5 +1,6 @@
 """ Unit tests for core_linked_records_app.rest.query.views
 """
+
 from unittest import TestCase
 from unittest.mock import patch, Mock
 
@@ -220,8 +221,8 @@ class TestExecuteOaiPmhQuery(TestCase):
         mock_get_by_template.return_value = mocks.MockPidPath()
         # Return `mock_data_pid` every time the call count is odd (3 times for a list
         # of 5 elements, at index 0, 2 and 4), otherwise returns None.
-        mock_get_value_from_dot_notation.side_effect = (
-            lambda d, p: mock_data_pid
+        mock_get_value_from_dot_notation.side_effect = lambda d, p: (
+            mock_data_pid
             if mock_get_value_from_dot_notation.call_count % 2
             else None
         )

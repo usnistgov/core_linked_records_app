@@ -1,5 +1,6 @@
 """ Local resolver API
 """
+
 from logging import getLogger
 
 from core_linked_records_app import settings

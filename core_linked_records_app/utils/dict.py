@@ -1,5 +1,6 @@
 """ Utilities to manipulate dictionaries
 """
+
 from django.core.exceptions import ValidationError
 
 from core_main_app.commons.exceptions import QueryError

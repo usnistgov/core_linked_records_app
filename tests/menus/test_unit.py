@@ -1,5 +1,6 @@
 """ Unit tests for menus
 """
+
 from unittest import TestCase
 
 from menu import Menu

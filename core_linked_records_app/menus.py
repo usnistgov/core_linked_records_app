@@ -5,6 +5,7 @@ Upon installation of the app the following menus are displayed:
 
     * PID settings
 """
+
 from django.urls import reverse
 from menu import Menu, MenuItem
 

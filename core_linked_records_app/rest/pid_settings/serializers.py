@@ -1,5 +1,6 @@
 """ Serializers for calls related to `PidSettings` model.
 """
+
 from rest_framework import serializers
 
 from core_linked_records_app.components.pid_settings import (

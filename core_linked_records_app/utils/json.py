@@ -1,5 +1,6 @@
 """ JSON utilities functions.
 """
+
 import logging
 
 from core_main_app.utils.json_utils import validate_json_data

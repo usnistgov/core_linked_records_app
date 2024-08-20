@@ -1,5 +1,6 @@
 """ REST views for the blob API
 """
+
 from rest_framework import status
 from rest_framework.permissions import (
     IsAdminUser,

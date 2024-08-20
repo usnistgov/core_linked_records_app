@@ -1,5 +1,6 @@
 """ Linked records REST views
 """
+
 import json
 import logging
 

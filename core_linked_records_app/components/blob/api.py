@@ -1,5 +1,6 @@
 """ Local resolver Blob API.
 """
+
 from importlib import import_module
 from logging import getLogger
 

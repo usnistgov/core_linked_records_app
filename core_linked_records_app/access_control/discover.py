@@ -1,5 +1,6 @@
 """ Initialize permissions related to PID implementation.
 """
+
 import logging
 
 from core_linked_records_app.access_control import rights

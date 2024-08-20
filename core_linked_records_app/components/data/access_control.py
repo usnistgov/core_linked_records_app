@@ -1,5 +1,6 @@
 """ Access control methods for `core_linked_records.components.data.api`.
 """
+
 from core_main_app.access_control.api import check_can_read_document
 from core_main_app.components.data.models import Data
 
