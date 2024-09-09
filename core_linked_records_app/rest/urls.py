@@ -59,4 +59,9 @@ urlpatterns += [
         providers_views.ProviderRecordView.as_view(),
         name="core_linked_records_provider_record",
     ),
+    re_path(
+        r"^data/pid/(?P<pk>\w+)/render/$",
+        pid_views.DataHtmlRenderByPID.as_view(),
+        name="core_linked_records_rest_data_html_render_by_pid",
+    ),
 ]

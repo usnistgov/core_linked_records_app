@@ -2,8 +2,9 @@
 """
 
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
+from django.test import SimpleTestCase
 from rest_framework import status
 
 from core_explore_common_app.components.query import api as query_api
@@ -12,6 +13,9 @@ from core_linked_records_app.components.data import api as data_api
 from core_linked_records_app.rest.pid import views as pid_views
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_main_app.utils.tests_tools.RequestMock import RequestMock
+from core_main_app.components.template_html_rendering import (
+    api as template_html_rendering_api,
+)
 from tests import mocks
 
 
@@ -184,4 +188,90 @@ class TestRetrieveListPidPost(TestCase):
         response = self.send_oauth_request(
             mock_query_get_by_id, mock_oauth2_post_request, mock_user
         )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class TestTemplateHtmlRenderingByDataPIDPermission(SimpleTestCase):
+    """TestTemplateHtmlRenderingByDataPIDPermission"""
+
+    def test_anonymous_returns_http_403(self):
+        """test_anonymous_returns_http_403
+
+        Returns:
+
+        """
+        response = RequestMock.do_request_get(
+            pid_views.DataHtmlRenderByPID.as_view(),
+            None,
+            param={"pk": 1},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @patch.object(data_api, "get_data_by_pid")
+    @patch.object(template_html_rendering_api, "get_by_template_id")
+    @patch.object(template_html_rendering_api, "render_data")
+    def test_authenticated_returns_http_200(
+        self,
+        mock_data_api_get_data_by_pid,
+        mock_template_html_rendering_api_get_by_template_id,
+        mock_template_html_rendering_api_render_data,
+    ):
+        """test_authenticated_returns_http_200
+
+         Args:
+            mock_data_api_get_data_by_pid:
+            mock_template_html_rendering_api_get_by_template_id:
+            mock_template_html_rendering_api_render_data:
+
+        Returns:
+
+        """
+        mock_data_api_get_data_by_pid.return_value = Mock()
+        mock_template_html_rendering_api_get_by_template_id.return_value = (
+            Mock()
+        )
+        mock_template_html_rendering_api_render_data.return_value = Mock()
+        mock_user = create_mock_user("1")
+
+        response = RequestMock.do_request_get(
+            pid_views.DataHtmlRenderByPID.as_view(),
+            mock_user,
+            param={"pk": 1},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @patch.object(data_api, "get_data_by_pid")
+    @patch.object(template_html_rendering_api, "get_by_template_id")
+    @patch.object(template_html_rendering_api, "render_data")
+    def test_staff_returns_http_200(
+        self,
+        mock_data_api_get_data_by_pid,
+        mock_template_html_rendering_api_get_by_template_id,
+        mock_template_html_rendering_api_render_data,
+    ):
+        """test_staff_returns_http_200
+
+         Args:
+            mock_data_api_get_data_by_pid:
+            mock_template_html_rendering_api_get_by_template_id:
+            mock_template_html_rendering_api_render_data:
+
+        Returns:
+
+        """
+        mock_data_api_get_data_by_pid.return_value = Mock()
+        mock_template_html_rendering_api_get_by_template_id.return_value = (
+            Mock()
+        )
+        mock_template_html_rendering_api_render_data.return_value = Mock()
+        mock_user = create_mock_user("1", is_staff=True)
+
+        response = RequestMock.do_request_get(
+            pid_views.DataHtmlRenderByPID.as_view(),
+            mock_user,
+            param={"pk": 1},
+        )
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -22,6 +22,7 @@ from core_linked_records_app import settings
 from core_linked_records_app.components.blob import api as blob_api
 from core_linked_records_app.components.data import api as data_api
 from core_linked_records_app.utils.query import execute_local_pid_query
+from core_main_app.rest.template_html_rendering.views import BaseDataHtmlRender
 
 if (
     "core_oaipmh_harvester_app" in settings.INSTALLED_APPS
@@ -235,3 +236,24 @@ class RetrieveListPIDView(APIView):
                 {"error": str(exception)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class DataHtmlRenderByPID(BaseDataHtmlRender):
+    """DataHtmlRenderByPID"""
+
+    def get_object(self, pk, request):
+        """get  data object by PID."""
+        return data_api.get_data_by_pid(pk, request)
+
+    def get(self, request, pk):
+        """Get `TemplateHtmlRendering` object from db
+
+        Args:
+            request: HTTP request
+            pk: data pid
+
+        Returns:
+            Html string
+        """
+        # Get rendering content
+        return self.get_rendering_content(request, pk)
