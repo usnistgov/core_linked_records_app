@@ -201,9 +201,7 @@ class TestTemplateHtmlRenderingByDataPIDPermission(SimpleTestCase):
 
         """
         response = RequestMock.do_request_get(
-            pid_views.DataHtmlRenderByPID.as_view(),
-            None,
-            param={"pk": 1},
+            pid_views.DataHtmlRenderByPID.as_view(), None
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -237,7 +235,7 @@ class TestTemplateHtmlRenderingByDataPIDPermission(SimpleTestCase):
         response = RequestMock.do_request_get(
             pid_views.DataHtmlRenderByPID.as_view(),
             mock_user,
-            param={"pk": 1},
+            data={"pid": ""},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -271,7 +269,7 @@ class TestTemplateHtmlRenderingByDataPIDPermission(SimpleTestCase):
         response = RequestMock.do_request_get(
             pid_views.DataHtmlRenderByPID.as_view(),
             mock_user,
-            param={"pk": 1},
+            data={"pid": ""},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

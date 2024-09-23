@@ -25,6 +25,11 @@ urlpatterns += [
         name="core_linked_records_app_settings",
     ),
     re_path(
+        r"^data/render$",
+        pid_views.DataHtmlRenderByPID.as_view(),
+        name="core_linked_records_rest_data_html_render_by_pid",
+    ),
+    re_path(
         r"^settings/path/$",
         pid_path_views.PidPathListView.as_view(),
         name="core_linked_records_app_settings_path_list",
@@ -58,10 +63,5 @@ urlpatterns += [
         r"^(?P<provider>[^/]+)/(?P<record>.*)$",
         providers_views.ProviderRecordView.as_view(),
         name="core_linked_records_provider_record",
-    ),
-    re_path(
-        r"^data/pid/(?P<pk>\w+)/render/$",
-        pid_views.DataHtmlRenderByPID.as_view(),
-        name="core_linked_records_rest_data_html_render_by_pid",
     ),
 ]

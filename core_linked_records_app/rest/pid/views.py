@@ -241,11 +241,11 @@ class RetrieveListPIDView(APIView):
 class DataHtmlRenderByPID(BaseDataHtmlRender):
     """DataHtmlRenderByPID"""
 
-    def get_object(self, pk, request):
+    def get_object(self, pid, request):
         """get  data object by PID."""
-        return data_api.get_data_by_pid(pk, request)
+        return data_api.get_data_by_pid(pid, request)
 
-    def get(self, request, pk):
+    def get(self, request):
         """Get `TemplateHtmlRendering` object from db
 
         Args:
@@ -255,5 +255,10 @@ class DataHtmlRenderByPID(BaseDataHtmlRender):
         Returns:
             Html string
         """
+        if "pid" not in request.GET:
+            return Response(
+                {"message": "Missing parameter 'pid'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         # Get rendering content
-        return self.get_rendering_content(request, pk)
+        return self.get_rendering_content(request, request.GET["pid"])
