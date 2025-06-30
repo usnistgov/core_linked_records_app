@@ -4,6 +4,12 @@
 import json
 import logging
 
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    extend_schema,
+    OpenApiResponse,
+)
 from rest_framework import status
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
@@ -32,6 +38,10 @@ from core_main_app.utils.file import get_file_http_response
 logger = logging.getLogger(__name__)
 
 
+@extend_schema(
+    tags=["OAI Provider Record"],
+    description="Provider Record View",
+)
 class ProviderRecordView(APIView):
     """Provider Record View"""
 
@@ -42,14 +52,35 @@ class ProviderRecordView(APIView):
         self.provider_manager = ProviderManager()
         super().__init__(**kwargs)
 
+    @extend_schema(
+        summary="Create a handle record",
+        description="Create a handle record",
+        parameters=[
+            OpenApiParameter(
+                name="provider",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Provider name",
+            ),
+            OpenApiParameter(
+                name="record",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Record name",
+            ),
+        ],
+        request=OpenApiTypes.OBJECT,
+        responses={
+            201: OpenApiResponse(description="Handle record created"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+    )
     def post(self, request, provider, record):
         """Create a handle record
-
         Args:
             request:
             provider:
             record:
-
         Returns:
         """
         try:
@@ -73,10 +104,8 @@ class ProviderRecordView(APIView):
                     },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-
             id_provider = self.provider_manager.get(provider)
             provider_response = id_provider.create(prefix, record)
-
             provider_content = json.loads(provider_response.content)
             return Response(
                 provider_content, status=provider_response.status_code
@@ -91,6 +120,29 @@ class ProviderRecordView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+    @extend_schema(
+        summary="Update a handle record",
+        description="Update the value of a given handle record",
+        parameters=[
+            OpenApiParameter(
+                name="provider",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Provider name",
+            ),
+            OpenApiParameter(
+                name="record",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Record name",
+            ),
+        ],
+        request=OpenApiTypes.OBJECT,
+        responses={
+            200: OpenApiResponse(description="Handle record updated"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+    )
     def put(
         self,
         request,  # noqa, pylint: disable=unused-argument
@@ -98,46 +150,62 @@ class ProviderRecordView(APIView):
         record,
     ):
         """Update the value of a given handle record
-
         Args:
             request:
             provider:
             record:
-
         Returns:
         """
         try:
             id_provider = self.provider_manager.get(provider)
             provider_response = id_provider.update(record)
-
             provider_content = json.loads(provider_response.content)
-
             return Response(
                 provider_content, status=provider_response.status_code
             )
         except Exception as exc:  # pylint: disable=broad-except
             return Response(
                 {
-                    "message": f"An unexpected error occurred while updating "
-                    f"record: {str(exc)}"
+                    "message": f"An unexpected error occurred while updating record: {str(exc)}"
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+    @extend_schema(
+        summary="Retrieve a handle record",
+        description="Retrieve the local data of a given handle record",
+        parameters=[
+            OpenApiParameter(
+                name="provider",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Provider name",
+            ),
+            OpenApiParameter(
+                name="record",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Record name",
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(description="Handle record retrieved"),
+            403: OpenApiResponse(description="Access Forbidden"),
+            404: OpenApiResponse(description="Object was not found"),
+            500: OpenApiResponse(description="Internal server error"),
+        },
+    )
     def get(self, request, provider, record):
         """Retrieve the local data of a given handle record
-
         Args:
             request:
             provider:
             record:
-
         Returns:
         """
         try:
             id_provider = self.provider_manager.get(provider)
             provider_response = id_provider.get(record)
-
             try:
                 query_result = get_data_by_pid(
                     json.loads(provider_response.content)["url"], request
@@ -153,7 +221,6 @@ class ProviderRecordView(APIView):
                         json.loads(provider_response.content)["url"],
                         request.user,
                     )
-
                     return get_file_http_response(
                         query_result.blob.read(), query_result.filename
                     )
@@ -177,6 +244,28 @@ class ProviderRecordView(APIView):
                 content, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @extend_schema(
+        summary="Delete a handle record",
+        description="Delete a handle record",
+        parameters=[
+            OpenApiParameter(
+                name="provider",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Provider name",
+            ),
+            OpenApiParameter(
+                name="record",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Record name",
+            ),
+        ],
+        responses={
+            204: None,
+            500: OpenApiResponse(description="Internal server error"),
+        },
+    )
     def delete(
         self,
         request,  # noqa, pylint: disable=unused-argument
@@ -184,28 +273,23 @@ class ProviderRecordView(APIView):
         record,
     ):
         """Delete a handle record
-
         Args:
             request:
             provider:
             record:
-
         Returns:
         """
         try:
             id_provider = self.provider_manager.get(provider)
             provider_response = id_provider.delete(record)
-
             provider_content = json.loads(provider_response.content)
-
             return Response(
                 provider_content, status=provider_response.status_code
             )
         except Exception as exc:  # pylint: disable=broad-except
             return Response(
                 {
-                    "message": f"An unexpected error occurred while deleting "
-                    f"record: {str(exc)}"
+                    "message": f"An unexpected error occurred while deleting record: {str(exc)}"
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

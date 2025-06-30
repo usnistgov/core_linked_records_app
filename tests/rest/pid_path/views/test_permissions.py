@@ -28,8 +28,8 @@ class TestPidPathListViewGet(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_authenticated_returns_200(self):
-        """test_authenticated_returns_200"""
+    def test_authenticated_returns_403(self):
+        """test_authenticated_returns_403"""
 
         mock_user = create_mock_user("1")
 
@@ -37,7 +37,7 @@ class TestPidPathListViewGet(TestCase):
             pid_path_views.PidPathListView.as_view(), mock_user
         )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_staff_returns_200(self):
         """test_staff_returns_200"""
@@ -66,19 +66,21 @@ class TestPidPathListViewPost(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch.object(ListCreateAPIView, "post")
-    def test_authenticated_returns_201(self, mock_view_post):
-        """test_authenticated_returns_201"""
+    def test_authenticated_returns_403(self, mock_view_post):
+        """test_authenticated_returns_403"""
 
         mock_user = create_mock_user("1")
 
-        mock_view_post.return_value = Response(status=status.HTTP_201_CREATED)
+        mock_view_post.return_value = Response(
+            status=status.HTTP_403_FORBIDDEN
+        )
         response = RequestMock.do_request_post(
             pid_path_views.PidPathListView.as_view(),
             mock_user,
             data={"path": "mock.path", "template": "mock_template_id"},
         )
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch.object(ListCreateAPIView, "post")
     def test_staff_returns_201(self, mock_view_post):
@@ -109,8 +111,8 @@ class TestPidPathDetailViewGet(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch.object(RetrieveUpdateDestroyAPIView, "get")
-    def test_authenticated_returns_200(self, mock_view_get):
-        """test_authenticated_returns_200"""
+    def test_authenticated_returns_403(self, mock_view_get):
+        """test_authenticated_returns_403"""
 
         mock_user = create_mock_user("1")
 
@@ -121,7 +123,7 @@ class TestPidPathDetailViewGet(TestCase):
             param={"id": 0},
         )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch.object(RetrieveUpdateDestroyAPIView, "get")
     def test_staff_returns_200(self, mock_view_get):
@@ -134,6 +136,52 @@ class TestPidPathDetailViewGet(TestCase):
             pid_path_views.PidPathDetailView.as_view(),
             mock_user,
             param={"id": 0},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class TestPidPathDetailViewPut(TestCase):
+    """Unit tests for `PidPutDetailView.patch` method."""
+
+    def test_anonymous_returns_403(self):
+        """test_anonymous_returns_403"""
+
+        response = RequestMock.do_request_put(
+            pid_path_views.PidPathDetailView.as_view(),
+            None,
+            data={"path": "mock.path", "template": "mock_template_id"},
+            param={"pk": "1"},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_authenticated_returns_403(self):
+        """test_authenticated_returns_403"""
+
+        mock_user = create_mock_user("1")
+
+        response = RequestMock.do_request_put(
+            pid_path_views.PidPathDetailView.as_view(),
+            mock_user,
+            data={"path": "mock.path", "template": "mock_template_id"},
+            param={"pk": "1"},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @patch.object(RetrieveUpdateDestroyAPIView, "put")
+    def test_staff_returns_200(self, mock_view_patch):
+        """test_staff_returns_200"""
+
+        mock_user = create_mock_user("1", is_staff=True)
+
+        mock_view_patch.return_value = Response(status=status.HTTP_200_OK)
+        response = RequestMock.do_request_put(
+            pid_path_views.PidPathDetailView.as_view(),
+            mock_user,
+            data={"path": "mock.path", "template": "mock_template_id"},
+            param={"pk": "1"},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -154,8 +202,8 @@ class TestPidPathDetailViewPatch(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch.object(RetrieveUpdateDestroyAPIView, "patch")
-    def test_authenticated_returns_200(self, mock_view_patch):
-        """test_authenticated_returns_200"""
+    def test_authenticated_returns_403(self, mock_view_patch):
+        """test_authenticated_returns_403"""
 
         mock_user = create_mock_user("1")
 
@@ -166,7 +214,7 @@ class TestPidPathDetailViewPatch(TestCase):
             data={"path": "mock.path", "template": "mock_template_id"},
         )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch.object(RetrieveUpdateDestroyAPIView, "patch")
     def test_staff_returns_200(self, mock_view_patch):
@@ -198,20 +246,20 @@ class TestPidPathDetailViewDelete(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch.object(RetrieveUpdateDestroyAPIView, "delete")
-    def test_authenticated_returns_204(self, mock_view_delete):
-        """test_authenticated_returns_204"""
+    def test_authenticated_returns_403(self, mock_view_delete):
+        """test_authenticated_returns_403"""
 
         mock_user = create_mock_user("1")
 
         mock_view_delete.return_value = Response(
-            status=status.HTTP_204_NO_CONTENT
+            status=status.HTTP_403_FORBIDDEN
         )
         response = RequestMock.do_request_delete(
             pid_path_views.PidPathDetailView.as_view(),
             mock_user,
         )
 
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @patch.object(RetrieveUpdateDestroyAPIView, "delete")
     def test_staff_returns_204(self, mock_view_delete):
