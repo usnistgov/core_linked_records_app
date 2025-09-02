@@ -44,6 +44,10 @@ before_script:
       -exec pip install --pre 
       --index-url ${CI_API_V4_URL}/groups/${CI_PROJECT_NAMESPACE_ID}/-/packages/pypi/simple/
       -r {} \;
+  - MAIN_APP_VERSION="$(pip freeze | grep core-main-app | cut -d '=' -f 3)"
+  - pip install --pre
+    --index-url ${CI_API_V4_URL}/groups/${CI_PROJECT_NAMESPACE_ID}/-/packages/pypi/simple/
+    --force-reinstall -U "core_main_app[develop]==${MAIN_APP_VERSION}"
 
 lint:
   stage: lint
