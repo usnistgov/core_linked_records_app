@@ -6,9 +6,17 @@ import logging
 from rest_framework import renderers, status
 from rest_framework.exceptions import APIException
 
+from core_main_app.access_control.exceptions import AccessControlError
+from core_main_app.components.abstract_processing_module.models import (
+    AbstractProcessingModule,
+)
 from core_main_app.components.data import api as data_api
 from core_main_app.utils.rendering import render
 from core_main_app.utils.view_builders import data as data_view_builder
+from core_main_app.components.data_processing_module import (
+    api as data_module_api,
+)
+from core_main_app.access_control import api as acl_api
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +81,28 @@ class DataHtmlUserRenderer(renderers.BaseRenderer):
                 )
 
             data_object = data_api.get_by_id(data["id"], request.user)
+            try:
+                acl_api.check_can_write(data_object, request.user)
+                can_edit_data = True
+            except:  # noqa: E722
+                can_edit_data = False
+
+            data_modules = []
+            if can_edit_data:
+                try:  # Retrieve data modules if authorized.
+                    data_modules = data_module_api.get_all_by_data_id(
+                        data["id"],
+                        request.user,
+                        run_strategy=AbstractProcessingModule.RUN_ON_DEMAND,
+                    )
+                except AccessControlError:
+                    data_modules = []
+
             page_context = data_view_builder.build_page(
-                data_object, display_download_options=True
+                data_object,
+                display_download_options=True,
+                data_modules=data_modules,
+                display_edit_options=can_edit_data,
             )
 
             return data_view_builder.render_page(
