@@ -53,7 +53,7 @@ class TestPidSettingsViewGet(TestCase):
             self.request,
             "core_linked_records_app/admin/pid_settings_error.html",
             context={
-                "error": "An error occured while retrieving the PID settings. "
+                "error": "An error occurred while retrieving the PID settings. "
                 "Please contact an administrator for more information. Exception: "
                 "mock_get_pid_path_api_get_all_exception."
             },
@@ -96,7 +96,7 @@ class TestPidSettingsViewGet(TestCase):
             self.request,
             "core_linked_records_app/admin/pid_settings_error.html",
             context={
-                "error": "An error occured while retrieving the PID settings. "
+                "error": "An error occurred while retrieving the PID settings. "
                 "Please contact an administrator for more information. Exception: "
                 "mock_get_pid_settings_dict_exception."
             },

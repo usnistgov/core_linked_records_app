@@ -46,7 +46,7 @@ let processAutoSetPidClick = (event) => {
         },
         error: function() {
             displayError(
-                "An error occured while switching 'auto_set_pid' value. Contact an " +
+                "An error occurred while switching 'auto_set_pid' value. Contact an " +
                 "administrator for more information."
             )
         }

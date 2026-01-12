@@ -34,6 +34,6 @@ class RetrieveQueryPidListView(APIView):
             )
         except Exception as exc:
             return Response(
-                f"An unexpected error occured while retrieving PID list: {str(exc)}",
+                f"An unexpected error occurred while retrieving PID list: {str(exc)}",
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

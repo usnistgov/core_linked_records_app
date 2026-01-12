@@ -78,7 +78,7 @@ class PidSettingsView(View):
                 request,
                 "core_linked_records_app/admin/pid_settings_error.html",
                 context={
-                    "error": "An error occured while retrieving the PID settings. "
+                    "error": "An error occurred while retrieving the PID settings. "
                     "Please contact an administrator for more information. Exception: "
                     f"{str(exc)}."
                 },
