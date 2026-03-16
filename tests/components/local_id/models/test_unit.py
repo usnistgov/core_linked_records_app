@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.components.local_id.models
-"""
+"""Unit tests for core_linked_records_app.components.local_id.models"""
 
 from unittest import TestCase
 from unittest.mock import patch

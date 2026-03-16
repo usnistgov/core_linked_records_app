@@ -1,5 +1,4 @@
-""" Unit tests for admin views
-"""
+"""Unit tests for admin views"""
 
 from unittest import TestCase
 from unittest.mock import patch

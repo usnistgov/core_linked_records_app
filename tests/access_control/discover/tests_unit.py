@@ -1,5 +1,4 @@
-""" Unit tests for `core_linked_records_app.access_control.discover`.
-"""
+"""Unit tests for `core_linked_records_app.access_control.discover`."""
 
 from unittest import TestCase
 from unittest.mock import patch, MagicMock, call

@@ -1,5 +1,4 @@
-""" Signals to trigger before Data save
-"""
+"""Signals to trigger before Data save"""
 
 import json
 import logging

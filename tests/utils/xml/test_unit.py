@@ -1,5 +1,4 @@
-""" Unit tests for `core_linked_records_app.utils.xml`.
-"""
+"""Unit tests for `core_linked_records_app.utils.xml`."""
 
 from unittest import TestCase
 from unittest.mock import patch, MagicMock, call

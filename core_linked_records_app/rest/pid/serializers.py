@@ -1,5 +1,4 @@
-""" Serializer classes for LocalID object
-"""
+"""Serializer classes for LocalID object"""
 
 from rest_framework.serializers import ModelSerializer
 

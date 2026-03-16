@@ -1,5 +1,4 @@
-""" REST views for the blob API
-"""
+"""REST views for the blob API"""
 
 from drf_spectacular.utils import (
     OpenApiExample,

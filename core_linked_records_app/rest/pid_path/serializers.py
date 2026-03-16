@@ -1,5 +1,4 @@
-""" Serializers for calls related to `PidPath` model.
-"""
+"""Serializers for calls related to `PidPath` model."""
 
 from rest_framework import serializers
 

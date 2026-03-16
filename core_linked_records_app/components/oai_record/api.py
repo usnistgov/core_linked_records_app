@@ -1,5 +1,4 @@
-""" Local resolver API
-"""
+"""Local resolver API"""
 
 import logging
 

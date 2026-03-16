@@ -1,5 +1,4 @@
-""" Access control methods for `core_linked_records.components.oai_record.api`.
-"""
+"""Access control methods for `core_linked_records.components.oai_record.api`."""
 
 from core_main_app.access_control.api import check_anonymous_access
 

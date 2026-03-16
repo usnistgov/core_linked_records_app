@@ -1,5 +1,4 @@
-""" Access control helpers for PidPath APIs.
-"""
+"""Access control helpers for PidPath APIs."""
 
 from core_main_app.components.template.access_control import (
     check_can_read_template,

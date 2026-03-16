@@ -1,5 +1,4 @@
-""" Utilities to manipulate dictionaries
-"""
+"""Utilities to manipulate dictionaries"""
 
 from django.core.exceptions import ValidationError
 

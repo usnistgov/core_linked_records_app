@@ -1,5 +1,4 @@
-""" Permission tests for core_linked_records_app.rest.blob.views
-"""
+"""Permission tests for core_linked_records_app.rest.blob.views"""
 
 from unittest import TestCase
 from unittest.mock import patch

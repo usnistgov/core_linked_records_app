@@ -1,5 +1,4 @@
-""" Signals to trigger after Blob modificaations.
-"""
+"""Signals to trigger after Blob modificaations."""
 
 import json
 from logging import getLogger

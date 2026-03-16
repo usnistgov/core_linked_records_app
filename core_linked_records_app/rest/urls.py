@@ -1,5 +1,4 @@
-""" Url router for the core linked records app
-"""
+"""Url router for the core linked records app"""
 
 from django.urls import re_path
 

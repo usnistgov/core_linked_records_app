@@ -1,5 +1,4 @@
-""" Unit tests for `core_linked_records_app.components.blob.watch` package.
-"""
+"""Unit tests for `core_linked_records_app.components.blob.watch` package."""
 
 import json
 from unittest import TestCase

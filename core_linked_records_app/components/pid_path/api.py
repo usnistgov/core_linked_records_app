@@ -1,5 +1,4 @@
-""" API for PidPath model
-"""
+"""API for PidPath model"""
 
 import logging
 

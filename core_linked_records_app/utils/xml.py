@@ -1,5 +1,4 @@
-""" XML utilities functions.
-"""
+"""XML utilities functions."""
 
 import logging
 

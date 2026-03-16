@@ -1,5 +1,4 @@
-""" Mock classes for objects used within core_linked_records_app
-"""
+"""Mock classes for objects used within core_linked_records_app"""
 
 from unittest.mock import Mock
 

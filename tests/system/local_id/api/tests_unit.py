@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.system.local_id.api.
-"""
+"""Unit tests for core_linked_records_app.system.local_id.api."""
 
 from unittest import TestCase
 from unittest.mock import patch, MagicMock

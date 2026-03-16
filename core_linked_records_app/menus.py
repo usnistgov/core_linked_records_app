@@ -1,4 +1,4 @@
-""" Menu configuration for core_linked_records_app.
+"""Menu configuration for core_linked_records_app.
 Upon installation of the app the following menus are displayed:
 
   * Admin menu

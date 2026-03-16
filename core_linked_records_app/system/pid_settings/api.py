@@ -1,5 +1,4 @@
-""" System API to manage PidSettings objects.
-"""
+"""System API to manage PidSettings objects."""
 
 import logging
 

@@ -1,5 +1,4 @@
-""" Unit tests for `core_linked_records.utils.json` package.
-"""
+"""Unit tests for `core_linked_records.utils.json` package."""
 
 from unittest import TestCase
 from unittest.mock import MagicMock, patch

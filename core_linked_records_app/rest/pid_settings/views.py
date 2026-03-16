@@ -1,5 +1,4 @@
-""" Rest API views to retrieve PID settings
-"""
+"""Rest API views to retrieve PID settings"""
 
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status

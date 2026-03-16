@@ -1,5 +1,4 @@
-""" Unit tests for menus
-"""
+"""Unit tests for menus"""
 
 from unittest import TestCase
 

@@ -1,5 +1,4 @@
-""" Linked records PID Path objects.
-"""
+"""Linked records PID Path objects."""
 
 import logging
 

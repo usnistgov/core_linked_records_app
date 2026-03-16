@@ -1,5 +1,4 @@
-""" REST views for PidPath collection
-"""
+"""REST views for PidPath collection"""
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (

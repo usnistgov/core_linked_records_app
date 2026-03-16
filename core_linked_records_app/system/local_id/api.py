@@ -1,5 +1,4 @@
-""" System API to manage LocalId objects.
-"""
+"""System API to manage LocalId objects."""
 
 import logging
 

@@ -1,5 +1,4 @@
-""" Protected API to manage PidSettings object.
-"""
+"""Protected API to manage PidSettings object."""
 
 import logging
 

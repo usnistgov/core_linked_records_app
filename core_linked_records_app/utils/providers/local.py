@@ -1,5 +1,4 @@
-""" Local record system implementation
-"""
+"""Local record system implementation"""
 
 import json
 import random

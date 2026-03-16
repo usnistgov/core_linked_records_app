@@ -1,5 +1,4 @@
-""" Url router for the explore OAI-PMH search application
-"""
+"""Url router for the explore OAI-PMH search application"""
 
 from django.conf.urls import include
 from django.contrib import admin

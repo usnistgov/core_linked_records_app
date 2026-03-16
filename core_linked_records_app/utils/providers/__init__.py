@@ -1,5 +1,4 @@
-""" Handle system abstract class
-"""
+"""Handle system abstract class"""
 
 import logging
 from abc import ABC, abstractmethod

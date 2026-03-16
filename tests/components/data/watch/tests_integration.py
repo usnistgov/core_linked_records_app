@@ -1,4 +1,4 @@
-""" Integration tests for data watchers (creation / deletion of PIDs when data are
+"""Integration tests for data watchers (creation / deletion of PIDs when data are
 created / deleted).
 """
 

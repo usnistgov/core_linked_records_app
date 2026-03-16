@@ -1,5 +1,4 @@
-""" Unit tests for data_xml_renderer packages.
-"""
+"""Unit tests for data_xml_renderer packages."""
 
 from unittest import TestCase
 

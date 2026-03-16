@@ -1,5 +1,4 @@
-""" Ajax views accessible by users.
-"""
+"""Ajax views accessible by users."""
 
 import json
 from urllib.parse import urljoin

@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.rest.pid.views
-"""
+"""Unit tests for core_linked_records_app.rest.pid.views"""
 
 import json
 from unittest import TestCase

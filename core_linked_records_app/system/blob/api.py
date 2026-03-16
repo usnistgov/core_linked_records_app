@@ -1,5 +1,4 @@
-""" System API to manage  Blob objects.
-"""
+"""System API to manage  Blob objects."""
 
 import logging
 

@@ -1,5 +1,4 @@
-""" PID utilities related to data objects.
-"""
+"""PID utilities related to data objects."""
 
 import json
 import logging

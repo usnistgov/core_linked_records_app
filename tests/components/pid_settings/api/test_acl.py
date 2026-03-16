@@ -1,5 +1,4 @@
-""" ACL tests for `core_linked_records.components.pid_settings.api`.
-"""
+"""ACL tests for `core_linked_records.components.pid_settings.api`."""
 
 from unittest import TestCase
 from unittest.mock import patch, MagicMock

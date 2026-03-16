@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.utils.path
-"""
+"""Unit tests for core_linked_records_app.utils.path"""
 
 from unittest import TestCase
 

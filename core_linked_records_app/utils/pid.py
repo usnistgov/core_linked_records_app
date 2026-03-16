@@ -1,5 +1,4 @@
-""" Utilities related to PID
-"""
+"""Utilities related to PID"""
 
 import re
 

@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.utils.blob
-"""
+"""Unit tests for core_linked_records_app.utils.blob"""
 
 from unittest import TestCase
 from unittest.mock import patch, MagicMock

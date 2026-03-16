@@ -1,5 +1,4 @@
-""" Utilities to retrieve path information.
-"""
+"""Utilities to retrieve path information."""
 
 
 def get_api_path_from_object(instance):

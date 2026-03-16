@@ -1,5 +1,4 @@
-""" Unit tests for data_html_renderer packages.
-"""
+"""Unit tests for data_html_renderer packages."""
 
 from unittest import TestCase
 from unittest.mock import patch, Mock

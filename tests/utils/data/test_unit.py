@@ -1,5 +1,4 @@
-""" Unit tests for `core_linked_records_app.utils.data`.
-"""
+"""Unit tests for `core_linked_records_app.utils.data`."""
 
 from copy import deepcopy
 from unittest import TestCase

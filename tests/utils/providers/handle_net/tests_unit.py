@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.utils.providers.handle_net
-"""
+"""Unit tests for core_linked_records_app.utils.providers.handle_net"""
 
 import json
 from unittest import TestCase

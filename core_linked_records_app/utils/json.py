@@ -1,5 +1,4 @@
-""" JSON utilities functions.
-"""
+"""JSON utilities functions."""
 
 import logging
 

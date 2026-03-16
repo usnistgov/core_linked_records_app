@@ -1,5 +1,4 @@
-"""Linked records models
-"""
+"""Linked records models"""
 
 from django.db import models
 

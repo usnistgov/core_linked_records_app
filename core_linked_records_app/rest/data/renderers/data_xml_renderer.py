@@ -1,5 +1,4 @@
-""" Data Xml renderer for django REST API
-"""
+"""Data Xml renderer for django REST API"""
 
 from django.http import HttpResponse
 from rest_framework import renderers

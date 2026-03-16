@@ -1,5 +1,4 @@
-""" Initialization function for PID Settings
-"""
+"""Initialization function for PID Settings"""
 
 import logging
 

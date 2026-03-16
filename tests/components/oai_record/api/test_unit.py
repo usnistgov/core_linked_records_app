@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.components.oai_record.api
-"""
+"""Unit tests for core_linked_records_app.components.oai_record.api"""
 
 from unittest import TestCase
 from unittest.mock import patch

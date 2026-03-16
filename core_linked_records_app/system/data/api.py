@@ -1,5 +1,4 @@
-""" System API to manage Data objects.
-"""
+"""System API to manage Data objects."""
 
 import logging
 

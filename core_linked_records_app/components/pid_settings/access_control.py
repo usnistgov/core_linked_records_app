@@ -1,5 +1,4 @@
-""" Access control methods for `core_linked_records.components.pid_settings.api`.
-"""
+"""Access control methods for `core_linked_records.components.pid_settings.api`."""
 
 from core_linked_records_app import settings
 from core_linked_records_app.access_control import rights

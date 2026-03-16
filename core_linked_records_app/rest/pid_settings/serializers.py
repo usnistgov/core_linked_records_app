@@ -1,5 +1,4 @@
-""" Serializers for calls related to `PidSettings` model.
-"""
+"""Serializers for calls related to `PidSettings` model."""
 
 from rest_framework import serializers
 

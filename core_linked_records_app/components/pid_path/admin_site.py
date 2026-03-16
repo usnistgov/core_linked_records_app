@@ -1,5 +1,4 @@
-""" Custom admin site for the `PidPath` model.
-"""
+"""Custom admin site for the `PidPath` model."""
 
 from django.contrib import admin
 

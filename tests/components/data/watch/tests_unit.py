@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.components.data.watch
-"""
+"""Unit tests for core_linked_records_app.components.data.watch"""
 
 import json
 from unittest import TestCase

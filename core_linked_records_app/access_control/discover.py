@@ -1,5 +1,4 @@
-""" Initialize permissions related to PID implementation.
-"""
+"""Initialize permissions related to PID implementation."""
 
 import logging
 

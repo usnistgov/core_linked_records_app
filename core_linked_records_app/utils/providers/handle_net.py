@@ -1,5 +1,4 @@
-""" Handle.net implementation class
-"""
+"""Handle.net implementation class"""
 
 import json
 import logging

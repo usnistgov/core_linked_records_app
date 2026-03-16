@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.components.pid_settings.models
-"""
+"""Unit tests for core_linked_records_app.components.pid_settings.models"""
 
 from unittest import TestCase
 from unittest.mock import patch

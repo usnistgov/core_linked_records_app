@@ -1,5 +1,4 @@
-""" Unit tests for core_linked_records_app.rest.blob.views
-"""
+"""Unit tests for core_linked_records_app.rest.blob.views"""
 
 from unittest import TestCase
 from unittest.mock import patch

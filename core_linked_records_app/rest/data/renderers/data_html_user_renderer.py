@@ -1,5 +1,4 @@
-""" Data HTML renderer for django REST API
-"""
+"""Data HTML renderer for django REST API"""
 
 import logging
 

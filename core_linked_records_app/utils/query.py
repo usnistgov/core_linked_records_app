@@ -1,5 +1,4 @@
-""" REST views for the query API
-"""
+"""REST views for the query API"""
 
 from core_explore_common_app.rest.query.views import build_local_query
 from core_linked_records_app import settings

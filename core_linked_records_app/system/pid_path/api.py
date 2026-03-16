@@ -1,5 +1,4 @@
-""" System API to manage PidPath objects.
-"""
+"""System API to manage PidPath objects."""
 
 import logging
 
