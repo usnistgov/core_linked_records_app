@@ -13,6 +13,7 @@ from core_linked_records_app.components.data import (
 )
 from core_linked_records_app.components.data import api as pid_data_api
 from core_linked_records_app.components.pid_path import api as pid_path_api
+from core_linked_records_app.components.pid_path.models import PidPath
 from core_linked_records_app.utils.exceptions import MultiplePidError
 from tests import mocks
 
@@ -92,6 +93,35 @@ class TestGetDataByPid(TestCase):
 
         result = pid_data_api.get_data_by_pid(**self.mock_kwargs)
         self.assertEqual(result, expected_result)
+
+    @patch.object(main_data_api, "execute_json_query")
+    @patch.object(pid_path_api, "get_all")
+    def test_get_pid_loops_on_all_set_pid_paths(
+        self, mock_get_all, mock_execute_json_query
+    ):
+        """test_get_pid_loops_on_all_set_pid_paths"""
+
+        mock_pid_path_1 = Mock(spec=PidPath)
+        mock_pid_path_1.path = "path_1"
+        mock_pid_path_2 = Mock(spec=PidPath)
+        mock_pid_path_2.path = "path_2"
+        mock_get_all.return_value = [mock_pid_path_1, mock_pid_path_2]
+        expected_result = mocks.MockData()
+        expected_result.user_id = self.mock_user.id
+        mock_execute_json_query.return_value = [expected_result]
+
+        result = pid_data_api.get_data_by_pid(**self.mock_kwargs)
+        self.assertEqual(result, expected_result)
+        mock_execute_json_query.assert_called_with(
+            {
+                "$or": [
+                    {"dict_content.path_1": "mock_pid"},  # path 1
+                    {"dict_content.path_2": "mock_pid"},  # path 2
+                    {"dict_content.mock.pid": "mock_pid"},  # default setting
+                ]
+            },
+            self.mock_user,
+        )
 
 
 class TestGetPidForData(TestCase):
@@ -298,6 +328,34 @@ class TestGetPidForData(TestCase):
 
         result = pid_data_api.get_pid_for_data(**self.mock_kwargs)
         self.assertEqual(result, expected_result)
+
+    @patch.object(pid_data_api, "is_valid_pid_value")
+    @patch.object(pid_data_api, "get_value_from_dot_notation")
+    @patch.object(pid_data_api, "is_dot_notation_in_dictionary")
+    @patch.object(pid_path_api, "get_by_template")
+    @patch.object(main_data_api, "get_by_id")
+    @patch.object(pid_data_acl, "Data")
+    @patch.object(pid_data_acl, "check_can_read_document")
+    def test_more_than_one_pid_path_set_in_document_raises_error(
+        self,
+        mock_check_can_read_document,
+        mock_data,  # noqa, pylint: disable=unused-argument
+        mock_get_by_id,
+        mock_get_by_template,
+        mock_is_dot_notation_in_dictionary,
+        mock_get_value_from_dot_notation,
+        mock_is_valid_pid_value,
+    ):
+        """test_more_than_one_pid_path_in_document_raises_error"""
+        mock_check_can_read_document.return_value = True
+        mock_get_by_id.return_value = self.mock_global_data
+        mock_get_by_template.return_value = mocks.MockPidPath()
+        mock_get_value_from_dot_notation.side_effect = ["pid1", "pid2"]
+        mock_is_dot_notation_in_dictionary.side_effect = [True, True]
+        mock_is_valid_pid_value.side_effect = [True, True]
+
+        with self.assertRaises(exceptions.ApiError):
+            pid_data_api.get_pid_for_data(**self.mock_kwargs)
 
 
 class TestGetPidForDataMultiPath(TestCase):

@@ -16,8 +16,9 @@ from core_main_app.utils.integration_tests.integration_base_transaction_test_cas
     IntegrationTransactionTestCase,
 )
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
-from tests.fixtures import DataFixtures
+from tests.fixtures import DataFixtures, MultiPIDsDataFixtures
 from tests.test_settings import SERVER_URI
+import json
 
 
 class TestRecordCreationWithDuplicatePid(IntegrationTransactionTestCase):
@@ -386,3 +387,368 @@ class TestRecordModificationToExistingPid(IntegrationTransactionTestCase):
 
         # Assert: Saving the data should not raise an error.
         data_2.save()
+
+
+class TestMultiPIDPathWithXMLData(IntegrationTransactionTestCase):
+    """Integration tests checking the creation of two data with mutliple PID Paths."""
+
+    fixture = MultiPIDsDataFixtures()
+
+    def setUp(self):  # pylint: disable=invalid-name
+        """setUp"""
+        self.user = create_mock_user(1)
+        self.data_path_1 = "mock.pid1"
+        self.data_path_2 = "mock.pid2"
+        self.mock_pid_1 = "pid1"
+        self.pid_prefix = join(
+            SERVER_URI,
+            "rest",
+            ID_PROVIDER_SYSTEM_NAME,
+            ID_PROVIDER_PREFIX_DEFAULT,
+        )
+        self.mock_pid_url_1 = join(
+            self.pid_prefix,
+            self.mock_pid_1,
+        )
+        self.mock_pid_2 = "pid2"
+        self.mock_pid_url_2 = join(
+            self.pid_prefix,
+            self.mock_pid_2,
+        )
+        super().setUp()
+
+    def test_no_pid_path_and_xml_data_does_not_contain_a_pid(
+        self,
+    ):
+        """test_no_pid_path_and_xml_data_does_not_contain_a_pid"""
+        self.fixture.auto_set_pid(True)
+
+        result = self.fixture.insert_record(
+            content="<mock></mock>",
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.xml_template,
+        )
+
+        self.assertTrue(
+            result.content.startswith, f"<mock><pid>{self.pid_prefix}"
+        )
+
+    def test_no_pid_path_and_xml_data_contains_a_pid(
+        self,
+    ):
+        """test_no_pid_path_and_xml_data_contains_a_pid"""
+        self.fixture.auto_set_pid(True)
+
+        result = self.fixture.insert_record(
+            content="<mock><pid1>test</pid1></mock>",
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.xml_template,
+        )
+
+        self.assertTrue(
+            result.content.startswith,
+            f"<mock><pid1>test</pid1><pid>{self.pid_prefix}",
+        )
+
+    def test_one_pid_path_and_xml_data_does_not_contain_a_pid(
+        self,
+    ):
+        """test_one_pid_path_and_xml_data_does_not_contain_a_pid"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.xml_template, path_1=self.data_path_1
+        )
+
+        result = self.fixture.insert_record(
+            content="<mock></mock>",
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.xml_template,
+        )
+
+        self.assertTrue(
+            result.content.startswith(f"<mock><pid1>{self.pid_prefix}")
+        )
+
+    def test_one_pid_path_and_xml_data_contains_pid_at_path(
+        self,
+    ):
+        """test_one_pid_path_and_xml_data_contains_pid_at_path"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.xml_template, path_1=self.data_path_1
+        )
+
+        result = self.fixture.insert_record(
+            content=f"<mock><pid1>{self.mock_pid_url_1}</pid1></mock>",
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.xml_template,
+        )
+        self.assertEqual(
+            result.content, f"<mock><pid1>{self.mock_pid_url_1}</pid1></mock>"
+        )
+
+    def test_one_pid_path_and_path_exists_in_xml_data(
+        self,
+    ):
+        """test_one_pid_path_and_path_exists_in_xml_data"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.xml_template, path_1=self.data_path_1
+        )
+
+        result = self.fixture.insert_record(
+            content="<mock><pid1></pid1></mock>",
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.xml_template,
+        )
+
+        self.assertTrue(
+            result.content.startswith(f"<mock><pid1>{self.pid_prefix}")
+        )
+
+    def test_two_pid_paths_and_two_paths_exist_in_xml_data(
+        self,
+    ):
+        """test_two_pid_paths_and_two_paths_exist_in_xml_data"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.xml_template,
+            path_1=self.data_path_1,
+            path_2=self.data_path_2,
+        )
+
+        self.fixture.insert_record(
+            content="<mock><pid1></pid1><pid2></pid2></mock>",
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.xml_template,
+        )
+
+    def test_two_pid_paths_and_two_paths_set_in_xml_data(
+        self,
+    ):
+        """test_two_pid_paths_and_two_paths_exist_in_xml_data"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.xml_template,
+            path_1=self.data_path_1,
+            path_2=self.data_path_2,
+        )
+
+        with self.assertRaises(Exception):
+            self.fixture.insert_record(
+                content=f"<mock><pid1>{self.mock_pid_url_1}</pid1><pid2>{self.mock_pid_url_2}</pid2></mock>",
+                data_name="record1",
+                user=self.user,
+                template=self.fixture.xml_template,
+            )
+
+    def test_two_pid_paths_and_no_paths_exist_in_xml_data(
+        self,
+    ):
+        """test_two_pid_paths_and_no_paths_exist_in_xml_data"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.xml_template,
+            path_1=self.data_path_1,
+            path_2=self.data_path_2,
+        )
+
+        self.fixture.insert_record(
+            content="<mock></mock>",
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.xml_template,
+        )
+
+
+class TestMultiPIDPathWithJSONData(IntegrationTransactionTestCase):
+    """Integration tests checking the creation of two data with mutliple PID Paths."""
+
+    fixture = MultiPIDsDataFixtures()
+
+    def setUp(self):  # pylint: disable=invalid-name
+        """setUp"""
+        self.user = create_mock_user(1)
+        self.data_path_1 = "mock.pid1"
+        self.data_path_2 = "mock.pid2"
+        self.mock_pid_1 = "pid1"
+        self.pid_prefix = join(
+            SERVER_URI,
+            "rest",
+            ID_PROVIDER_SYSTEM_NAME,
+            ID_PROVIDER_PREFIX_DEFAULT,
+        )
+        self.mock_pid_url_1 = join(
+            self.pid_prefix,
+            self.mock_pid_1,
+        )
+        self.mock_pid_2 = "pid2"
+        self.mock_pid_url_2 = join(
+            self.pid_prefix,
+            self.mock_pid_2,
+        )
+        super().setUp()
+
+    def test_no_pid_path_and_json_data_does_not_contain_a_pid(
+        self,
+    ):
+        """test_no_pid_path_and_json_data_does_not_contain_a_pid"""
+        self.fixture.auto_set_pid(True)
+
+        result = self.fixture.insert_record(
+            content=json.dumps({"mock": {}}),
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.json_template,
+        )
+
+        json_result = json.loads(result.content)
+        self.assertTrue(json_result["mock"]["pid"].startswith(self.pid_prefix))
+
+    def test_no_pid_path_and_json_data_contains_a_pid(
+        self,
+    ):
+        """test_no_pid_path_and_json_data_contains_a_pid"""
+        self.fixture.auto_set_pid(True)
+
+        result = self.fixture.insert_record(
+            content=json.dumps({"mock": {"pid1": "test"}}),
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.json_template,
+        )
+
+        # when no pid path set, it uses default pid path
+        json_result = json.loads(result.content)
+        self.assertTrue(json_result["mock"]["pid"].startswith(self.pid_prefix))
+
+    def test_one_pid_path_and_json_data_does_not_contain_a_pid(
+        self,
+    ):
+        """test_one_pid_path_and_json_data_does_not_contain_a_pid"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.json_template, path_1=self.data_path_1
+        )
+
+        result = self.fixture.insert_record(
+            content=json.dumps({"mock": {}}),
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.json_template,
+        )
+
+        json_result = json.loads(result.content)
+        self.assertTrue(
+            json_result["mock"]["pid1"].startswith(self.pid_prefix)
+        )
+
+    def test_one_pid_path_and_json_data_contains_pid_at_path(
+        self,
+    ):
+        """test_one_pid_path_and_json_data_contains_pid_at_path"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.json_template, path_1=self.data_path_1
+        )
+
+        result = self.fixture.insert_record(
+            content=json.dumps({"mock": {"pid1": self.mock_pid_url_1}}),
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.json_template,
+        )
+
+        json_result = json.loads(result.content)
+        self.assertTrue(
+            json_result["mock"]["pid1"].startswith(self.pid_prefix)
+        )
+
+    def test_one_pid_path_and_path_exists_in_json_data(
+        self,
+    ):
+        """test_one_pid_path_and_path_exists_in_json_data"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.json_template, path_1=self.data_path_1
+        )
+
+        result = self.fixture.insert_record(
+            content=json.dumps({"mock": {"pid1": ""}}),
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.json_template,
+        )
+
+        json_result = json.loads(result.content)
+        self.assertTrue(
+            json_result["mock"]["pid1"].startswith(self.pid_prefix)
+        )
+
+    def test_two_pid_paths_and_two_paths_exist_in_json_data(
+        self,
+    ):
+        """test_two_pid_paths_and_two_paths_exist_in_json_data"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.json_template,
+            path_1=self.data_path_1,
+            path_2=self.data_path_2,
+        )
+
+        self.fixture.insert_record(
+            content=json.dumps({"mock": {"pid1": None, "pid2": None}}),
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.json_template,
+        )
+
+    def test_two_pid_paths_and_two_paths_set_in_json_data(
+        self,
+    ):
+        """test_two_pid_paths_and_two_paths_set_in_json_data"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.json_template,
+            path_1=self.data_path_1,
+            path_2=self.data_path_2,
+        )
+
+        with self.assertRaises(Exception):
+            self.fixture.insert_record(
+                content=json.dumps(
+                    {
+                        "mock": {
+                            "pid1": self.mock_pid_url_1,
+                            "pid2": self.mock_pid_url_2,
+                        }
+                    }
+                ),
+                data_name="record1",
+                user=self.user,
+                template=self.fixture.json_template,
+            )
+
+    def test_two_pid_paths_and_no_paths_exist_in_json_data(
+        self,
+    ):
+        """test_two_pid_paths_and_no_paths_exist_in_json_data"""
+        self.fixture.auto_set_pid(True)
+        self.fixture.insert_pid_paths(
+            template=self.fixture.json_template,
+            path_1=self.data_path_1,
+            path_2=self.data_path_2,
+        )
+
+        self.fixture.insert_record(
+            content=json.dumps({"mock": {}}),
+            data_name="record1",
+            user=self.user,
+            template=self.fixture.json_template,
+        )

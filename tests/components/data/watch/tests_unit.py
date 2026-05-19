@@ -2,15 +2,16 @@
 
 import json
 from unittest import TestCase
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch, MagicMock, Mock
 
 from rest_framework import status
 
-from core_linked_records_app.components.data import watch
 from core_linked_records_app.components.data import watch as data_watch
 from core_linked_records_app.components.pid_settings.models import PidSettings
 from core_linked_records_app.system.data import api as data_system_api
-from core_linked_records_app.system.pid_path import api as pid_path_system_api
+from core_linked_records_app.system.pid_path import (
+    api as pid_path_system_api,
+)
 from core_linked_records_app.utils import data as data_utils
 from core_linked_records_app.utils import exceptions
 from core_linked_records_app.utils import providers as providers_utils
@@ -595,6 +596,32 @@ class TestSetDataPid(TestCase):
 
         self.assertIsNone(data_watch._set_data_pid(**self.mock_kwargs))
 
+    @patch.object(data_utils, "set_pid_value_for_data")
+    @patch.object(data_utils, "get_pid_value_for_data")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
+    @patch.object(PidSettings, "get")
+    def test_data_contains_more_than_one_pids_raises_error(
+        self,
+        mock_pid_settings_get,
+        mock_get_all_pid_paths_by_template,
+        mock_get_pid_value_for_data,
+        mock_set_pid_value_for_data,
+    ):
+        """test_data_contains_more_than_one_pids_raises_error"""
+
+        mock_pid_settings_get.return_value = mocks.MockPidSettings()
+        mock_get_all_pid_paths_by_template.return_value = [
+            mocks.MockPidPath(),
+            mocks.MockPidPath(),
+        ]
+        mock_get_pid_value_for_data.side_effect = ["mock_pid_1", "mock_pid_2"]
+        mock_set_pid_value_for_data.return_value = None
+
+        with self.assertRaises(Exception):
+            data_watch._set_data_pid(**self.mock_kwargs)
+
+        self.assertFalse(mock_set_pid_value_for_data.called)
+
 
 class TestDeleteDataPid(TestCase):
     """Unit tests for `detele_data_pid` function."""
@@ -638,10 +665,10 @@ class TestSetDataPidMultiPids(TestCase):
         mock_pid_settings.auto_set_pid = False
         mock_get_pid_settings.return_value = mock_pid_settings
 
-        result = watch._set_data_pid(self.mock_data)
+        result = data_watch._set_data_pid(self.mock_data)
         self.assertIsNone(result)
 
-    @patch.object(watch, "data_utils")
+    @patch.object(data_watch, "data_utils")
     @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_multiple_paths_with_no_candidate_found_returns_unchanged_data(
@@ -663,11 +690,11 @@ class TestSetDataPidMultiPids(TestCase):
 
         mock_data_utils.get_pid_value_for_data.return_value = None
 
-        result = watch._set_data_pid(self.mock_data)
+        result = data_watch._set_data_pid(self.mock_data)
 
         self.assertIsNone(result)
 
-    @patch.object(watch, "data_utils")
+    @patch.object(data_watch, "data_utils")
     @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_multiple_paths_pid_in_second_path_uses_second_path(
@@ -704,7 +731,7 @@ class TestSetDataPidMultiPids(TestCase):
         ]
 
         try:
-            watch._set_data_pid(self.mock_data)
+            data_watch._set_data_pid(self.mock_data)
         except Exception:
             pass
 
@@ -713,7 +740,7 @@ class TestSetDataPidMultiPids(TestCase):
         _, called_path = third_call[0]
         self.assertEqual(called_path, "path2")
 
-    @patch.object(watch, "data_utils")
+    @patch.object(data_watch, "data_utils")
     @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_exception_on_path_during_scan_skips_to_next_path(
@@ -741,14 +768,14 @@ class TestSetDataPidMultiPids(TestCase):
         ]
 
         try:
-            watch._set_data_pid(self.mock_data)
+            data_watch._set_data_pid(self.mock_data)
         except exceptions.PidCreateError as exc:
             # Must not be the multi pid error
             self.assertNotIn("Cannot automatically assign PID", str(exc))
         except Exception:
             pass  # Provider errors expected with incomplete mocking
 
-    @patch.object(watch, "data_utils")
+    @patch.object(data_watch, "data_utils")
     @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_single_path_template_uses_that_path(
@@ -770,7 +797,7 @@ class TestSetDataPidMultiPids(TestCase):
         mock_data_utils.get_pid_value_for_data.return_value = "existing_pid"
 
         try:
-            watch._set_data_pid(self.mock_data)
+            data_watch._set_data_pid(self.mock_data)
         except Exception:
             pass
 
@@ -778,7 +805,7 @@ class TestSetDataPidMultiPids(TestCase):
         _, called_path = first_call[0]
         self.assertEqual(called_path, "only_path")
 
-    @patch.object(watch, "data_utils")
+    @patch.object(data_watch, "data_utils")
     @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_multiple_paths_both_have_pids_raises_an_error(
@@ -804,6 +831,6 @@ class TestSetDataPidMultiPids(TestCase):
         ]
 
         with self.assertRaises(exceptions.PidCreateError) as ctx:
-            watch._set_data_pid(self.mock_data)
+            data_watch._set_data_pid(self.mock_data)
 
         self.assertIn("Cannot automatically assign PID", str(ctx.exception))

@@ -440,6 +440,23 @@ class TestGetPidValueForDataForXMLData(TestCase):
             mock_pid_value[:-1],
         )
 
+    @patch.object(data_utils, "pid_xml_utils")
+    def test_raise_exception_if_pid_found_at_more_than_one_path(
+        self,
+        mock_pid_xml_utils,
+    ):
+        """test_raise_exception_if_pid_found_at_more_than_one_path"""
+        mock_pid_value_1 = "mock_pid_value_1"
+        mock_pid_value_2 = "mock_pid_value_2"
+
+        mock_pid_xml_utils.get_value_at_xpath.return_value = [
+            mock_pid_value_1,
+            mock_pid_value_2,
+        ]
+
+        with self.assertRaises(Exception):
+            data_utils.get_pid_value_for_data(**self.kwargs)
+
 
 class TestGetPidValueForDataForJsonData(TestCase):
     """Unit tests for `get_pid_value_for_data` function, limiting to JSON data."""
@@ -551,6 +568,23 @@ class TestGetPidValueForDataForJsonData(TestCase):
             data_utils.get_pid_value_for_data(**self.kwargs),
             mock_pid_value[:-1],
         )
+
+    @patch.object(data_utils, "pid_json_utils")
+    def test_raise_exception_if_pid_found_at_more_than_one_path(
+        self,
+        mock_pid_xml_utils,
+    ):
+        """test_raise_exception_if_pid_found_at_more_than_one_path"""
+        mock_pid_value_1 = "mock_pid_value_1"
+        mock_pid_value_2 = "mock_pid_value_2"
+
+        mock_pid_xml_utils.get_value_from_dot_notation.return_value = [
+            mock_pid_value_1,
+            mock_pid_value_2,
+        ]
+
+        with self.assertRaises(Exception):
+            data_utils.get_pid_value_for_data(**self.kwargs)
 
 
 class TestGetPidValueForDataForUnsupportedFormats(TestCase):
