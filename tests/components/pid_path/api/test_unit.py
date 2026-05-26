@@ -1,7 +1,7 @@
 """Unit tests for core_linked_records_app.components.pid_path.api"""
 
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from core_linked_records_app.components.pid_path import (
     api as pid_path_api,
@@ -13,6 +13,7 @@ from core_main_app.components.template import (
 )
 from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from tests import mocks
+from core_linked_records_app import settings
 
 
 class TestGetByTemplateId(TestCase):
@@ -53,40 +54,39 @@ class TestGetByTemplateId(TestCase):
         with self.assertRaises(ApiError):
             pid_path_api.get_by_template(**self.kwargs)
 
-    @patch.object(PidPath, "__init__")
-    @patch.object(PidPath, "get_by_template")
+    @patch("core_linked_records_app.components.pid_path.api.PidPath")
     def test_returns_new_pid_path_if_not_exists(
         self,
-        mock_get_by_template,
-        mock_pid_path,  # noqa, pylint: disable=unused-argument
+        mock_pid_path_class,  # noqa, pylint: disable=unused-argument
     ):
         """test_returns_new_pid_path_if_not_exists"""
+        mock_qs = Mock()
+        mock_qs.exists.return_value = False
 
-        expected_result = "mock_pid_path_object"
-        mock_get_by_template.return_value = expected_result
+        mock_pid_path_class.get_by_template.return_value = mock_qs
 
-        self.assertEqual(
-            pid_path_api.get_by_template(**self.kwargs), expected_result
+        pid_path_api.get_by_template(**self.kwargs)
+
+        mock_pid_path_class.assert_called_once_with(
+            template=self.mock_template, path=settings.PID_PATH
         )
 
-    @patch.object(PidPath, "__new__")
     @patch.object(template_api, "get_by_id")
     @patch.object(PidPath, "get_by_template")
     def test_returns_pid_path_if_exists(
         self,
         mock_get_by_template,
         mock_get_by_id,
-        mock_pid_path,
     ):
         """test_returns_pid_path_if_exists"""
-        expected_result = "mock_pid_path"
-        mock_get_by_template.return_value = None
-        mock_get_by_id.return_value = self.mock_template
-        mock_pid_path.return_value = expected_result
+        mock_template = mocks.MockTemplate()
+        mock_template.pk = 123
+        mock_qs = Mock()
+        mock_qs.exists.return_value = True
+        mock_get_by_template.return_value = mock_qs
+        mock_get_by_id.return_value = mock_template
 
-        self.assertEqual(
-            pid_path_api.get_by_template(**self.kwargs), expected_result
-        )
+        self.assertEqual(pid_path_api.get_by_template(**self.kwargs), mock_qs)
 
 
 class TestGetAll(TestCase):

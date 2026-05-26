@@ -87,6 +87,13 @@ class TestGetValueFromDotNotation(TestCase):
             self.mock_dictionary["root"]["elem11"]["elem21"],
         )
 
+    def test_path_is_none_in_dictionnary_returns_none(self):
+        """Test path is none in dictionnary returns none"""
+        self.assertEqual(
+            get_value_from_dot_notation({"root": None}, "root.elem11"),
+            None,
+        )
+
 
 class TestIsDotNotationInDictionary(TestCase):
     """Tests for is_dot_notation_in_dictionary function"""

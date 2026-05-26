@@ -89,22 +89,25 @@ def execute_local_query(raw_query, request):
     data_list = data_api.execute_json_query(raw_query, request.user)
 
     for data in data_list:
-        pid_path_object = pid_path_api.get_by_template(
-            data.template, request.user
-        )
-        pid_path = pid_path_object.path
+        pid_paths = pid_path_api.get_by_template(data.template, request.user)
 
-        data_pid = get_value_from_dot_notation(
-            data.get_dict_content(),
-            pid_path,
-        )
+        for pid_path_object in pid_paths:
+            pid_path = pid_path_object.path
 
-        if not is_valid_pid_value(
-            data_pid, settings.ID_PROVIDER_SYSTEM_NAME, settings.PID_FORMAT
-        ):
-            continue
+            data_pid = get_value_from_dot_notation(
+                data.get_dict_content(),
+                pid_path,
+            )
 
-        pid_list.append(data_pid)
+            if not is_valid_pid_value(
+                data_pid, settings.ID_PROVIDER_SYSTEM_NAME, settings.PID_FORMAT
+            ):
+                continue
+
+            pid_list.append(data_pid)
+            # Since only one PID is allowed per record across all paths,
+            # we stop searching once we find a valid one.
+            break
 
     return pid_list
 
@@ -147,20 +150,25 @@ def execute_oaipmh_query(raw_query, request):
     data_list = oai_record_api.execute_json_query(raw_query, request.user)
 
     for data in data_list:
-        pid_path_object = pid_path_api.get_by_template(
+        pid_paths = pid_path_api.get_by_template(
             data.harvester_metadata_format.template, request.user
         )
-        pid_path = pid_path_object.path
 
-        data_pid = get_value_from_dot_notation(
-            data.get_dict_content(),
-            pid_path,
-        )
+        for pid_path_object in pid_paths:
+            pid_path = pid_path_object.path
 
-        if not data_pid:
-            continue
+            data_pid = get_value_from_dot_notation(
+                data.get_dict_content(),
+                pid_path,
+            )
 
-        pid_list.append(data_pid)
+            if not data_pid:
+                continue
+
+            pid_list.append(data_pid)
+            # Since only one PID is allowed per record across all paths,
+            # we stop searching once we find a valid one.
+            break
 
     return pid_list
 

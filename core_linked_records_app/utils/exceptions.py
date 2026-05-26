@@ -73,3 +73,15 @@ class InvalidRecordError(CoreError):
             message (str): Error message
         """
         super().__init__(message)
+
+
+class MultiplePidError(CoreError):
+    """Exception raised when multiple PIDs are found across different paths."""
+
+    def __init__(self, message):
+        """Initialize exception
+
+        Args:
+            message (str): Error message
+        """
+        super().__init__(message)

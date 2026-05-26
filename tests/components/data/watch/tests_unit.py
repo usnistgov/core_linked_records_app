@@ -2,16 +2,15 @@
 
 import json
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 from rest_framework import status
 
+from core_linked_records_app.components.data import watch
 from core_linked_records_app.components.data import watch as data_watch
 from core_linked_records_app.components.pid_settings.models import PidSettings
 from core_linked_records_app.system.data import api as data_system_api
-from core_linked_records_app.system.pid_path import (
-    api as pid_path_system_api,
-)
+from core_linked_records_app.system.pid_path import api as pid_path_system_api
 from core_linked_records_app.utils import data as data_utils
 from core_linked_records_app.utils import exceptions
 from core_linked_records_app.utils import providers as providers_utils
@@ -267,15 +266,15 @@ class TestSetDataPid(TestCase):
         with self.assertRaises(exceptions.PidCreateError):
             data_watch._set_data_pid(**self.mock_kwargs)
 
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_get_pid_path_by_template_failure_raises_pid_create_error(
-        self, mock_pid_settings_get, mock_get_pid_path_by_template
+        self, mock_pid_settings_get, mock_get_all_pid_paths_by_template
     ):
         """test_get_pid_path_by_template_failure_raises_pid_create_error"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.side_effect = Exception(
+        mock_get_all_pid_paths_by_template.side_effect = Exception(
             "mock_get_pid_path_by_template_exception"
         )
 
@@ -283,18 +282,18 @@ class TestSetDataPid(TestCase):
             data_watch._set_data_pid(**self.mock_kwargs)
 
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_get_pid_value_for_data_failure_returns_none(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
     ):
         """test_get_pid_value_for_data_failure_returns_none"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.side_effect = Exception(
             "mock_get_pid_value_for_data_exception"
         )
@@ -303,19 +302,19 @@ class TestSetDataPid(TestCase):
 
     @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_delete_pid_for_data_raises_pid_create_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
     ):
         """test_delete_pid_for_data_raises_pid_create_error"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.return_value = "mock_pid_value"
         mock_delete_pid_for_data.side_effect = Exception(
             "mock_delete_pid_for_data_exception"
@@ -327,12 +326,12 @@ class TestSetDataPid(TestCase):
     @patch.object(providers_utils, "retrieve_provider_name")
     @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_retrieve_provider_name_failure_raise_pid_create_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
         mock_retrieve_provider_name,
@@ -340,7 +339,7 @@ class TestSetDataPid(TestCase):
         """test_retrieve_provider_name_failure_raise_pid_create_error"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.return_value = "mock_pid_value"
         mock_delete_pid_for_data.return_value = None
         mock_retrieve_provider_name.side_effect = Exception(
@@ -354,12 +353,12 @@ class TestSetDataPid(TestCase):
     @patch.object(providers_utils, "retrieve_provider_name")
     @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_provider_manager_get_failure_raise_pid_create_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
         mock_retrieve_provider_name,
@@ -368,7 +367,7 @@ class TestSetDataPid(TestCase):
         """test_provider_manager_get_failure_raise_pid_create_error"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.return_value = None
         mock_delete_pid_for_data.return_value = None
         mock_retrieve_provider_name.return_value = "mock_provider_name"
@@ -384,12 +383,12 @@ class TestSetDataPid(TestCase):
     @patch.object(providers_utils, "retrieve_provider_name")
     @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_is_pid_defined_failure_raise_pid_create_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
         mock_retrieve_provider_name,
@@ -399,7 +398,7 @@ class TestSetDataPid(TestCase):
         """test_is_pid_defined_failure_raise_pid_create_error"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.return_value = None
         mock_delete_pid_for_data.return_value = None
         mock_retrieve_provider_name.return_value = "mock_provider_name"
@@ -417,12 +416,12 @@ class TestSetDataPid(TestCase):
     @patch.object(providers_utils, "retrieve_provider_name")
     @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_is_pid_defined_for_data_failure_raise_pid_create_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
         mock_retrieve_provider_name,
@@ -433,7 +432,7 @@ class TestSetDataPid(TestCase):
         """test_is_pid_defined_for_data_failure_raise_pid_create_error"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.return_value = None
         mock_delete_pid_for_data.return_value = None
         mock_retrieve_provider_name.return_value = "mock_provider_name"
@@ -452,12 +451,12 @@ class TestSetDataPid(TestCase):
     @patch.object(providers_utils, "retrieve_provider_name")
     @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_pid_already_defined_raise_pid_create_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
         mock_retrieve_provider_name,
@@ -468,7 +467,7 @@ class TestSetDataPid(TestCase):
         """test_pid_already_defined_raise_pid_create_error"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.return_value = None
         mock_delete_pid_for_data.return_value = None
         mock_retrieve_provider_name.return_value = "mock_provider_name"
@@ -486,12 +485,12 @@ class TestSetDataPid(TestCase):
     @patch.object(providers_utils, "retrieve_provider_name")
     @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_register_pid_for_data_id_failure_raise_pid_create_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
         mock_retrieve_provider_name,
@@ -503,7 +502,7 @@ class TestSetDataPid(TestCase):
         """test_register_pid_for_data_id_failure_raise_pid_create_error"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.return_value = None
         mock_delete_pid_for_data.return_value = None
         mock_retrieve_provider_name.return_value = "mock_provider_name"
@@ -525,12 +524,12 @@ class TestSetDataPid(TestCase):
     @patch.object(providers_utils, "retrieve_provider_name")
     @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_set_pid_value_for_data_failure_raise_pid_create_error(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
         mock_retrieve_provider_name,
@@ -543,7 +542,7 @@ class TestSetDataPid(TestCase):
         """test_set_pid_value_for_data_failure_raise_pid_create_error"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.return_value = None
         mock_delete_pid_for_data.return_value = None
         mock_retrieve_provider_name.return_value = "mock_provider_name"
@@ -566,12 +565,12 @@ class TestSetDataPid(TestCase):
     @patch.object(providers_utils, "retrieve_provider_name")
     @patch.object(data_system_api, "delete_pid_for_data")
     @patch.object(data_utils, "get_pid_value_for_data")
-    @patch.object(pid_path_system_api, "get_pid_path_by_template")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
     @patch.object(PidSettings, "get")
     def test_default_execution_returns_none(
         self,
         mock_pid_settings_get,
-        mock_get_pid_path_by_template,
+        mock_get_all_pid_paths_by_template,
         mock_get_pid_value_for_data,
         mock_delete_pid_for_data,
         mock_retrieve_provider_name,
@@ -584,7 +583,7 @@ class TestSetDataPid(TestCase):
         """test_default_execution_returns_none"""
 
         mock_pid_settings_get.return_value = mocks.MockPidSettings()
-        mock_get_pid_path_by_template.return_value = mocks.MockPidPath()
+        mock_get_all_pid_paths_by_template.return_value = [mocks.MockPidPath()]
         mock_get_pid_value_for_data.return_value = None
         mock_delete_pid_for_data.return_value = None
         mock_retrieve_provider_name.return_value = "mock_provider_name"
@@ -623,3 +622,188 @@ class TestDeleteDataPid(TestCase):
         data_watch.delete_data_pid(None, self.mock_data)
 
         mock_logger.warning.assert_called()
+
+
+class TestSetDataPidMultiPids(TestCase):
+    """Test multi pids rule in _set_data_pid"""
+
+    def setUp(self) -> None:
+        self.mock_data = mocks.MockData()
+        self.mock_data.pk = 1
+
+    @patch.object(PidSettings, "get")
+    def test_auto_set_pid_disabled_returns_early(self, mock_get_pid_settings):
+        """Test function returns early when auto_set_pid is False"""
+        mock_pid_settings = Mock()
+        mock_pid_settings.auto_set_pid = False
+        mock_get_pid_settings.return_value = mock_pid_settings
+
+        result = watch._set_data_pid(self.mock_data)
+        self.assertIsNone(result)
+
+    @patch.object(watch, "data_utils")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
+    @patch.object(PidSettings, "get")
+    def test_multiple_paths_with_no_candidate_found_returns_unchanged_data(
+        self,
+        mock_get_pid_settings,
+        mock_get_all_paths,
+        mock_data_utils,
+    ):
+        """Test when multiple paths exist but record has no PID"""
+        mock_pid_settings = Mock()
+        mock_pid_settings.auto_set_pid = True
+        mock_get_pid_settings.return_value = mock_pid_settings
+
+        mock_path_1 = Mock()
+        mock_path_1.path = "path1"
+        mock_path_2 = Mock()
+        mock_path_2.path = "path2"
+        mock_get_all_paths.return_value = [mock_path_1, mock_path_2]
+
+        mock_data_utils.get_pid_value_for_data.return_value = None
+
+        result = watch._set_data_pid(self.mock_data)
+
+        self.assertIsNone(result)
+
+    @patch.object(watch, "data_utils")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
+    @patch.object(PidSettings, "get")
+    def test_multiple_paths_pid_in_second_path_uses_second_path(
+        self,
+        mock_get_pid_settings,
+        mock_get_all_paths,
+        mock_data_utils,
+    ):
+        """Test that pid_path used for write is the path that actually has the PID.
+
+        If path1 is empty but path2 has a PID, the function must use path2,
+        not silently fall back to path1 and issue a new PID there.
+        """
+        mock_pid_settings = Mock()
+        mock_pid_settings.auto_set_pid = True
+        mock_get_pid_settings.return_value = mock_pid_settings
+
+        mock_path_1 = Mock()
+        mock_path_1.path = "path1"
+        mock_path_2 = Mock()
+        mock_path_2.path = "path2"
+        mock_get_all_paths.return_value = [mock_path_1, mock_path_2]
+
+        # path1 has no PID, path2 has one
+        mock_data_utils.get_pid_value_for_data.side_effect = [
+            None,
+            "existing_pid",
+        ]
+
+        mock_data_utils.get_pid_value_for_data.side_effect = [
+            None,
+            "existing_pid",
+            "existing_pid",
+        ]
+
+        try:
+            watch._set_data_pid(self.mock_data)
+        except Exception:
+            pass
+
+        # The third call (regular flow) must use path2, not path1.
+        third_call = mock_data_utils.get_pid_value_for_data.call_args_list[2]
+        _, called_path = third_call[0]
+        self.assertEqual(called_path, "path2")
+
+    @patch.object(watch, "data_utils")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
+    @patch.object(PidSettings, "get")
+    def test_exception_on_path_during_scan_skips_to_next_path(
+        self,
+        mock_get_pid_settings,
+        mock_get_all_paths,
+        mock_data_utils,
+    ):
+        """Exceptions during the multi pid scan are caught and next path tried"""
+        mock_pid_settings = Mock()
+        mock_pid_settings.auto_set_pid = True
+        mock_get_pid_settings.return_value = mock_pid_settings
+
+        mock_path_1 = Mock()
+        mock_path_1.path = "path1"
+        mock_path_2 = Mock()
+        mock_path_2.path = "path2"
+        mock_get_all_paths.return_value = [mock_path_1, mock_path_2]
+
+        # path1 raises, path2 has a PID — should NOT raise PidCreateError for multi pid
+        mock_data_utils.get_pid_value_for_data.side_effect = [
+            Exception("xpath error"),
+            "pid_in_path2",
+            "pid_in_path2",
+        ]
+
+        try:
+            watch._set_data_pid(self.mock_data)
+        except exceptions.PidCreateError as exc:
+            # Must not be the multi pid error
+            self.assertNotIn("Cannot automatically assign PID", str(exc))
+        except Exception:
+            pass  # Provider errors expected with incomplete mocking
+
+    @patch.object(watch, "data_utils")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
+    @patch.object(PidSettings, "get")
+    def test_single_path_template_uses_that_path(
+        self,
+        mock_get_pid_settings,
+        mock_get_all_paths,
+        mock_data_utils,
+    ):
+        """Single-path template skips multi pid scan and uses the one defined path"""
+        mock_pid_settings = Mock()
+        mock_pid_settings.auto_set_pid = True
+        mock_get_pid_settings.return_value = mock_pid_settings
+
+        mock_path = Mock()
+        mock_path.path = "only_path"
+        mock_get_all_paths.return_value = [mock_path]
+
+        # Regular flow read from the single path
+        mock_data_utils.get_pid_value_for_data.return_value = "existing_pid"
+
+        try:
+            watch._set_data_pid(self.mock_data)
+        except Exception:
+            pass
+
+        first_call = mock_data_utils.get_pid_value_for_data.call_args_list[0]
+        _, called_path = first_call[0]
+        self.assertEqual(called_path, "only_path")
+
+    @patch.object(watch, "data_utils")
+    @patch.object(pid_path_system_api, "get_all_pid_paths_by_template")
+    @patch.object(PidSettings, "get")
+    def test_multiple_paths_both_have_pids_raises_an_error(
+        self,
+        mock_get_pid_settings,
+        mock_get_all_paths,
+        mock_data_utils,
+    ):
+        """Test that a PidCreateError is raised when multiple paths contain different PIDs"""
+        mock_pid_settings = Mock()
+        mock_pid_settings.auto_set_pid = True
+        mock_get_pid_settings.return_value = mock_pid_settings
+
+        mock_path_1 = Mock()
+        mock_path_1.path = "path1"
+        mock_path_2 = Mock()
+        mock_path_2.path = "path2"
+        mock_get_all_paths.return_value = [mock_path_1, mock_path_2]
+
+        mock_data_utils.get_pid_value_for_data.side_effect = [
+            "pid_one",
+            "pid_two",
+        ]
+
+        with self.assertRaises(exceptions.PidCreateError) as ctx:
+            watch._set_data_pid(self.mock_data)
+
+        self.assertIn("Cannot automatically assign PID", str(ctx.exception))

@@ -12,6 +12,7 @@ from core_main_app.utils.tests_tools.MockUser import create_mock_user
 from core_oaipmh_harvester_app.components.oai_record import (
     api as oaipmh_harvester_oai_record_api,
 )
+from core_linked_records_app.utils.exceptions import MultiplePidError
 from tests import mocks
 
 
@@ -83,10 +84,33 @@ class TestGetPidForData(TestCase):
 
         expected_result = "mock_get_pid_for_data"
         mock_get_by_id.return_value = mocks.MockData()
-        mock_get_by_template.return_value = mocks.MockPidPath()
+        mock_get_by_template.return_value = [mocks.MockPidPath()]
         mock_get_value_from_dot_notation.return_value = expected_result
 
         self.assertEqual(
             oai_record_api.get_pid_for_data(**self.kwargs),
             expected_result,
         )
+
+    @patch.object(oai_record_api, "get_value_from_dot_notation")
+    @patch.object(pid_path_api, "get_by_template")
+    @patch.object(oaipmh_harvester_oai_record_api, "get_by_id")
+    def test_multiple_pids_found_raises_multiple_pid_error(
+        self,
+        mock_get_by_id,
+        mock_get_by_template,
+        mock_get_value_from_dot_notation,
+    ):
+        """test_multiple_pids_found_raises_multiple_pid_error"""
+
+        pid1 = "mock_get_pid_for_data_1"
+        pid2 = "mock_get_pid_for_data_2"
+        mock_get_by_id.return_value = mocks.MockData()
+        mock_get_by_template.return_value = [
+            mocks.MockPidPath(),
+            mocks.MockPidPath(),
+        ]
+        mock_get_value_from_dot_notation.side_effect = [pid1, pid2]
+
+        with self.assertRaises(MultiplePidError):
+            oai_record_api.get_pid_for_data(**self.kwargs)

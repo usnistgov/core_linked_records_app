@@ -18,29 +18,31 @@ logger = logging.getLogger(__name__)
 
 @access_control(can_get_by_template)
 def get_by_template(template, user):  # noqa, pylint: disable=unused-argument
-    """Retrieve PID path associated with a specific template ID
+    """Retrieve PID paths associated with a specific template ID
 
     Args:
         template: Template
         user: User
 
     Returns:
-        str - Dot notation path for the given template ID.
+        QuerySet - PidPath objects for the given template ID.
     """
     try:
-        pid_path_object = PidPath.get_by_template(template)
+        pid_paths = PidPath.get_by_template(template)
 
-        # Returns default PID_PATH settings if the template has no defined PidPath
-        if pid_path_object is None:
-            return PidPath(
-                template=template,
-                path=settings.PID_PATH,
-            )
+        # Returns a list containing a default PidPath if the template has none defined
+        if not pid_paths.exists():
+            return [
+                PidPath(
+                    template=template,
+                    path=settings.PID_PATH,
+                )
+            ]
 
-        return pid_path_object
+        return pid_paths
     except Exception as exc:
         error_message = (
-            f"An unexpected error occurred while retrieving PidPath "
+            f"An unexpected error occurred while retrieving PidPaths "
             f"assigned to template {template.pk}"
         )
 

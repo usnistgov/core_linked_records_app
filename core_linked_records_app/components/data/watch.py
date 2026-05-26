@@ -104,6 +104,8 @@ def _set_data_pid(instance: Data):
     """Set the PID in the field specified in the settings. If the PID
     already exists and is valid, it is not reset.
 
+    Raises an error if record has more than one PID defined.
+
     Args:
         instance:
 
@@ -113,12 +115,41 @@ def _set_data_pid(instance: Data):
         if not PidSettings.get().auto_set_pid:
             return
 
-        # Retrieve PID path from `PidSettings.path_list`. Skip PID assignment
-        # if the PID path is not defined for the template.
-        template_pid_path = pid_path_system_api.get_pid_path_by_template(
+        # Determine which path to use for PID assignment.
+        all_paths = pid_path_system_api.get_all_pid_paths_by_template(
             instance.template
         )
-        pid_path = template_pid_path.path
+        if len(all_paths) > 1:
+            pid_path = None
+            candidate = None
+            for pid_path_object in all_paths:
+                new_candidate = None
+                try:
+                    new_candidate = data_utils.get_pid_value_for_data(
+                        instance, pid_path_object.path
+                    )
+                    # If candidate is not None, the path exists in document
+                    if new_candidate is not None:
+                        candidate = new_candidate
+                        if (
+                            pid_path is not None
+                        ):  # a pid path has already been found
+                            pid_path = None
+                            break
+                        pid_path = pid_path_object.path
+                except Exception:  # pylint: disable=broad-except
+                    continue
+
+            if pid_path is None:
+                if candidate is not None:
+                    raise exceptions.PidCreateError(
+                        f"Cannot automatically assign PID: template {instance.template.pk} "
+                        f"has multiple defined paths ({len(all_paths)}) but record has "
+                        f"values set in more than one."
+                    )
+                return
+        else:
+            pid_path = all_paths[0].path
 
         try:  # Retrieve the PID located at predefined dot notation path.
             pid_value = data_utils.get_pid_value_for_data(instance, pid_path)

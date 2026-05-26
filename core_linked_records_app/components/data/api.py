@@ -7,6 +7,7 @@ from core_linked_records_app.components.data.access_control import (
     can_get_pid_for_data,
     can_get_data_by_pid,
 )
+from core_linked_records_app.utils.exceptions import MultiplePidError
 from core_linked_records_app.components.pid_path import api as pid_path_api
 from core_linked_records_app.utils.dict import (
     is_dot_notation_in_dictionary,
@@ -78,30 +79,33 @@ def get_pid_for_data(data_id, request):
         # Retrieve the document passed as input and extra the PID field.
         data = data_api.get_by_id(data_id, request.user)
 
-        # Return PID value from the document and the pid_path retrieved from
-        # `PidSettings`
-        pid_path_object = pid_path_api.get_by_template(
-            data.template, request.user
-        )
-        pid_path = pid_path_object.path
+        # Iterate through all possible paths for the template and enforce exclusivity
+        pid_paths = pid_path_api.get_by_template(data.template, request.user)
 
-        # If the pid_path does not exist in the document, exit early and return None
-        if not is_dot_notation_in_dictionary(
-            data.get_dict_content(), pid_path
-        ):
-            return None
+        found_pid = None
+        dict_content = data.get_dict_content()
 
-        pid_value = get_value_from_dot_notation(
-            data.get_dict_content(), pid_path
-        )
+        for pid_path_object in pid_paths:
+            pid_path = pid_path_object.path
+            if is_dot_notation_in_dictionary(dict_content, pid_path):
+                pid_value = get_value_from_dot_notation(dict_content, pid_path)
 
-        # If the field has an invalid PID, raise an exception.
-        if not is_valid_pid_value(
-            pid_value, settings.ID_PROVIDER_SYSTEM_NAME, settings.PID_FORMAT
-        ):
-            raise ApiError(f"Invalid PID in data '{data_id}'")
+                # Validate the PID value
+                if is_valid_pid_value(
+                    pid_value,
+                    settings.ID_PROVIDER_SYSTEM_NAME,
+                    settings.PID_FORMAT,
+                ):
+                    if found_pid is not None:
+                        raise MultiplePidError(
+                            f"Data record '{data_id}' contains multiple valid PIDs "
+                            f"across defined paths for template {data.template.pk}"
+                        )
+                    found_pid = pid_value
 
-        return pid_value
+        return found_pid
+    except MultiplePidError:
+        raise
     except Exception as exc:
         error_message = (
             f"An error occurred while looking up PID assigned to data "

@@ -151,7 +151,7 @@ class TestExecuteLocalQuery(TestCase):
 
         mock_data_pid = "mock_data_pid"
         mock_execute_query.return_value = [mocks.MockData() for _ in range(5)]
-        mock_get_by_template.return_value = mocks.MockPidPath()
+        mock_get_by_template.return_value = [mocks.MockPidPath()]
         mock_get_value_from_dot_notation.return_value = mock_data_pid
         # Return True every time the call count is odd (3 times for a list of 5
         # elements, at index 0, 2 and 4).
@@ -217,7 +217,7 @@ class TestExecuteOaiPmhQuery(TestCase):
 
         mock_data_pid = "mock_data_pid"
         mock_execute_query.return_value = [mocks.MockData() for _ in range(5)]
-        mock_get_by_template.return_value = mocks.MockPidPath()
+        mock_get_by_template.return_value = [mocks.MockPidPath()]
         # Return `mock_data_pid` every time the call count is odd (3 times for a list
         # of 5 elements, at index 0, 2 and 4), otherwise returns None.
         mock_get_value_from_dot_notation.side_effect = lambda d, p: (

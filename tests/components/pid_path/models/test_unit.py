@@ -3,8 +3,6 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from django.core.exceptions import ObjectDoesNotExist
-
 from core_linked_records_app.components.pid_path.models import PidPath
 from core_main_app.commons.exceptions import ModelError
 from core_main_app.components.template.models import Template
@@ -65,18 +63,18 @@ class TestPidPathGetByTemplate(TestCase):
     """Unit tests for `PidPath.get_by_template` method."""
 
     @patch.object(PidPath, "objects")
-    def test_pid_path_get_does_not_exists_returns_none(self, mock_pid_path):
-        """test_pid_path_get_does_not_exists_returns_none"""
+    def test_pid_path_filter_does_not_exists_returns_none(self, mock_pid_path):
+        """test_pid_path_filter_does_not_exists_returns_none"""
 
-        mock_pid_path.get.side_effect = ObjectDoesNotExist()
-
-        self.assertIsNone(PidPath.get_by_template("mock_template"))
+        mock_pid_path.filter.return_value = []
+        result = PidPath.get_by_template("mock_template")
+        self.assertEqual(result, [])
 
     @patch.object(PidPath, "objects")
-    def test_pid_path_get_raises_model_error(self, mock_pid_path):
-        """test_pid_path_get_raises_model_error"""
+    def test_pid_path_filter_raises_model_error(self, mock_pid_path):
+        """test_pid_path_filter_raises_model_error"""
 
-        mock_pid_path.get.side_effect = Exception(
+        mock_pid_path.filter.side_effect = Exception(
             "mock_pid_path_get_exception"
         )
 
@@ -84,11 +82,11 @@ class TestPidPathGetByTemplate(TestCase):
             PidPath.get_by_template("mock_template")
 
     @patch.object(PidPath, "objects")
-    def test_returns_pid_path_get_output(self, mock_pid_path):
-        """test_returns_pid_path_get_output"""
+    def test_returns_pid_path_filter_output(self, mock_pid_path):
+        """test_returns_pid_path_filter_output"""
 
-        expected_result = "mock_pid_path_get"
-        mock_pid_path.get.return_value = expected_result
+        expected_result = ["mock_pid_path_get"]
+        mock_pid_path.filter.return_value = expected_result
 
         self.assertEqual(
             PidPath.get_by_template("mock_template"), expected_result

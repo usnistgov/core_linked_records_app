@@ -178,6 +178,7 @@ class TestGetPidForData(TestCase):
         self,
         mock_data,
         mock_get_by_id,
+        mock_get_by_template,
         mock_get_value_from_dot_notation,
         user,
         owner=None,
@@ -188,6 +189,7 @@ class TestGetPidForData(TestCase):
 
         mock_data.get_by_id.return_value = self.mock_data
         mock_get_by_id.return_value = self.mock_data
+        mock_get_by_template.return_value = [MagicMock()]
 
         mock_get_value_from_dot_notation.return_value = self.mock_data_pid
 
@@ -212,6 +214,7 @@ class TestGetPidForData(TestCase):
         self.setup_mocks(
             mock_data,
             mock_get_by_id,
+            mock_get_by_template,
             mock_get_value_from_dot_notation,
             user,
         )
@@ -249,6 +252,7 @@ class TestGetPidForData(TestCase):
         self.setup_mocks(
             mock_data,
             mock_get_by_id,
+            mock_get_by_template,
             mock_get_value_from_dot_notation,
             user,
             owner,
@@ -289,6 +293,7 @@ class TestGetPidForData(TestCase):
         self.setup_mocks(
             mock_data,
             mock_get_by_id,
+            mock_get_by_template,
             mock_get_value_from_dot_notation,
             user,
             owner,
@@ -325,6 +330,7 @@ class TestGetPidForData(TestCase):
         self.setup_mocks(
             mock_data,
             mock_get_by_id,
+            mock_get_by_template,
             mock_get_value_from_dot_notation,
             user,
         )
@@ -365,6 +371,7 @@ class TestGetPidForData(TestCase):
         self.setup_mocks(
             mock_data,
             mock_get_by_id,
+            mock_get_by_template,
             mock_get_value_from_dot_notation,
             user,
         )
@@ -403,6 +410,7 @@ class TestGetPidForData(TestCase):
         self.setup_mocks(
             mock_data,
             mock_get_by_id,
+            mock_get_by_template,
             mock_get_value_from_dot_notation,
             user,
         )

@@ -38,7 +38,7 @@ def get_value_from_dot_notation(dictionary, dot_notation):
     while len(key_list) > 0:
         key = key_list.pop(0)
 
-        if key in dictionary.keys():
+        if isinstance(dictionary, dict) and key in dictionary.keys():
             return get_value_from_dot_notation(
                 dictionary[key], ".".join(key_list)
             )

@@ -34,7 +34,7 @@ class TestGetPidForData(TestCase):
         self.mock_request.user = user
 
         mock_get_by_id.return_value = MagicMock()
-        mock_get_by_template.return_value = MagicMock()
+        mock_get_by_template.return_value = [MagicMock()]
         mock_get_value_from_dot_notation.return_value = (
             self.mock_get_value_from_dot_notation_return_value
         )

@@ -2,7 +2,6 @@
 
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from core_linked_records_app.utils.dict import validate_dot_notation
@@ -19,12 +18,11 @@ class PidPath(models.Model):
     path = models.CharField(
         blank=False, max_length=255, validators=[validate_dot_notation]
     )
-    template = models.OneToOneField(
+    template = models.ForeignKey(
         Template,
         blank=False,
         on_delete=models.CASCADE,
         null=False,
-        unique=True,
     )
 
     @staticmethod
@@ -64,11 +62,9 @@ class PidPath(models.Model):
         Returns:
         """
         try:
-            return PidPath.objects.get(  # pylint: disable=no-member
+            return PidPath.objects.filter(  # pylint: disable=no-member
                 template=template
             )
-        except ObjectDoesNotExist:
-            return None
         except Exception as exc:
             raise exceptions.ModelError(str(exc)) from exc
 
