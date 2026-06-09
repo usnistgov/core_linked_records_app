@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 @extend_schema(
-    tags=["OAI Provider Record"],
+    tags=["PID"],
     description="Provider Record View",
 )
 class ProviderRecordView(APIView):
