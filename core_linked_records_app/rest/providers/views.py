@@ -144,7 +144,7 @@ class ProviderRecordView(APIView):
     )
     def put(
         self,
-        request,  # noqa, pylint: disable=unused-argument
+        request,
         provider,
         record,
     ):
@@ -156,8 +156,33 @@ class ProviderRecordView(APIView):
         Returns:
         """
         try:
+            try:
+                prefix, record_name = split_prefix_from_record(record)
+            except (
+                InvalidPrefixError,
+                InvalidRecordError,
+            ) as invalid_record_error:
+                return Response(
+                    {
+                        "record": record,
+                        "url": request.build_absolute_uri("?"),
+                        "message": str(invalid_record_error),
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
+            if not record_name:
+                return Response(
+                    {
+                        "record": record,
+                        "url": request.build_absolute_uri("?"),
+                        "message": f"Record {record} is not valid.",
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
             id_provider = self.provider_manager.get(provider)
-            provider_response = id_provider.update(record)
+            provider_response = id_provider.update(f"{prefix}/{record_name}")
             provider_content = json.loads(provider_response.content)
             return Response(
                 provider_content, status=provider_response.status_code

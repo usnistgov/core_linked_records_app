@@ -228,6 +228,16 @@ class TestLocalIdProviderUpdate(TestCase):
     @patch(
         "core_linked_records_app.utils.providers.local.LocalIdProvider.create"
     )
+    def test_create_is_called_with_prefix_and_record(self, mock_create):
+        """test_create_is_called_with_prefix_and_record"""
+        mock_create.return_value = None
+        self.provider.update("mock_prefix/mock_record")
+
+        mock_create.assert_called_with("mock_prefix", "mock_record")
+
+    @patch(
+        "core_linked_records_app.utils.providers.local.LocalIdProvider.create"
+    )
     def test_returns_correct_content(self, mock_create):
         """test_returns_correct_content"""
         mock_create.return_value = None
