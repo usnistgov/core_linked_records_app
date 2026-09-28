@@ -129,7 +129,10 @@ class LocalIdProvider(AbstractIdProvider):
 
         Returns:
         """
-        self.create(record)
+        # `create` takes the prefix and the record name separately, and
+        # generates a random name when it is not given.
+        prefix, _, record_name = record.rpartition("/")
+        self.create(prefix, record_name)
 
         record_url = f"{self.provider_lookup_url}/{record}"
 

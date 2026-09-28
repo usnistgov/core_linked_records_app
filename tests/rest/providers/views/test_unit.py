@@ -154,6 +154,40 @@ class TestProviderRecordViewPut(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+    @patch.object(ProviderManager, "get")
+    def test_unknown_prefix_returns_500(self, mock_provider_manager_get):
+        """test_unknown_prefix_returns_500"""
+
+        mock_provider_manager_get.return_value = mocks.MockProviderManager(
+            update_result=mocks.MockResponse()
+        )
+
+        test_view = providers_views.ProviderRecordView()
+        response = test_view.put(
+            self.mock_request,
+            "mock_provider",
+            "not_a_registered_prefix/mock_record",
+        )
+
+        self.assertEqual(response.status_code, 500)
+
+    @patch.object(ProviderManager, "get")
+    def test_missing_record_name_returns_500(self, mock_provider_manager_get):
+        """test_missing_record_name_returns_500"""
+
+        mock_provider_manager_get.return_value = mocks.MockProviderManager(
+            update_result=mocks.MockResponse()
+        )
+
+        test_view = providers_views.ProviderRecordView()
+        response = test_view.put(
+            self.mock_request,
+            "mock_provider",
+            f"{settings.ID_PROVIDER_PREFIXES[0]}/",
+        )
+
+        self.assertEqual(response.status_code, 500)
+
 
 class TestProviderRecordViewGet(TestCase):
     """Test Provider Record View Get"""
